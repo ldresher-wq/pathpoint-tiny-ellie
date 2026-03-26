@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7B1000010000000000000001 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7B1000030000000000000001 /* Lottie */; };
 		929E60C42F748E3E003EA359 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 929E60C32F748E3E003EA359 /* Sparkle */; };
 		A10000010000000000000001 /* LilAgentsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000001 /* LilAgentsApp.swift */; };
 		A10000010000000000000002 /* walk-bruce-01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000002 /* walk-bruce-01.mov */; };
@@ -15,6 +16,8 @@
 		A10000010000000000000010 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000010 /* Sounds */; };
 		A10000110000000000000001 /* CharacterSprites in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000001 /* CharacterSprites */; };
 		A10000110000000000000002 /* ExpertAvatars in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000002 /* ExpertAvatars */; };
+		A10000110000000000000003 /* fall-smoke-dust.lottie in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000003 /* fall-smoke-dust.lottie */; };
+		A10000110000000000000004 /* fall-smoke-dust.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000004 /* fall-smoke-dust.json */; };
 		A10000010000000000000020 /* PopoverTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000020 /* PopoverTheme.swift */; };
 		A10000010000000000000021 /* CharacterContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000021 /* CharacterContentView.swift */; };
 			A10000010000000000000022 /* ClaudeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000022 /* ClaudeSession.swift */; };
@@ -47,6 +50,8 @@
 		A10000020000000000000010 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		A10000120000000000000001 /* CharacterSprites */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CharacterSprites; sourceTree = "<group>"; };
 		A10000120000000000000002 /* ExpertAvatars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ExpertAvatars; sourceTree = "<group>"; };
+		A10000120000000000000003 /* fall-smoke-dust.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fall-smoke-dust.lottie"; sourceTree = "<group>"; };
+		A10000120000000000000004 /* fall-smoke-dust.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "fall-smoke-dust.json"; sourceTree = "<group>"; };
 		A10000020000000000000020 /* PopoverTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverTheme.swift; sourceTree = "<group>"; };
 		A10000020000000000000021 /* CharacterContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterContentView.swift; sourceTree = "<group>"; };
 			A10000020000000000000022 /* ClaudeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSession.swift; sourceTree = "<group>"; };
@@ -75,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7B1000010000000000000001 /* Lottie in Frameworks */,
 				929E60C42F748E3E003EA359 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -120,6 +126,8 @@
 				A10000020000000000000010 /* Sounds */,
 				A10000120000000000000001 /* CharacterSprites */,
 				A10000120000000000000002 /* ExpertAvatars */,
+				A10000120000000000000003 /* fall-smoke-dust.lottie */,
+				A10000120000000000000004 /* fall-smoke-dust.json */,
 				A10000020000000000000003 /* Info.plist */,
 				A10000020000000000000004 /* LilAgents.entitlements */,
 			);
@@ -151,6 +159,7 @@
 			);
 			name = LilAgents;
 			packageProductDependencies = (
+				7B1000030000000000000001 /* Lottie */,
 				929E60C32F748E3E003EA359 /* Sparkle */,
 			);
 			productName = LilAgents;
@@ -182,6 +191,7 @@
 			);
 			mainGroup = A10000050000000000000001;
 			packageReferences = (
+				7B1000020000000000000001 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 				929E60C22F748E3E003EA359 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = A10000050000000000000003 /* Products */;
@@ -204,6 +214,8 @@
 				A10000010000000000000010 /* Sounds in Resources */,
 				A10000110000000000000001 /* CharacterSprites in Resources */,
 				A10000110000000000000002 /* ExpertAvatars in Resources */,
+				A10000110000000000000003 /* fall-smoke-dust.lottie in Resources */,
+				A10000110000000000000004 /* fall-smoke-dust.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,7 +368,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LilAgents/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "lil agents";
+				INFOPLIST_KEY_CFBundleDisplayName = LennyTheGenie;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainNibFile = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -366,7 +378,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lilagents.app;
-				PRODUCT_NAME = "lil agents";
+				PRODUCT_NAME = LennyTheGenie;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -383,7 +395,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LilAgents/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "lil agents";
+				INFOPLIST_KEY_CFBundleDisplayName = LennyTheGenie;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainNibFile = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -393,7 +405,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.lilagents.app;
-				PRODUCT_NAME = "lil agents";
+				PRODUCT_NAME = LennyTheGenie;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -423,6 +435,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7B1000020000000000000001 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
 		929E60C22F748E3E003EA359 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sparkle-project/Sparkle";
@@ -434,6 +454,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7B1000030000000000000001 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7B1000020000000000000001 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
 		929E60C32F748E3E003EA359 /* Sparkle */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 929E60C22F748E3E003EA359 /* XCRemoteSwiftPackageReference "Sparkle" */;

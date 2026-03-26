@@ -1,6 +1,19 @@
 import AppKit
 
 extension TerminalView {
+    func presentAttachmentPicker() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = true
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.resolvesAliases = true
+        panel.title = "Add Attachments"
+        panel.message = "Choose screenshots, PDFs, or other supported files to send with your question."
+
+        guard panel.runModal() == .OK else { return }
+        queueAttachments(panel.urls.compactMap(SessionAttachment.from(url:)))
+    }
+
     func refreshAttachmentLabel() {
         if pendingAttachments.isEmpty {
             attachmentLabel.stringValue = ""
@@ -24,14 +37,19 @@ extension TerminalView {
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         let attachments = draggedAttachments(from: sender)
         guard !attachments.isEmpty else { return false }
-
-        for attachment in attachments where !pendingAttachments.contains(attachment) {
-            pendingAttachments.append(attachment)
-        }
-
-        refreshAttachmentLabel()
-        appendStatus("Queued \(attachments.count) attachment\(attachments.count == 1 ? "" : "s")")
+        queueAttachments(attachments)
         return true
+    }
+
+    private func queueAttachments(_ attachments: [SessionAttachment]) {
+        guard !attachments.isEmpty else { return }
+
+        let newAttachments = attachments.filter { !pendingAttachments.contains($0) }
+        guard !newAttachments.isEmpty else { return }
+
+        pendingAttachments.append(contentsOf: newAttachments)
+        refreshAttachmentLabel()
+        appendStatus("Queued \(newAttachments.count) attachment\(newAttachments.count == 1 ? "" : "s")")
     }
 
     private func draggedAttachments(from sender: NSDraggingInfo) -> [SessionAttachment] {

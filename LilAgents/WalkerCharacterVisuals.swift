@@ -1,6 +1,10 @@
 import AppKit
+import Lottie
 
 extension WalkerCharacter {
+    private static let importedGuestArrivalEffectName = "fall-smoke-dust"
+    private static let importedGuestArrivalEffectExtension = "json"
+
     func animatePersonaSwap() {
         guard let imageView else { return }
         imageView.alphaValue = 0.5
@@ -34,8 +38,71 @@ extension WalkerCharacter {
         case .lenny:
             showHandoffCloud(accent: NSColor(red: 0.96, green: 0.63, blue: 0.23, alpha: 1.0), trailing: true)
         case .expert:
-            showHandoffCloud(accent: NSColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1.0), trailing: false)
+            if !showImportedGuestArrivalEffect() {
+                showHandoffCloud(accent: NSColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1.0), trailing: false)
+            }
         }
+    }
+
+    private func showImportedGuestArrivalEffect() -> Bool {
+        guard let effectURL = Bundle.main.url(
+            forResource: Self.importedGuestArrivalEffectName,
+            withExtension: Self.importedGuestArrivalEffectExtension
+        ) else {
+            return false
+        }
+
+        guard let effectWindow = handoffEffectWindow ?? makeHandoffEffectWindow() else { return false }
+        handoffEffectWindow = effectWindow
+        guard let contentView = effectWindow.contentView else { return false }
+
+        contentView.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
+        let animationView = configuredHandoffEffectAnimationView(in: contentView.bounds)
+        animationView.frame = contentView.bounds
+        if animationView.superview == nil {
+            contentView.addSubview(animationView)
+        }
+        guard let animation = LottieAnimation.filepath(effectURL.path) else { return false }
+        animationView.stop()
+        animationView.animation = animation
+
+        let charFrame = window.frame
+        let effectSize: CGFloat = 200
+        effectWindow.setFrame(
+            CGRect(
+                x: charFrame.midX - effectSize / 2,
+                y: charFrame.midY - effectSize / 2 + 10,
+                width: effectSize,
+                height: effectSize
+            ),
+            display: false
+        )
+        effectWindow.orderFrontRegardless()
+        animationView.play()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.35) { [weak self] in
+            guard let self else { return }
+            self.handoffEffectAnimationView?.stop()
+            self.handoffEffectAnimationView?.removeFromSuperview()
+            self.handoffEffectWindow?.orderOut(nil)
+            self.handoffEffectWindow?.contentView?.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
+        }
+
+        return true
+    }
+
+    private func configuredHandoffEffectAnimationView(in frame: CGRect) -> LottieAnimationView {
+        if let handoffEffectAnimationView {
+            handoffEffectAnimationView.frame = frame
+            return handoffEffectAnimationView
+        }
+
+        let animationView = LottieAnimationView(frame: frame)
+        animationView.backgroundBehavior = .pauseAndRestore
+        animationView.loopMode = .playOnce
+        animationView.autoresizingMask = [.width, .height]
+        handoffEffectAnimationView = animationView
+        return animationView
     }
 
     private func showHandoffCloud(accent: NSColor, trailing: Bool) {
@@ -43,6 +110,8 @@ extension WalkerCharacter {
         handoffEffectWindow = effectWindow
         guard let contentView = effectWindow.contentView else { return }
 
+        handoffEffectAnimationView?.stop()
+        handoffEffectAnimationView?.removeFromSuperview()
         contentView.layer?.sublayers?.forEach { $0.removeFromSuperlayer() }
         contentView.alphaValue = 1.0
 
@@ -154,6 +223,7 @@ extension WalkerCharacter {
     ]
 
     private static let bubbleH: CGFloat = 26
+    private static let expertNameTagH: CGFloat = 24
     private static let completionSounds: [(name: String, ext: String)] = [
         ("ping-aa", "mp3"), ("ping-bb", "mp3"), ("ping-cc", "mp3"),
         ("ping-dd", "mp3"), ("ping-ee", "mp3"), ("ping-ff", "mp3"),
@@ -196,6 +266,55 @@ extension WalkerCharacter {
     func hideBubble() {
         if thinkingBubbleWindow?.isVisible ?? false {
             thinkingBubbleWindow?.orderOut(nil)
+        }
+    }
+
+    func updateExpertNameTag() {
+        let name = representedExpert?.name ?? focusedExpert?.name
+        guard let name, !name.isEmpty else {
+            hideExpertNameTag()
+            return
+        }
+
+        if expertNameWindow == nil {
+            createExpertNameTag()
+        }
+
+        let t = resolvedTheme
+        let font = NSFont.systemFont(ofSize: 11, weight: .bold)
+        let horizontalPadding: CGFloat = 12
+        let textWidth = ceil((name as NSString).size(withAttributes: [.font: font]).width)
+        let tagWidth = min(max(textWidth + horizontalPadding * 2, 82), 180)
+        let tagHeight = Self.expertNameTagH
+
+        let charFrame = window.frame
+        let x = charFrame.midX - tagWidth / 2
+        let y = charFrame.maxY - 4
+        expertNameWindow?.setFrame(CGRect(x: x, y: y, width: tagWidth, height: tagHeight), display: false)
+
+        if let container = expertNameWindow?.contentView {
+            container.frame = NSRect(x: 0, y: 0, width: tagWidth, height: tagHeight)
+            container.layer?.backgroundColor = t.titleBarBg.withAlphaComponent(0.96).cgColor
+            container.layer?.borderColor = t.popoverBorder.withAlphaComponent(0.55).cgColor
+            container.layer?.cornerRadius = tagHeight / 2
+
+            if let label = container.viewWithTag(410) as? NSTextField {
+                label.frame = NSRect(x: horizontalPadding, y: 4, width: tagWidth - horizontalPadding * 2, height: 16)
+                label.font = font
+                label.textColor = t.titleText
+                label.stringValue = name
+            }
+        }
+
+        if !(expertNameWindow?.isVisible ?? false) {
+            expertNameWindow?.alphaValue = 1.0
+            expertNameWindow?.orderFrontRegardless()
+        }
+    }
+
+    func hideExpertNameTag() {
+        if expertNameWindow?.isVisible ?? false {
+            expertNameWindow?.orderOut(nil)
         }
     }
 
@@ -327,6 +446,47 @@ extension WalkerCharacter {
 
         win.contentView = container
         thinkingBubbleWindow = win
+    }
+
+    func createExpertNameTag() {
+        let t = resolvedTheme
+        let w: CGFloat = 120
+        let h = Self.expertNameTagH
+        let win = NSWindow(
+            contentRect: CGRect(x: 0, y: 0, width: w, height: h),
+            styleMask: .borderless, backing: .buffered, defer: false
+        )
+        win.isOpaque = false
+        win.backgroundColor = .clear
+        win.hasShadow = true
+        win.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 4)
+        win.ignoresMouseEvents = true
+        win.collectionBehavior = [.canJoinAllSpaces, .stationary]
+
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: w, height: h))
+        container.wantsLayer = true
+        container.layer?.backgroundColor = t.titleBarBg.withAlphaComponent(0.96).cgColor
+        container.layer?.cornerRadius = h / 2
+        container.layer?.borderWidth = 1
+        container.layer?.borderColor = t.popoverBorder.withAlphaComponent(0.55).cgColor
+        container.layer?.shadowColor = NSColor.black.withAlphaComponent(0.12).cgColor
+        container.layer?.shadowOpacity = 1
+        container.layer?.shadowRadius = 8
+        container.layer?.shadowOffset = CGSize(width: 0, height: -1)
+
+        let label = NSTextField(labelWithString: "")
+        label.font = NSFont.systemFont(ofSize: 11, weight: .bold)
+        label.textColor = t.titleText
+        label.alignment = .center
+        label.drawsBackground = false
+        label.isBordered = false
+        label.isEditable = false
+        label.frame = NSRect(x: 12, y: 4, width: w - 24, height: 16)
+        label.tag = 410
+        container.addSubview(label)
+
+        win.contentView = container
+        expertNameWindow = win
     }
 
     func playCompletionSound() {

@@ -1,12 +1,13 @@
 import AppKit
+import Lottie
 
 final class WalkerCharacter {
     let videoName: String
     var window: NSWindow!
     var imageView: NSImageView!
 
-    let displayHeight: CGFloat = 154
-    let displayWidth: CGFloat = 154
+    let displayHeight: CGFloat = 124
+    let displayWidth: CGFloat = 124
 
     var accelStart: CFTimeInterval = 3.0
     var fullSpeedStart: CFTimeInterval = 3.75
@@ -43,6 +44,8 @@ final class WalkerCharacter {
     var representedExpert: ResponderExpert?
     var isCompanionAvatar = false
     var handoffEffectWindow: NSWindow?
+    var handoffEffectAnimationView: LottieAnimationView?
+    var expertNameWindow: NSWindow?
 
     var isClaudeBusy: Bool { claudeSession?.isBusy ?? false }
 

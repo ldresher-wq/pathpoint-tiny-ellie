@@ -73,6 +73,7 @@ extension WalkerCharacter {
         positionProgress = position
         hideBubble()
         setPersona(.expert(expert))
+        updateExpertNameTag()
         window.orderFrontRegardless()
     }
 
@@ -80,6 +81,7 @@ extension WalkerCharacter {
         representedExpert = nil
         isCompanionAvatar = false
         hideBubble()
+        hideExpertNameTag()
         window.orderOut(nil)
     }
 
@@ -91,6 +93,7 @@ extension WalkerCharacter {
         } else {
             setPersona(.lenny)
         }
+        updateExpertNameTag()
         if !isIdleForPopover {
             openPopover()
         } else {

@@ -85,6 +85,7 @@ extension WalkerCharacter {
             let y = dockTopY - bottomPadding + yOffset
             window.setFrameOrigin(NSPoint(x: x, y: y))
             hideBubble()
+            updateExpertNameTag()
             return
         }
         if isIdleForPopover {
@@ -95,6 +96,7 @@ extension WalkerCharacter {
             window.setFrameOrigin(NSPoint(x: x, y: y))
             updatePopoverPosition()
             updateThinkingBubble()
+            updateExpertNameTag()
             return
         }
 
@@ -109,6 +111,7 @@ extension WalkerCharacter {
                 let bottomPadding = displayHeight * 0.15
                 let y = dockTopY - bottomPadding + yOffset
                 window.setFrameOrigin(NSPoint(x: x, y: y))
+                updateExpertNameTag()
                 return
             }
         }
@@ -138,5 +141,6 @@ extension WalkerCharacter {
         }
 
         updateThinkingBubble()
+        updateExpertNameTag()
     }
 }

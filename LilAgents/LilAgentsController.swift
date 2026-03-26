@@ -60,6 +60,12 @@ class LilAgentsController {
         syncGuestCharacters()
     }
 
+    func returnToGenie() {
+        currentExperts.removeAll()
+        onExpertsChanged?([])
+        focus(on: nil)
+    }
+
     func focus(on expert: ResponderExpert?) {
         focusedExpert = expert
         onFocusedExpertChanged?(expert)

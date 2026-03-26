@@ -8,7 +8,8 @@ class TerminalView: NSView {
     let liveStatusSpinner = NSProgressIndicator()
     let liveStatusLabel = NSTextField(labelWithString: "")
     let attachmentLabel = NSTextField(labelWithString: "")
-    let returnButton = NSButton(title: "Back to Lenny", target: nil, action: nil)
+    let attachButton = NSButton(title: "Attach", target: nil, action: nil)
+    let returnButton = NSButton(title: "Return to Genie", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?
 
@@ -16,7 +17,7 @@ class TerminalView: NSView {
     var themeOverride: PopoverTheme?
     var currentAssistantText = ""
     var isStreaming = false
-    var placeholderText = "Ask Lenny..."
+    var placeholderText = "Ask LennyTheGenie..."
     var pendingAttachments: [SessionAttachment] = []
 
     override init(frame: NSRect) {

@@ -17,7 +17,7 @@ extension WalkerCharacter {
         terminalView?.inputField.isEditable = false
         terminalView?.updatePlaceholder("")
         let welcome = """
-        hey! i’m lenny.
+        hey! i’m LennyTheGenie.
 
         ask me a startup, product, growth, pricing, or AI question and i’ll search Lenny’s archive for the best answers.
 
@@ -155,7 +155,7 @@ extension WalkerCharacter {
         if let expert = focusedExpert {
             terminalView?.updatePlaceholder("Ask \(expert.name)...")
         } else {
-            terminalView?.updatePlaceholder("Ask Lenny...")
+            terminalView?.updatePlaceholder("Ask LennyTheGenie...")
         }
     }
 
@@ -165,8 +165,8 @@ extension WalkerCharacter {
 
     func createPopoverWindow() {
         let t = resolvedTheme
-        let popoverWidth: CGFloat = 460
-        let popoverHeight: CGFloat = 340
+        let popoverWidth: CGFloat = 520
+        let popoverHeight: CGFloat = 376
 
         let win = KeyableWindow(
             contentRect: CGRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight),
@@ -191,24 +191,52 @@ extension WalkerCharacter {
         container.layer?.borderWidth = t.popoverBorderWidth
         container.layer?.borderColor = t.popoverBorder.cgColor
         container.autoresizingMask = [.width, .height]
+        addDecorativeBackdrop(to: container, theme: t, size: CGSize(width: popoverWidth, height: popoverHeight))
 
-        let titleBar = NSView(frame: NSRect(x: 0, y: popoverHeight - 28, width: popoverWidth, height: 28))
+        let titleBar = NSView(frame: NSRect(x: 0, y: popoverHeight - 64, width: popoverWidth, height: 64))
         titleBar.wantsLayer = true
-        titleBar.layer?.backgroundColor = t.titleBarBg.cgColor
+        titleBar.layer?.backgroundColor = NSColor.clear.cgColor
         container.addSubview(titleBar)
 
+        let eyebrow = NSTextField(labelWithString: "ARCHIVE-GROUNDED GUIDE")
+        eyebrow.font = NSFont.systemFont(ofSize: 10, weight: .bold)
+        eyebrow.textColor = t.accentColor
+        eyebrow.frame = NSRect(x: 24, y: 42, width: popoverWidth - 160, height: 14)
+        titleBar.addSubview(eyebrow)
+
         let titleLabel = NSTextField(labelWithString: t.titleString)
-        titleLabel.font = t.titleFont
+        titleLabel.font = NSFont(name: "Avenir Next Heavy", size: 28) ?? .systemFont(ofSize: 28, weight: .bold)
         titleLabel.textColor = t.titleText
-        titleLabel.frame = NSRect(x: 12, y: 6, width: popoverWidth - 24, height: 16)
+        titleLabel.frame = NSRect(x: 24, y: 12, width: popoverWidth - 180, height: 30)
         titleBar.addSubview(titleLabel)
 
-        let sep = NSView(frame: NSRect(x: 0, y: popoverHeight - 29, width: popoverWidth, height: 1))
+        let subtitle = NSTextField(labelWithString: "Ask one question. Get the archive. Summon the right expert.")
+        subtitle.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        subtitle.textColor = t.textDim
+        subtitle.frame = NSRect(x: 24, y: -2, width: popoverWidth - 180, height: 16)
+        titleBar.addSubview(subtitle)
+
+        let badge = NSView(frame: NSRect(x: popoverWidth - 144, y: 18, width: 118, height: 28))
+        badge.wantsLayer = true
+        badge.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.88).cgColor
+        badge.layer?.cornerRadius = 14
+        badge.layer?.borderWidth = 1
+        badge.layer?.borderColor = t.separatorColor.withAlphaComponent(0.45).cgColor
+        titleBar.addSubview(badge)
+
+        let badgeLabel = NSTextField(labelWithString: focusedExpert?.name ?? "Genie Mode")
+        badgeLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        badgeLabel.textColor = t.titleText
+        badgeLabel.alignment = .center
+        badgeLabel.frame = NSRect(x: 8, y: 6, width: 102, height: 16)
+        badge.addSubview(badgeLabel)
+
+        let sep = NSView(frame: NSRect(x: 24, y: popoverHeight - 66, width: popoverWidth - 48, height: 1))
         sep.wantsLayer = true
-        sep.layer?.backgroundColor = t.separatorColor.cgColor
+        sep.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.55).cgColor
         container.addSubview(sep)
 
-        let terminal = TerminalView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight - 29))
+        let terminal = TerminalView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight - 68))
         terminal.characterColor = characterColor
         terminal.themeOverride = themeOverride
         terminal.autoresizingMask = [.width, .height]
@@ -217,7 +245,7 @@ extension WalkerCharacter {
             self?.claudeSession?.send(message: message, attachments: attachments)
         }
         terminal.onReturnToLenny = { [weak self] in
-            self?.controller?.focus(on: nil)
+            self?.controller?.returnToGenie()
         }
         terminal.setReturnToLennyVisible(focusedExpert != nil)
         container.addSubview(terminal)
@@ -225,6 +253,33 @@ extension WalkerCharacter {
         win.contentView = container
         popoverWindow = win
         terminalView = terminal
+    }
+
+    private func addDecorativeBackdrop(to container: NSView, theme t: PopoverTheme, size: CGSize) {
+        guard let layer = container.layer else { return }
+
+        let glow = CAGradientLayer()
+        glow.frame = CGRect(origin: .zero, size: size)
+        glow.colors = [
+            t.titleBarBg.withAlphaComponent(0.92).cgColor,
+            t.popoverBg.withAlphaComponent(0.0).cgColor
+        ]
+        glow.startPoint = CGPoint(x: 0.15, y: 1.0)
+        glow.endPoint = CGPoint(x: 0.72, y: 0.2)
+        layer.addSublayer(glow)
+
+        let orbSpecs: [(CGRect, NSColor)] = [
+            (CGRect(x: size.width - 132, y: size.height - 104, width: 92, height: 92), t.accentColor.withAlphaComponent(0.07)),
+            (CGRect(x: -24, y: size.height - 92, width: 86, height: 86), t.titleBarBg.withAlphaComponent(0.24)),
+            (CGRect(x: size.width - 86, y: 16, width: 56, height: 56), t.successColor.withAlphaComponent(0.05))
+        ]
+
+        for spec in orbSpecs {
+            let orb = CAShapeLayer()
+            orb.path = CGPath(ellipseIn: spec.0, transform: nil)
+            orb.fillColor = spec.1.cgColor
+            layer.addSublayer(orb)
+        }
     }
 
     private func wireSession(_ session: ClaudeSession) {
@@ -271,7 +326,7 @@ extension WalkerCharacter {
             }
             self.terminalView?.appendStatus(expertSummary)
             if self.focusedExpert == nil, let first = experts.first {
-                self.focus(on: first)
+                self.controller?.focus(on: first)
                 self.terminalView?.appendStatus("Handed off to \(first.name)")
             }
         }

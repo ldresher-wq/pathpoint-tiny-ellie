@@ -20,86 +20,136 @@ Current behavior:
 - The app maintains separate follow-up threads for Lenny and each guest.
 - The popover currently uses one default visual style instead of multiple selectable themes.
 
+## Source Folder Layout
+
+```
+LilAgents/
+  App/         — entry point, coordinator, settings
+  Session/     — all AI / MCP / session logic
+  Character/   — WalkerCharacter and all extensions
+  Terminal/    — chat UI (TerminalView and extensions)
+  Support/     — shared theme and view utilities
+```
+
 ## Top-Level Structure
 
 ### App shell
-- `LilAgents/LilAgentsApp.swift`
+- `LilAgents/App/LilAgentsApp.swift`
   App entry point, menu bar setup, app delegate, expert status items, theme/display controls, and the Settings window host.
 
-- `LilAgents/LilAgentsController.swift`
+- `LilAgents/App/LilAgentsController.swift`
   Coordinates all on-screen characters, display-link ticking, Dock geometry, expert focus, and companion guest avatars.
 
-- `LilAgents/AppSettings.swift`
-  Persistent app settings for archive mode, official MCP token override, and debug logging.
+- `LilAgents/App/AppSettings.swift`
+  Persistent app settings for archive mode, preferred transport, official MCP token override, and debug logging.
 
-- `LilAgents/SettingsView.swift`
-  Settings UI for archive mode selection, official MCP token entry, debug logging, and setup instructions.
+- `LilAgents/App/SettingsView.swift`
+  Settings UI for archive mode selection, transport preference, official MCP token entry, debug logging, and setup instructions.
 
 ### Main character system
-- `LilAgents/WalkerCharacter.swift`
+- `LilAgents/Character/WalkerCharacter.swift`
   Thin shell for the character object.
 
-- `LilAgents/WalkerCharacterTypes.swift`
+- `LilAgents/Character/WalkerCharacterTypes.swift`
   Shared enums/constants for `WalkerCharacter`.
 
-- `LilAgents/WalkerCharacterCore.swift`
+- `LilAgents/Character/WalkerCharacterCore.swift`
   Character setup, asset loading, persona switching, click handling, companion avatar configuration.
 
-- `LilAgents/WalkerCharacterPopover.swift`
-  Popover creation, session wiring, input placeholder updates, popover opening/closing, live dialog behavior.
+- `LilAgents/Character/WalkerCharacterPopover.swift`
+  Popover opening/closing, expert-focus wiring, live dialog behavior.
 
-- `LilAgents/WalkerCharacterVisuals.swift`
-  Handoff effects, smoke/genie visuals, thinking/completion bubbles, sound playback.
+- `LilAgents/Character/WalkerCharacterPopoverWindow.swift`
+  Popover window creation, title bar, theme resolution, return-to-Lenny button, and `TerminalView` instantiation.
 
-- `LilAgents/WalkerCharacterMovement.swift`
+- `LilAgents/Character/WalkerCharacterSessionWiring.swift`
+  Wires `ClaudeSession` callbacks (`onText`, `onTurnComplete`, `onError`, `onToolUse`, `onToolResult`, `onExpertsUpdated`) to the character and terminal UI.
+
+- `LilAgents/Character/WalkerCharacterBubble.swift`
+  Thinking/completion speech bubbles, sound playback, bubble positioning, and expert name tag height constant.
+
+- `LilAgents/Character/WalkerCharacterExpertTag.swift`
+  Floating expert-name tag window creation, positioning, styling, and activity-status display.
+
+- `LilAgents/Character/WalkerCharacterVisuals.swift`
+  Handoff effects, smoke/genie visuals, and remaining visual helpers.
+
+- `LilAgents/Character/WalkerCharacterMovement.swift`
   Walking state, pause timing, movement interpolation, per-frame position updates.
 
 ### Session / AI / MCP
-- `LilAgents/ClaudeSession.swift`
+- `LilAgents/Session/ClaudeSession.swift`
   Thin orchestration shell for a single conversation session, including staged expert suggestions.
 
-- `LilAgents/ClaudeSessionModels.swift`
-  Data models such as `ResponderExpert`, attachments, and message structures.
+- `LilAgents/Session/ClaudeSessionModels.swift`
+  Data models: `ResponderExpert`, `SessionAttachment`, `ConversationState`, `SearchEnvelope`/`SearchResult`, and `Message`.
 
-- `LilAgents/ClaudeSessionState.swift`
-  Per-thread conversation state and history helpers.
+- `LilAgents/Session/ClaudeSessionState.swift`
+  Per-thread conversation state, history helpers, prompt building (`buildInstructions`, `buildUserPrompt`, `buildConversationPrompt`, `buildInputContent`), and turn lifecycle (`finishTurn`, `failTurn`).
 
-- `LilAgents/ClaudeSessionTransport.swift`
-  Backend resolution, local starter-pack search, Claude/Codex/OpenAI transport handling, official MCP configuration, structured JSON answer parsing, logging, and error handling.
+- `LilAgents/Session/ClaudeSessionBackend.swift`
+  Shell environment resolution, backend discovery (Claude Code CLI → Codex CLI → OpenAI API), forced-backend handling, executable PATH lookup, auth checks, MCP token resolution, and setup/status messaging.
 
-- `LilAgents/ClaudeSessionExpertResolution.swift`
-  Local/MCP expert extraction, scoring, avatar resolution, assistant-text fallback parsing, and guest context building.
+- `LilAgents/Session/ClaudeSessionTransport.swift`
+  Top-level `start()` and `send()` entry points, archive-mode routing (starter pack vs. official MCP), local starter-archive search, expert publishing after responses, and process termination.
 
-- `LilAgents/LocalArchive.swift`
+- `LilAgents/Session/ClaudeSessionCLI.swift`
+  Claude Code CLI and Codex CLI dispatch: argument assembly, MCP config file creation, process execution, and result routing.
+
+- `LilAgents/Session/ClaudeSessionCLIParsing.swift`
+  CLI output parsing: structured JSON envelope extraction (`answer_markdown` / `suggested_experts`), Claude CLI result/metadata extraction, error normalization (with prompt-dump suppression), and `prepareAssistantOutput`.
+
+- `LilAgents/Session/ClaudeSessionOpenAI.swift`
+  Direct OpenAI Responses API transport: request construction, MCP tool injection, response handling, `mcp_call`/`mcp_list_tools` processing, and message text extraction.
+
+- `LilAgents/Session/ClaudeSessionExpertResolution.swift`
+  Local/MCP expert extraction, scoring, avatar resolution, assistant-text fallback parsing, speaker-name extraction from filenames/titles, and guest context building.
+
+- `LilAgents/Session/ClaudeSessionExpertCatalog.swift`
+  Expert name catalog: avatar path lookup, canonical name matching, known-expert enumeration from bundled assets, markdown bold-name extraction, structured expert-tag parsing, PNG avatar conversion/caching, and name normalization.
+
+- `LilAgents/Session/ClaudeSessionExpertTextResolution.swift`
+  `responseScript` generation, `flattenOutputStrings` for varied API output shapes, and recursive `expertNames(in:)` extraction from nested payloads.
+
+- `LilAgents/Session/ClaudeSessionSupport.swift`
+  Low-level helpers: `runProcess` (subprocess execution), `imageDataURL` (base64 image encoding), `documentText` (PDF/RTF/text extraction), and document truncation.
+
+- `LilAgents/Session/LocalArchive.swift`
   Local starter-pack indexing and retrieval over the bundled free newsletter and podcast subset.
 
-- `LilAgents/SessionDebugLogger.swift`
+- `LilAgents/Session/SessionDebugLogger.swift`
   Structured debug logging for backend selection, archive mode, requests, subprocess output, and responses.
 
 ### Popover / terminal UI
-- `LilAgents/TerminalView.swift`
-  Thin shell for the chat UI view, including deferred expert suggestions and the visible expert panel.
+- `LilAgents/Terminal/TerminalView.swift`
+  Thin shell for the chat UI view, including deferred expert suggestions, the return-to-Lenny hook, and property declarations.
 
-- `LilAgents/TerminalView+Setup.swift`
+- `LilAgents/Terminal/TerminalView+Setup.swift`
   View creation, layout, controls, status bar, expert suggestion panel, input field, attachment label, drag/drop registration.
 
-- `LilAgents/TerminalView+Transcript.swift`
+- `LilAgents/Terminal/TerminalView+Panels.swift`
+  Expert suggestion panel population, live-status display, status clearing, expert-button tap handling, and `NSTextViewDelegate` link-click routing.
+
+- `LilAgents/Terminal/TerminalViewLayout.swift`
+  Layout constants, `relayoutPanels()` frame calculations, panel styling helpers, and panel visibility toggling.
+
+- `LilAgents/Terminal/TerminalView+Transcript.swift`
   Transcript appending, replay, user/assistant/status/error lines, and transcript sizing/scroll behavior.
 
-- `LilAgents/TerminalView+Attachments.swift`
+- `LilAgents/Terminal/TerminalView+Attachments.swift`
   Drag-and-drop attachment extraction and attachment label refresh.
 
-- `LilAgents/TerminalMarkdownRenderer.swift`
+- `LilAgents/Terminal/TerminalMarkdownRenderer.swift`
   Markdown and inline markdown rendering for transcript output.
 
-- `LilAgents/PaddedTextFieldCell.swift`
+- `LilAgents/Terminal/PaddedTextFieldCell.swift`
   Custom text field cell used by the composer input.
 
 ### Theme / support
-- `LilAgents/PopoverTheme.swift`
+- `LilAgents/Support/PopoverTheme.swift`
   Theme definitions, colors, typography, and character-color adjustments. The app currently ships with a single default theme.
 
-- `LilAgents/CharacterContentView.swift`
+- `LilAgents/Support/CharacterContentView.swift`
   Transparent clickable character host view with alpha-aware hit testing.
 
 ## Asset Structure
@@ -136,24 +186,25 @@ These are old assets from the original app and are no longer the main runtime ch
 ## 2. User asks a question
 1. The user clicks Lenny.
 2. `WalkerCharacterPopover` opens the popover above the character.
-3. `ClaudeSession` resolves the current archive mode and the best available backend.
+3. `ClaudeSessionTransport.send()` resolves the current archive mode and the best available backend via `ClaudeSessionBackend`.
 4. In `starterPack` mode, `LocalArchive` retrieves bundled local context.
 5. In `officialMCP` mode, the app prefers Claude Code CLI, then Codex CLI, then direct OpenAI Responses API fallback.
 6. Official mode can use:
    - the user's existing Claude/Codex MCP configuration
    - or a bearer token entered in Settings
-7. The response path emits:
+7. The actual request is dispatched through `ClaudeSessionCLI` (for CLI backends) or `ClaudeSessionOpenAI` (for direct API).
+8. The response path emits:
    - live status updates
    - transcript content
    - optional staged expert suggestions
-   - structured answer parsing when the model returns the JSON response envelope
+   - structured answer parsing via `ClaudeSessionCLIParsing` when the model returns the JSON response envelope
    - verbose debug logs when enabled
 
 ## 3. Expert suggestions appear
-1. `ClaudeSessionExpertResolution` identifies relevant experts from local search, MCP-derived data, or assistant text fallback.
+1. `ClaudeSessionExpertResolution` and `ClaudeSessionExpertCatalog` identify relevant experts from local search, MCP-derived data, or assistant text fallback.
 2. `LilAgentsController` creates or updates companion avatars as needed.
 3. The app does not auto-switch to another expert.
-4. After the response completes, the popover shows a dedicated expert suggestion bar with visible buttons.
+4. After the response completes, the popover shows a dedicated expert suggestion bar with visible buttons via `TerminalView+Panels`.
 5. Clicking one of those buttons opens that expert's own dialog above that avatar.
 6. Suggestions only surface when the expert name resolves to a bundled avatar.
 
@@ -168,55 +219,66 @@ These are old assets from the original app and are no longer the main runtime ch
 
 ### If you want to change AI behavior
 Start with:
-- `LilAgents/ClaudeSessionTransport.swift`
-- `LilAgents/ClaudeSessionExpertResolution.swift`
-- `LilAgents/ClaudeSessionModels.swift`
-- `LilAgents/LocalArchive.swift`
+- `LilAgents/Session/ClaudeSessionTransport.swift`
+- `LilAgents/Session/ClaudeSessionBackend.swift`
+- `LilAgents/Session/ClaudeSessionCLI.swift`
+- `LilAgents/Session/ClaudeSessionOpenAI.swift`
+- `LilAgents/Session/ClaudeSessionCLIParsing.swift`
+- `LilAgents/Session/ClaudeSessionState.swift`
 
 ### If you want to change which guests appear
 Start with:
-- `LilAgents/ClaudeSessionExpertResolution.swift`
-- `LilAgents/LilAgentsController.swift`
-- `LilAgents/WalkerCharacterPopover.swift`
+- `LilAgents/Session/ClaudeSessionExpertResolution.swift`
+- `LilAgents/Session/ClaudeSessionExpertCatalog.swift`
+- `LilAgents/Session/ClaudeSessionExpertTextResolution.swift`
+- `LilAgents/App/LilAgentsController.swift`
+- `LilAgents/Character/WalkerCharacterPopover.swift`
 
 ### If you want to change character behavior or animations
 Start with:
-- `LilAgents/WalkerCharacterCore.swift`
-- `LilAgents/WalkerCharacterVisuals.swift`
-- `LilAgents/WalkerCharacterMovement.swift`
+- `LilAgents/Character/WalkerCharacterCore.swift`
+- `LilAgents/Character/WalkerCharacterVisuals.swift`
+- `LilAgents/Character/WalkerCharacterBubble.swift`
+- `LilAgents/Character/WalkerCharacterMovement.swift`
+- `LilAgents/Character/WalkerCharacterExpertTag.swift`
 
 ### If you want to change the chat popup
 Start with:
-- `LilAgents/TerminalView+Setup.swift`
-- `LilAgents/TerminalView+Transcript.swift`
-- `LilAgents/TerminalMarkdownRenderer.swift`
-- `LilAgents/WalkerCharacterPopover.swift`
+- `LilAgents/Terminal/TerminalView+Setup.swift`
+- `LilAgents/Terminal/TerminalView+Panels.swift`
+- `LilAgents/Terminal/TerminalView+Transcript.swift`
+- `LilAgents/Terminal/TerminalViewLayout.swift`
+- `LilAgents/Terminal/TerminalMarkdownRenderer.swift`
+- `LilAgents/Character/WalkerCharacterPopoverWindow.swift`
 
 ### If you want to change menu bar behavior
 Start with:
-- `LilAgents/LilAgentsApp.swift`
+- `LilAgents/App/LilAgentsApp.swift`
 
 ### If you want to change settings or archive-source behavior
 Start with:
-- `LilAgents/AppSettings.swift`
-- `LilAgents/SettingsView.swift`
-- `LilAgents/ClaudeSessionTransport.swift`
-- `LilAgents/LocalArchive.swift`
+- `LilAgents/App/AppSettings.swift`
+- `LilAgents/App/SettingsView.swift`
+- `LilAgents/Session/ClaudeSessionBackend.swift`
+- `LilAgents/Session/ClaudeSessionTransport.swift`
+- `LilAgents/Session/LocalArchive.swift`
 
 ### If you want to inspect verbose runtime logs
 Start with:
-- `LilAgents/SessionDebugLogger.swift`
-- `LilAgents/ClaudeSessionTransport.swift`
+- `LilAgents/Session/SessionDebugLogger.swift`
+- `LilAgents/Session/ClaudeSessionTransport.swift`
 
-## Current Larger Files
+## File Size Overview
 
-After the refactor, most responsibilities are split, but a few helper files are still on the larger side:
-- `LilAgents/ClaudeSessionExpertResolution.swift`
-- `LilAgents/ClaudeSessionTransport.swift`
-- `LilAgents/WalkerCharacterVisuals.swift`
-- `LilAgents/WalkerCharacterPopover.swift`
-
-These are the next best candidates if you want to continue breaking the codebase into smaller units.
+After the refactor, responsibilities are well-split across focused files. The larger files are:
+- `LilAgents/ClaudeSessionBackend.swift` — backend discovery and environment resolution
+- `LilAgents/ClaudeSessionTransport.swift` — top-level send/start routing and starter-pack search
+- `LilAgents/ClaudeSessionExpertResolution.swift` — expert extraction from MCP payloads
+- `LilAgents/ClaudeSessionExpertCatalog.swift` — expert name catalog and avatar management
+- `LilAgents/TerminalView+Setup.swift` — terminal view construction
+- `LilAgents/WalkerCharacterVisuals.swift` — visual effects
+- `LilAgents/WalkerCharacterBubble.swift` — bubbles and sound
+- `LilAgents/WalkerCharacterPopoverWindow.swift` — popover window assembly
 
 ## Notes
 
@@ -236,11 +298,26 @@ If you are new to the codebase, read in this order:
 3. `LilAgents/AppSettings.swift`
 4. `LilAgents/SettingsView.swift`
 5. `LilAgents/WalkerCharacter.swift`
-6. `LilAgents/WalkerCharacterPopover.swift`
-7. `LilAgents/ClaudeSession.swift`
-8. `LilAgents/ClaudeSessionTransport.swift`
-9. `LilAgents/LocalArchive.swift`
-10. `LilAgents/ClaudeSessionExpertResolution.swift`
-11. `LilAgents/SessionDebugLogger.swift`
-12. `LilAgents/TerminalView.swift`
-13. `LilAgents/TerminalView+Setup.swift`
+6. `LilAgents/WalkerCharacterCore.swift`
+7. `LilAgents/WalkerCharacterPopover.swift`
+8. `LilAgents/WalkerCharacterPopoverWindow.swift`
+9. `LilAgents/WalkerCharacterSessionWiring.swift`
+10. `LilAgents/ClaudeSession.swift`
+11. `LilAgents/ClaudeSessionModels.swift`
+12. `LilAgents/ClaudeSessionState.swift`
+13. `LilAgents/ClaudeSessionBackend.swift`
+14. `LilAgents/ClaudeSessionTransport.swift`
+15. `LilAgents/ClaudeSessionCLI.swift`
+16. `LilAgents/ClaudeSessionCLIParsing.swift`
+17. `LilAgents/ClaudeSessionOpenAI.swift`
+18. `LilAgents/ClaudeSessionExpertResolution.swift`
+19. `LilAgents/ClaudeSessionExpertCatalog.swift`
+20. `LilAgents/ClaudeSessionExpertTextResolution.swift`
+21. `LilAgents/ClaudeSessionSupport.swift`
+22. `LilAgents/LocalArchive.swift`
+23. `LilAgents/SessionDebugLogger.swift`
+24. `LilAgents/TerminalView.swift`
+25. `LilAgents/TerminalView+Setup.swift`
+26. `LilAgents/TerminalView+Panels.swift`
+27. `LilAgents/TerminalViewLayout.swift`
+28. `LilAgents/TerminalView+Transcript.swift`

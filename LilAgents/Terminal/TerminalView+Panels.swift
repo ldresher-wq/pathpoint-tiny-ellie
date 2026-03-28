@@ -97,17 +97,3 @@ extension TerminalView {
     }
 
 }
-
-extension TerminalView: NSTextViewDelegate {
-    func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
-        guard let url = link as? URL,
-              url.scheme == "lilagents-expert",
-              let host = url.host,
-              let expert = expertSuggestionTargets[host] else {
-            return false
-        }
-
-        onSelectExpert?(expert)
-        return true
-    }
-}

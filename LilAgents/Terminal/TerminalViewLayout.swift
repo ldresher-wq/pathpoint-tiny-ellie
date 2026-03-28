@@ -51,7 +51,9 @@ extension TerminalView {
         let scrollY = bottomCursor + Layout.interSectionSpacing
         let scrollHeight = max(160, scrollTop - scrollY)
         scrollView.frame = NSRect(x: Layout.padding, y: scrollY, width: width, height: scrollHeight)
-        textView.textContainer?.containerSize = NSSize(width: scrollView.contentSize.width, height: .greatestFiniteMagnitude)
+        
+        transcriptContainer.frame.size.width = width
+        
         resizeTranscriptToFitContent()
     }
 

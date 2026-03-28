@@ -1,155 +1,232 @@
 import AppKit
 
-extension TerminalView {
+class FlippedView: NSView {
+    override var isFlipped: Bool { true }
+}
 
-    // MARK: - Paragraph styles
+class ChatBubbleView: NSView, NSTextViewDelegate {
+    let textView = NSTextView()
+    let headerLabel = NSTextField(labelWithString: "")
+    let bubbleBackground = NSView()
+    private let isUser: Bool
+    private let theme: PopoverTheme
 
-    private var assistantParagraph: NSParagraphStyle {
-        let p = NSMutableParagraphStyle()
-        p.lineSpacing = 3
-        p.paragraphSpacing = 4
-        p.tailIndent = -16 // Padding from right edge
-        return p
+    init(text: NSAttributedString, isUser: Bool, speakerName: String, theme: PopoverTheme) {
+        self.isUser = isUser
+        self.theme = theme
+        super.init(frame: .zero)
+        setupViews()
+        populate(text: text, name: speakerName)
     }
 
-    private func ensureNewline() {
-        if let storage = textView.textStorage, storage.length > 0,
-           !storage.string.hasSuffix("\n") {
-            storage.append(NSAttributedString(string: "\n"))
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setupViews() {
+        wantsLayer = true
+        translatesAutoresizingMaskIntoConstraints = false
+
+        headerLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        headerLabel.textColor = isUser ? theme.textDim : theme.accentColor
+        headerLabel.alignment = isUser ? .right : .left
+        headerLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerLabel.isEditable = false
+        headerLabel.isBordered = false
+        headerLabel.drawsBackground = false
+        addSubview(headerLabel)
+
+        bubbleBackground.wantsLayer = true
+        bubbleBackground.layer?.cornerRadius = 14
+        bubbleBackground.layer?.backgroundColor = isUser ? theme.accentColor.withAlphaComponent(0.12).cgColor : theme.bubbleBg.cgColor
+        bubbleBackground.layer?.borderWidth = isUser ? 0 : 0.75
+        bubbleBackground.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.4).cgColor
+        bubbleBackground.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(bubbleBackground)
+
+        textView.backgroundColor = .clear
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isRichText = true
+        textView.textContainerInset = NSSize(width: 14, height: 12)
+        textView.translatesAutoresizingMaskIntoConstraints = false
+        textView.delegate = self
+        textView.linkTextAttributes = [
+            .foregroundColor: theme.accentColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue
+        ]
+        
+        let p = NSMutableParagraphStyle()
+        p.lineSpacing = 3
+        p.paragraphSpacing = 6
+        p.alignment = .left 
+        textView.defaultParagraphStyle = p
+        
+        bubbleBackground.addSubview(textView)
+
+        NSLayoutConstraint.activate([
+            headerLabel.topAnchor.constraint(equalTo: topAnchor),
+            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 4),
+            headerLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -4),
+
+            bubbleBackground.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 4),
+            bubbleBackground.bottomAnchor.constraint(equalTo: bottomAnchor),
+            
+            textView.topAnchor.constraint(equalTo: bubbleBackground.topAnchor),
+            textView.bottomAnchor.constraint(equalTo: bubbleBackground.bottomAnchor),
+            textView.leadingAnchor.constraint(equalTo: bubbleBackground.leadingAnchor),
+            textView.trailingAnchor.constraint(equalTo: bubbleBackground.trailingAnchor)
+        ])
+
+        if isUser {
+            bubbleBackground.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
+            bubbleBackground.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 40).isActive = true
+        } else {
+            bubbleBackground.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
+            bubbleBackground.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -40).isActive = true
         }
     }
 
-    // MARK: - User bubble
+    private func populate(text: NSAttributedString, name: String) {
+        headerLabel.stringValue = name
+        
+        // Disable automatic tracking so we can set explicit sizes
+        textView.textContainer?.widthTracksTextView = false
+        textView.textContainer?.containerSize = NSSize(width: 1000, height: CGFloat.greatestFiniteMagnitude)
+        
+        textView.textStorage?.setAttributedString(text)
+        recalculateSize()
+    }
+
+    func appendText(_ newText: NSAttributedString) {
+        textView.textStorage?.append(newText)
+        recalculateSize()
+    }
+
+    private func recalculateSize() {
+        guard let layoutManager = textView.layoutManager,
+              let textContainer = textView.textContainer else { return }
+
+        // Start large
+        textContainer.containerSize = NSSize(width: 1000, height: CGFloat.greatestFiniteMagnitude)
+        layoutManager.ensureLayout(for: textContainer)
+        let rect = layoutManager.usedRect(for: textContainer)
+        
+        let targetContentWidth = rect.width
+        let paddingWidth: CGFloat = 28 // left+right 14px
+
+        let maxWidth: CGFloat = 500
+        let desiredWidth = targetContentWidth + paddingWidth
+
+        // Cleanup old layout constraints
+        textView.constraints.filter { $0.firstAttribute == .width || $0.firstAttribute == .height }.forEach { textView.removeConstraint($0) }
+        
+        if desiredWidth >= maxWidth {
+            textContainer.containerSize = NSSize(width: maxWidth - paddingWidth, height: CGFloat.greatestFiniteMagnitude)
+            layoutManager.ensureLayout(for: textContainer)
+            let newRect = layoutManager.usedRect(for: textContainer)
+            textView.widthAnchor.constraint(equalToConstant: maxWidth).isActive = true
+            textView.heightAnchor.constraint(equalToConstant: newRect.height + 24).isActive = true
+        } else {
+            let finalWidth = max(desiredWidth, 60)
+            textView.widthAnchor.constraint(equalToConstant: finalWidth).isActive = true
+            textView.heightAnchor.constraint(equalToConstant: rect.height + 24).isActive = true
+        }
+    }
+
+    func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
+        var view: NSView? = self.superview
+        while let v = view {
+            if let terminal = v as? TerminalView {
+                guard let url = link as? URL,
+                      url.scheme == "lilagents-expert",
+                      let host = url.host,
+                      let expert = terminal.expertSuggestionTargets[host] else {
+                    return false
+                }
+                terminal.onSelectExpert?(expert)
+                return true
+            }
+            view = v.superview
+        }
+        return false
+    }
+}
+
+extension TerminalView {
 
     func appendUser(_ text: String, attachments: [SessionAttachment] = []) {
         let t = theme
-        ensureNewline()
-
-        // Label line: right-aligned "You"
-        let labelPara = NSMutableParagraphStyle()
-        labelPara.alignment = .right
-        labelPara.paragraphSpacingBefore = 14
-        labelPara.paragraphSpacing = 3
-        labelPara.tailIndent = -16
-        
-        let labelAttrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 10.5, weight: .bold),
-            .foregroundColor: t.textDim,
-            .paragraphStyle: labelPara
-        ]
-        textView.textStorage?.append(NSAttributedString(string: "You\n", attributes: labelAttrs))
-
-        // Message text: right-aligned
-        let bubblePara = NSMutableParagraphStyle()
-        bubblePara.alignment = .right
-        bubblePara.paragraphSpacing = 2
-        bubblePara.lineSpacing = 2
-        bubblePara.tailIndent = -16
-        
         let visibleText = text.isEmpty ? "(with attachments)" : text
-        let bubbleAttrs: [NSAttributedString.Key: Any] = [
+        let attrText = NSMutableAttributedString(string: visibleText, attributes: [
             .font: t.fontBold,
-            .foregroundColor: t.textPrimary,
-            .paragraphStyle: bubblePara
-        ]
-        textView.textStorage?.append(NSAttributedString(string: "\(visibleText)\n", attributes: bubbleAttrs))
+            .foregroundColor: t.textPrimary
+        ])
 
-        // Attachment note
         if !attachments.isEmpty {
             let attachText = attachments.map(\.displayName).joined(separator: ", ")
-            let attachPara = NSMutableParagraphStyle()
-            attachPara.alignment = .right
-            attachPara.paragraphSpacing = 10
-            attachPara.tailIndent = -16
-            textView.textStorage?.append(NSAttributedString(string: "📎 \(attachText)\n", attributes: [
+            attrText.append(NSAttributedString(string: "\n📎 \(attachText)", attributes: [
                 .font: NSFont.systemFont(ofSize: 10.5, weight: .regular),
-                .foregroundColor: t.textDim,
-                .paragraphStyle: attachPara
-            ]))
-        } else {
-            // Spacer below bubble
-            let spacerPara = NSMutableParagraphStyle()
-            spacerPara.paragraphSpacing = 10
-            textView.textStorage?.append(NSAttributedString(string: "\n", attributes: [
-                .font: NSFont.systemFont(ofSize: 4),
-                .paragraphStyle: spacerPara
+                .foregroundColor: t.textDim
             ]))
         }
+        
+        let bubble = ChatBubbleView(text: attrText, isUser: true, speakerName: "You", theme: t)
+        transcriptStack.addArrangedSubview(bubble)
+        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
         scrollToBottom()
     }
 
-    // MARK: - Assistant streaming
-
     func appendStreamingText(_ text: String) {
         var cleaned = text
-        // Strip leading newlines at start of response
         if currentAssistantText.isEmpty {
             cleaned = cleaned.replacingOccurrences(of: "^\\n+", with: "", options: .regularExpression)
         }
         currentAssistantText += cleaned
         if !cleaned.isEmpty {
-            textView.textStorage?.append(TerminalMarkdownRenderer.render(cleaned, theme: theme))
+            if let lastBubble = transcriptStack.arrangedSubviews.last as? ChatBubbleView {
+                let formatted = TerminalMarkdownRenderer.render(cleaned, theme: theme)
+                lastBubble.appendText(formatted)
+            } else {
+                beginAssistantTurn(name: theme.titleString)
+                if let lastBubble = transcriptStack.arrangedSubviews.last as? ChatBubbleView {
+                    let formatted = TerminalMarkdownRenderer.render(cleaned, theme: theme)
+                    lastBubble.appendText(formatted)
+                }
+            }
             scrollToBottom()
         }
     }
 
     func beginAssistantTurn(name: String?) {
-        let t = theme
-        ensureNewline()
-        let labelPara = NSMutableParagraphStyle()
-        labelPara.alignment = .left
-        labelPara.paragraphSpacingBefore = 14
-        labelPara.paragraphSpacing = 4
-        let labelName = name ?? t.titleString
-        textView.textStorage?.append(NSAttributedString(string: "\(labelName)\n", attributes: [
-            .font: NSFont.systemFont(ofSize: 10.5, weight: .semibold),
-            .foregroundColor: t.accentColor,
-            .paragraphStyle: labelPara
-        ]))
+        let labelName = name ?? theme.titleString
+        let bubble = ChatBubbleView(text: NSAttributedString(string: ""), isUser: false, speakerName: labelName, theme: theme)
+        transcriptStack.addArrangedSubview(bubble)
+        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        scrollToBottom()
     }
 
     func endStreaming() {
         isStreaming = false
-        // Add breathing room after the assistant message
-        let spacerPara = NSMutableParagraphStyle()
-        spacerPara.paragraphSpacing = 12
-        textView.textStorage?.append(NSAttributedString(string: "\n", attributes: [
-            .font: NSFont.systemFont(ofSize: 4),
-            .paragraphStyle: spacerPara
-        ]))
     }
-
-    // MARK: - Error
 
     func appendError(_ text: String) {
         let t = theme
-        ensureNewline()
-        let errorPara = NSMutableParagraphStyle()
-        errorPara.paragraphSpacingBefore = 8
-        errorPara.paragraphSpacing = 8
-        textView.textStorage?.append(NSAttributedString(string: text + "\n", attributes: [
+        let errorText = NSAttributedString(string: text, attributes: [
             .font: t.font,
-            .foregroundColor: t.errorColor,
-            .paragraphStyle: errorPara
-        ]))
+            .foregroundColor: t.errorColor
+        ])
+        let bubble = ChatBubbleView(text: errorText, isUser: false, speakerName: "System", theme: t)
+        transcriptStack.addArrangedSubview(bubble)
+        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
         scrollToBottom()
     }
 
-    // MARK: - Status (inline, minimal)
-
     func appendStatus(_ text: String) {
-        // Status lives in the live-status pill, not the transcript.
-        // Intentionally no-op for transcript — use setLiveStatus instead.
+        // Handled entirely by live status pill
     }
-
-    // MARK: - Expert suggestion text (no longer injected into transcript)
 
     func appendExpertSuggestion(_ experts: [ResponderExpert]) {
-        // Expert suggestions are shown in the suggestion panel, not in the transcript.
-        // We just update the panel from WalkerCharacterSessionWiring.
+        // Handled by Panel
     }
-
-    // MARK: - Tool use (shown in live status only)
 
     func appendToolUse(toolName: String, summary: String) {
         endStreaming()
@@ -160,13 +237,12 @@ extension TerminalView {
         setLiveStatus(summary, isBusy: false, isError: isError)
     }
 
-    // MARK: - History replay
-
     func replayHistory(_ messages: [ClaudeSession.Message]) {
         let t = theme
-        textView.textStorage?.setAttributedString(NSAttributedString(string: ""))
+        transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         currentAssistantText = ""
         var lastRole: ClaudeSession.Message.Role?
+        
         for msg in messages {
             switch msg.role {
             case .user:
@@ -175,7 +251,10 @@ extension TerminalView {
                 if lastRole != .assistant {
                     beginAssistantTurn(name: t.titleString)
                 }
-                textView.textStorage?.append(TerminalMarkdownRenderer.render(msg.text + "\n", theme: t))
+                if let lastBubble = transcriptStack.arrangedSubviews.last as? ChatBubbleView {
+                    let formatted = TerminalMarkdownRenderer.render(msg.text + "\n", theme: t)
+                    lastBubble.appendText(formatted)
+                }
             case .error:
                 appendError(msg.text)
             case .toolUse, .toolResult:
@@ -183,29 +262,27 @@ extension TerminalView {
             }
             lastRole = msg.role
         }
-        // Close the last assistant message if needed
+
         if lastRole == .assistant {
             endStreaming()
         }
         scrollToBottom()
     }
 
-    // MARK: - Scroll helpers
-
     func scrollToBottom() {
         resizeTranscriptToFitContent()
-        textView.scrollToEndOfDocument(nil)
+        if let docView = scrollView.documentView {
+            let maxScroll = docView.bounds.height - scrollView.contentSize.height
+            if maxScroll > 0 {
+                docView.scroll(NSPoint(x: 0, y: maxScroll))
+            }
+        }
     }
 
     func resizeTranscriptToFitContent() {
-        guard let textContainer = textView.textContainer,
-              let layoutManager = textView.layoutManager else { return }
-        layoutManager.ensureLayout(for: textContainer)
-        let usedRect = layoutManager.usedRect(for: textContainer)
-        let targetHeight = max(scrollView.contentSize.height,
-                               ceil(usedRect.height + textView.textContainerInset.height * 2 + 12))
-        if abs(textView.frame.height - targetHeight) > 1 {
-            textView.frame.size.height = targetHeight
-        }
+        transcriptStack.layoutSubtreeIfNeeded()
+        let stackHeight = transcriptStack.fittingSize.height
+        let targetHeight = max(scrollView.contentSize.height, stackHeight + 10)
+        transcriptContainer.frame.size.height = targetHeight
     }
 }

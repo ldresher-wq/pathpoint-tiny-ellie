@@ -22,34 +22,22 @@ extension TerminalView {
         scrollView.drawsBackground = false
         scrollView.contentInsets = NSEdgeInsets(top: 2, left: 0, bottom: 8, right: 0)
 
-        textView.frame = scrollView.contentView.bounds
-        textView.autoresizingMask = [.width]
-        textView.isEditable = false
-        textView.isSelectable = true
-        textView.backgroundColor = .clear
-        textView.textColor = t.textPrimary
-        textView.font = t.font
-        textView.isRichText = true
-        textView.textContainerInset = NSSize(width: 18, height: 16)
-        let defaultPara = NSMutableParagraphStyle()
-        defaultPara.paragraphSpacing = 12
-        defaultPara.lineSpacing = 3
-        defaultPara.tailIndent = -16
-        textView.defaultParagraphStyle = defaultPara
-        textView.textContainer?.widthTracksTextView = true
-        textView.textContainer?.heightTracksTextView = false
-        textView.textContainer?.containerSize = NSSize(width: scrollView.contentSize.width, height: .greatestFiniteMagnitude)
-        textView.minSize = NSSize(width: 0, height: scrollView.contentSize.height)
-        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
-        textView.isVerticallyResizable = true
-        textView.isHorizontallyResizable = false
-        textView.isAutomaticLinkDetectionEnabled = false
-        textView.delegate = self
-        textView.linkTextAttributes = [
-            .foregroundColor: t.accentColor,
-            .underlineStyle: NSUnderlineStyle.single.rawValue
-        ]
-        scrollView.documentView = textView
+        transcriptStack.orientation = .vertical
+        transcriptStack.alignment = .leading
+        transcriptStack.distribution = .fill
+        transcriptStack.spacing = 20
+        transcriptStack.translatesAutoresizingMaskIntoConstraints = false
+        transcriptContainer.addSubview(transcriptStack)
+        
+        NSLayoutConstraint.activate([
+            transcriptStack.leadingAnchor.constraint(equalTo: transcriptContainer.leadingAnchor),
+            transcriptStack.trailingAnchor.constraint(equalTo: transcriptContainer.trailingAnchor),
+            transcriptStack.bottomAnchor.constraint(equalTo: transcriptContainer.bottomAnchor)
+        ])
+        
+        transcriptContainer.frame = NSRect(x: 0, y: 0, width: scrollView.contentSize.width, height: scrollView.contentSize.height)
+        transcriptContainer.autoresizingMask = [.width]
+        scrollView.documentView = transcriptContainer
         addSubview(scrollView)
 
         liveStatusContainer.frame = NSRect(

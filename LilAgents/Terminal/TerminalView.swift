@@ -2,7 +2,8 @@ import AppKit
 
 class TerminalView: NSView {
     let scrollView = NSScrollView()
-    let textView = NSTextView()
+    let transcriptContainer = FlippedView()
+    let transcriptStack = NSStackView()
     let inputField = NSTextField()
     let liveStatusContainer = NSView()
     let liveStatusSpinner = NSProgressIndicator()

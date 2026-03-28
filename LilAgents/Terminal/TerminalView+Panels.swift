@@ -1,5 +1,41 @@
 import AppKit
 
+// MARK: - Hoverable button used for all interactive rows
+
+class HoverButton: NSButton {
+    var normalBg: CGColor = NSColor.clear.cgColor
+    var hoverBg: CGColor = NSColor.clear.cgColor
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach { removeTrackingArea($0) }
+        addTrackingArea(NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeInKeyWindow, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        ))
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.12
+            animator().layer?.backgroundColor = hoverBg
+        }
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.12
+            animator().layer?.backgroundColor = normalBg
+        }
+    }
+
+    override func resetCursorRects() {
+        addCursorRect(bounds, cursor: .pointingHand)
+    }
+}
+
 extension TerminalView {
     func setExpertSuggestions(_ experts: [ResponderExpert]) {
         currentExpertSuggestions = experts
@@ -47,19 +83,23 @@ extension TerminalView {
         let t = theme
 
         if expertSuggestionsCollapsed {
-            let button = NSButton(title: "", target: self, action: #selector(expandExpertSuggestionsTapped))
+            let button = HoverButton(title: "", target: self, action: #selector(expandExpertSuggestionsTapped))
             button.isBordered = false
             button.wantsLayer = true
+            button.normalBg = t.inputBg.cgColor
+            button.hoverBg = t.accentColor.withAlphaComponent(0.07).cgColor
             button.layer?.backgroundColor = t.inputBg.cgColor
-            button.layer?.cornerRadius = 8
+            button.layer?.cornerRadius = 10
             button.layer?.borderWidth = 1
-            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.4).cgColor
+            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.45).cgColor
 
             let pstyle = NSMutableParagraphStyle()
             pstyle.alignment = .left
+            pstyle.firstLineHeadIndent = 14
+            pstyle.headIndent = 14
 
             let names = experts.prefix(3).map(\.name).joined(separator: ", ")
-            let title = "   \(experts.count) expert\(experts.count == 1 ? "" : "s"): \(names) · Show options"
+            let title = "\(experts.count) expert\(experts.count == 1 ? "" : "s"): \(names) · Show options"
             button.attributedTitle = NSAttributedString(
                 string: title,
                 attributes: [
@@ -86,19 +126,24 @@ extension TerminalView {
             let identifier = normalizeExpertSuggestionID(expert.name)
             expertSuggestionTargets[identifier] = expert
 
-            let button = NSButton(title: "", target: self, action: #selector(expertSuggestionButtonTapped(_:)))
+            let button = HoverButton(title: "", target: self, action: #selector(expertSuggestionButtonTapped(_:)))
             button.isBordered = false
             button.wantsLayer = true
+            button.normalBg = t.bubbleBg.cgColor
+            button.hoverBg = t.accentColor.withAlphaComponent(0.07).cgColor
             button.layer?.backgroundColor = t.bubbleBg.cgColor
-            button.layer?.cornerRadius = 8
+            button.layer?.cornerRadius = 10
             button.layer?.borderWidth = 1
-            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.4).cgColor
-            
+            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.40).cgColor
+
             let pstyle = NSMutableParagraphStyle()
             pstyle.alignment = .left
-            
+            pstyle.firstLineHeadIndent = 14
+            pstyle.headIndent = 14
+            pstyle.lineBreakMode = .byTruncatingTail
+
             button.attributedTitle = NSAttributedString(
-                string: "   \(expert.name)",
+                string: expert.name,
                 attributes: [
                     .font: NSFont.systemFont(ofSize: 13, weight: .medium),
                     .foregroundColor: t.textPrimary,
@@ -130,19 +175,24 @@ extension TerminalView {
         let t = theme
         expertSuggestionLabel.stringValue = "\(expert.name) picked"
 
-        let button = NSButton(title: "", target: self, action: #selector(returnToLennyTapped))
+        let button = HoverButton(title: "", target: self, action: #selector(returnToLennyTapped))
         button.isBordered = false
         button.wantsLayer = true
+        button.normalBg = t.inputBg.cgColor
+        button.hoverBg = t.accentColor.withAlphaComponent(0.07).cgColor
         button.layer?.backgroundColor = t.inputBg.cgColor
-        button.layer?.cornerRadius = 8
+        button.layer?.cornerRadius = 10
         button.layer?.borderWidth = 1
-        button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.4).cgColor
-        
+        button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.45).cgColor
+
         let pstyle = NSMutableParagraphStyle()
         pstyle.alignment = .left
+        pstyle.firstLineHeadIndent = 14
+        pstyle.headIndent = 14
+        pstyle.lineBreakMode = .byTruncatingTail
 
         button.attributedTitle = NSAttributedString(
-            string: "   End conversation and select another expert",
+            string: "End conversation · select another expert",
             attributes: [
                 .font: NSFont.systemFont(ofSize: 13, weight: .medium),
                 .foregroundColor: t.textDim,
@@ -174,9 +224,26 @@ extension TerminalView {
         sendButton.isHidden = true
         attachButton.isHidden = true
 
-        liveStatusLabel.textColor = isError ? t.errorColor : (isBusy ? t.accentColor : t.successColor)
-        liveStatusLabel.stringValue = text
-        
+        // Build attributed string: status text + dim "close anytime" hint when busy
+        let mainColor = isError ? t.errorColor : (isBusy ? t.accentColor : t.successColor)
+        let attrStr = NSMutableAttributedString(
+            string: text,
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+                .foregroundColor: mainColor
+            ]
+        )
+        if isBusy && !isError {
+            attrStr.append(NSAttributedString(
+                string: "  ·  Close anytime",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 12, weight: .regular),
+                    .foregroundColor: t.textDim
+                ]
+            ))
+        }
+        liveStatusLabel.attributedStringValue = attrStr
+
         liveStatusLabel.isHidden = false
         liveStatusSpinner.stopAnimation(nil)
         liveStatusSpinner.isHidden = true
@@ -188,7 +255,7 @@ extension TerminalView {
     }
 
     func clearLiveStatus() {
-        liveStatusLabel.stringValue = ""
+        liveStatusLabel.attributedStringValue = NSAttributedString(string: "")
         liveStatusSpinner.stopAnimation(nil)
         stopLiveStatusAvatarShuffle()
         

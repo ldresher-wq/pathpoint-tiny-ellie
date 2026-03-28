@@ -1,6 +1,16 @@
 import AppKit
 
 extension WalkerCharacter {
+    func horizontalRangeMetrics(screen: NSScreen, dockX: CGFloat, dockWidth: CGFloat) -> (minX: CGFloat, travelDistance: CGFloat) {
+        if usesExpandedHorizontalRange {
+            let margin: CGFloat = 24
+            let minX = screen.visibleFrame.minX + margin
+            let availableWidth = screen.visibleFrame.width - margin * 2
+            return (minX, max(availableWidth - displayWidth, 0))
+        }
+        return (dockX, max(dockWidth - displayWidth, 0))
+    }
+
     func startWalk() {
         isPaused = false
         isWalking = true
@@ -76,11 +86,22 @@ extension WalkerCharacter {
         }
     }
 
-    func update(dockX: CGFloat, dockWidth: CGFloat, dockTopY: CGFloat) {
-        currentTravelDistance = max(dockWidth - displayWidth, 0)
+    func update(screen: NSScreen, dockX: CGFloat, dockWidth: CGFloat, dockTopY: CGFloat) {
+        let horizontalMetrics = horizontalRangeMetrics(screen: screen, dockX: dockX, dockWidth: dockWidth)
+        currentTravelDistance = horizontalMetrics.travelDistance
+        if isDraggingHorizontally {
+            let x = horizontalMetrics.minX + currentTravelDistance * positionProgress + flipXOffset
+            let bottomPadding = displayHeight * 0.15
+            let y = dockTopY - bottomPadding + yOffset
+            window.setFrameOrigin(NSPoint(x: x, y: y))
+            updatePopoverPosition()
+            updateThinkingBubble()
+            updateExpertNameTag()
+            return
+        }
         if isCompanionAvatar {
             let travelDistance = currentTravelDistance
-            let x = dockX + travelDistance * positionProgress + flipXOffset
+            let x = horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset
             let bottomPadding = displayHeight * 0.15
             let y = dockTopY - bottomPadding + yOffset
             window.setFrameOrigin(NSPoint(x: x, y: y))
@@ -90,7 +111,7 @@ extension WalkerCharacter {
         }
         if isIdleForPopover {
             let travelDistance = currentTravelDistance
-            let x = dockX + travelDistance * positionProgress + flipXOffset
+            let x = horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset
             let bottomPadding = displayHeight * 0.15
             let y = dockTopY - bottomPadding + yOffset
             window.setFrameOrigin(NSPoint(x: x, y: y))
@@ -106,8 +127,7 @@ extension WalkerCharacter {
             if now >= pauseEndTime {
                 startWalk()
             } else {
-                let travelDistance = max(dockWidth - displayWidth, 0)
-                let x = dockX + travelDistance * positionProgress + flipXOffset
+                let x = horizontalMetrics.minX + currentTravelDistance * positionProgress + flipXOffset
                 let bottomPadding = displayHeight * 0.15
                 let y = dockTopY - bottomPadding + yOffset
                 window.setFrameOrigin(NSPoint(x: x, y: y))
@@ -134,7 +154,7 @@ extension WalkerCharacter {
                 return
             }
 
-            let x = dockX + travelDistance * positionProgress + flipXOffset
+            let x = horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset
             let bottomPadding = displayHeight * 0.15
             let y = dockTopY - bottomPadding + yOffset
             window.setFrameOrigin(NSPoint(x: x, y: y))

@@ -49,6 +49,9 @@ final class WalkerCharacter {
     var popoverTitleLabel: NSTextField?
     var popoverSubtitleLabel: NSTextField?
     var popoverReturnButton: NSButton?
+    var popoverExpandButton: HoverButton?
+    var isPopoverExpanded = false
+    static let defaultPopoverHeight: CGFloat = 600
 
     var isClaudeBusy: Bool { claudeSession?.isBusy ?? false }
 
@@ -64,6 +67,8 @@ final class WalkerCharacter {
     var liveStatusFallbackTimer: Timer?
     var lastLiveStatusEventAt: Date?
     var liveStatusFallbackIndex = 0
+    var isDraggingHorizontally = false
+    var usesExpandedHorizontalRange = false
 
     init(videoName: String) {
         self.videoName = videoName

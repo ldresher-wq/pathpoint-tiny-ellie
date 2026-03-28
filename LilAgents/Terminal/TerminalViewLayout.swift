@@ -35,8 +35,8 @@ extension TerminalView {
             let suggestionHeight = 14 + 16 + 10 + stackHeight + 14
             let suggestionY = bottomCursor + Layout.interSectionSpacing
             expertSuggestionContainer.frame = NSRect(x: Layout.padding, y: suggestionY, width: width, height: suggestionHeight)
-            expertSuggestionLabel.frame = NSRect(x: 14, y: suggestionHeight - 30, width: width - 28, height: 16)
-            expertSuggestionStack.frame = NSRect(x: 14, y: 14, width: width - 28, height: stackHeight)
+            expertSuggestionLabel.frame = NSRect(x: 16, y: suggestionHeight - 30, width: width - 32, height: 16)
+            expertSuggestionStack.frame = NSRect(x: 16, y: 14, width: width - 32, height: stackHeight)
             bottomCursor = suggestionY + suggestionHeight
         }
 

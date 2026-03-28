@@ -150,6 +150,27 @@ class LilAgentsController {
         }
     }
 
+    func currentDockMetrics() -> (screen: NSScreen, dockX: CGFloat, dockWidth: CGFloat, dockTopY: CGFloat)? {
+        guard let screen = activeScreen else { return nil }
+
+        let screenWidth = screen.frame.width
+        let dockX: CGFloat
+        let dockWidth: CGFloat
+        let dockTopY: CGFloat
+
+        if screenHasDock(screen) {
+            (dockX, dockWidth) = getDockIconArea(screenWidth: screenWidth)
+            dockTopY = screen.visibleFrame.origin.y
+        } else {
+            let margin: CGFloat = 40.0
+            dockX = screen.frame.origin.x + margin
+            dockWidth = screenWidth - margin * 2
+            dockTopY = screen.frame.origin.y
+        }
+
+        return (screen, dockX, dockWidth, dockTopY)
+    }
+
     // MARK: - Debug
 
     private func setupDebugLine() {
@@ -243,24 +264,11 @@ class LilAgentsController {
     }
 
     func tick() {
-        guard let screen = activeScreen else { return }
-
-        let screenWidth = screen.frame.width
-        let dockX: CGFloat
-        let dockWidth: CGFloat
-        let dockTopY: CGFloat
-
-        if screenHasDock(screen) {
-            // Dock is on this screen — constrain to dock area
-            (dockX, dockWidth) = getDockIconArea(screenWidth: screenWidth)
-            dockTopY = screen.visibleFrame.origin.y
-        } else {
-            // No dock on this screen — use full screen width with small margin
-            let margin: CGFloat = 40.0
-            dockX = screen.frame.origin.x + margin
-            dockWidth = screenWidth - margin * 2
-            dockTopY = screen.frame.origin.y
-        }
+        guard let metrics = currentDockMetrics() else { return }
+        let screen = metrics.screen
+        let dockX = metrics.dockX
+        let dockWidth = metrics.dockWidth
+        let dockTopY = metrics.dockTopY
 
         updateDebugLine(dockX: dockX, dockWidth: dockWidth, dockTopY: dockTopY)
 
@@ -275,7 +283,7 @@ class LilAgentsController {
             }
         }
         for char in activeChars {
-            char.update(dockX: dockX, dockWidth: dockWidth, dockTopY: dockTopY)
+            char.update(screen: screen, dockX: dockX, dockWidth: dockWidth, dockTopY: dockTopY)
         }
 
         let sorted = activeChars.sorted { $0.positionProgress < $1.positionProgress }

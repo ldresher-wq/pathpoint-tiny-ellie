@@ -6,7 +6,10 @@ extension TerminalView {
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
 
-        let panelRadius = max(t.inputCornerRadius, 12)
+        // Corner radius design system:
+        //   Window: 28  ·  Composer pill: composerHeight/2  ·  Inner panels: 16  ·  Buttons: 10  ·  Circles: size/2
+        let composerRadius = Layout.composerHeight / 2   // 28 — perfect pill
+        let innerPanelRadius: CGFloat = 16               // subordinate panels inside window
 
         scrollView.frame = NSRect(
             x: Layout.padding,
@@ -20,6 +23,8 @@ extension TerminalView {
         scrollView.hasHorizontalScroller = false
         scrollView.borderType = .noBorder
         scrollView.drawsBackground = false
+        scrollView.contentView.drawsBackground = false
+        scrollView.contentView.backgroundColor = .clear
         scrollView.contentInsets = NSEdgeInsets(top: 2, left: 0, bottom: 8, right: 0)
 
         transcriptStack.orientation = .vertical
@@ -35,6 +40,8 @@ extension TerminalView {
             transcriptStack.bottomAnchor.constraint(equalTo: transcriptContainer.bottomAnchor)
         ])
         
+        transcriptContainer.wantsLayer = true
+        transcriptContainer.layer?.backgroundColor = NSColor.clear.cgColor
         transcriptContainer.frame = NSRect(x: 0, y: 0, width: scrollView.contentSize.width, height: scrollView.contentSize.height)
         transcriptContainer.autoresizingMask = [.width]
         scrollView.documentView = transcriptContainer
@@ -49,12 +56,12 @@ extension TerminalView {
             height: 128
         )
         expertSuggestionContainer.autoresizingMask = [.width, .maxYMargin]
-        stylePanel(expertSuggestionContainer, background: t.inputBg.withAlphaComponent(0.96), border: t.separatorColor.withAlphaComponent(0.34), radius: panelRadius)
+        stylePanel(expertSuggestionContainer, background: t.inputBg.withAlphaComponent(0.96), border: t.separatorColor.withAlphaComponent(0.34), radius: innerPanelRadius)
         expertSuggestionContainer.alphaValue = 0
         expertSuggestionContainer.isHidden = true
         addSubview(expertSuggestionContainer)
 
-        expertSuggestionLabel.frame = NSRect(x: 14, y: 96, width: expertSuggestionContainer.frame.width - 28, height: 16)
+        expertSuggestionLabel.frame = NSRect(x: 16, y: 96, width: expertSuggestionContainer.frame.width - 32, height: 16)
         expertSuggestionLabel.autoresizingMask = [.width]
         expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         expertSuggestionLabel.textColor = t.textDim
@@ -66,7 +73,7 @@ extension TerminalView {
         expertSuggestionStack.distribution = .fill
         expertSuggestionStack.spacing = 8
         expertSuggestionStack.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        expertSuggestionStack.frame = NSRect(x: 14, y: 12, width: expertSuggestionContainer.frame.width - 28, height: 76)
+        expertSuggestionStack.frame = NSRect(x: 16, y: 12, width: expertSuggestionContainer.frame.width - 32, height: 76)
         expertSuggestionStack.autoresizingMask = [.width, .height]
         expertSuggestionContainer.addSubview(expertSuggestionStack)
 
@@ -90,21 +97,23 @@ extension TerminalView {
             height: Layout.composerHeight
         ))
         composerPanel.autoresizingMask = [.width, .maxYMargin]
-        stylePanel(composerPanel, background: t.inputBg.withAlphaComponent(0.98), border: t.separatorColor.withAlphaComponent(0.40), radius: panelRadius + 4)
+        stylePanel(composerPanel, background: t.inputBg.withAlphaComponent(0.98), border: t.separatorColor.withAlphaComponent(0.40), radius: composerRadius)
         addSubview(composerPanel)
 
         let sendButtonSize: CGFloat = 34
         let attachButtonSize: CGFloat = 28
-        let rightInset: CGFloat = 12
-        let sendY = (Layout.composerHeight - sendButtonSize) / 2
+        let rightInset: CGFloat = 11                                         // symmetric with left text inset (~11px from circle edge to panel edge)
+        let sendY = (Layout.composerHeight - sendButtonSize) / 2             // vertically centered
         let attachY = (Layout.composerHeight - attachButtonSize) / 2
         let sendX = composerPanel.frame.width - rightInset - sendButtonSize
-        let attachX = sendX - 8 - attachButtonSize
+        let attachX = sendX - 10 - attachButtonSize
 
         sendButton.frame = NSRect(x: sendX, y: sendY, width: sendButtonSize, height: sendButtonSize)
         sendButton.autoresizingMask = [.minXMargin]
         sendButton.isBordered = false
         sendButton.wantsLayer = true
+        sendButton.normalBg = t.accentColor.cgColor
+        sendButton.hoverBg = t.accentColor.withAlphaComponent(0.80).cgColor
         sendButton.layer?.backgroundColor = t.accentColor.cgColor
         sendButton.layer?.cornerRadius = sendButtonSize / 2
         if let img = NSImage(systemSymbolName: "arrow.up", accessibilityDescription: "Send message") {
@@ -121,7 +130,9 @@ extension TerminalView {
         attachButton.autoresizingMask = [.minXMargin]
         attachButton.isBordered = false
         attachButton.wantsLayer = true
-        attachButton.layer?.backgroundColor = t.bubbleBg.withAlphaComponent(0.85).cgColor
+        attachButton.normalBg = t.separatorColor.withAlphaComponent(0.14).cgColor
+        attachButton.hoverBg = t.separatorColor.withAlphaComponent(0.28).cgColor
+        attachButton.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.14).cgColor
         attachButton.layer?.cornerRadius = attachButtonSize / 2
         if let img = NSImage(systemSymbolName: "paperclip", accessibilityDescription: "Attach file") {
             let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
@@ -134,9 +145,9 @@ extension TerminalView {
         composerPanel.addSubview(attachButton)
 
         inputField.frame = NSRect(
-            x: 14,
+            x: 16,
             y: 8,
-            width: attachX - 24,
+            width: attachX - 16 - 8,   // 16px left inset, 8px gap before attach button
             height: Layout.composerHeight - 16
         )
         inputField.autoresizingMask = [.width]
@@ -163,12 +174,12 @@ extension TerminalView {
 
         liveStatusSpinner.style = .spinning
         liveStatusSpinner.controlSize = .small
-        liveStatusSpinner.frame = NSRect(x: 20, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
+        liveStatusSpinner.frame = NSRect(x: 16, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
         liveStatusSpinner.isDisplayedWhenStopped = false
         liveStatusSpinner.isHidden = true
         composerPanel.addSubview(liveStatusSpinner)
 
-        liveStatusAvatarView.frame = NSRect(x: 16, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)
+        liveStatusAvatarView.frame = NSRect(x: 16, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)  // 16px left, vertically centered
         liveStatusAvatarView.wantsLayer = true
         liveStatusAvatarView.layer?.cornerRadius = 13
         liveStatusAvatarView.layer?.masksToBounds = true
@@ -186,7 +197,8 @@ extension TerminalView {
         liveStatusLabel.textColor = t.accentColor
         liveStatusLabel.lineBreakMode = .byTruncatingTail
         liveStatusLabel.isHidden = true
-        liveStatusLabel.frame = NSRect(x: 52, y: (Layout.composerHeight - 16) / 2 - 1, width: composerPanel.frame.width - 66, height: 16)
+        // 16 (left inset) + 26 (avatar) + 10 (gap) = 52 start; right edge leaves room for send button
+        liveStatusLabel.frame = NSRect(x: 52, y: (Layout.composerHeight - 18) / 2, width: composerPanel.frame.width - 52 - rightInset - sendButtonSize - 8, height: 18)
         liveStatusLabel.autoresizingMask = [.width]
         composerPanel.addSubview(liveStatusLabel)
 
@@ -197,6 +209,13 @@ extension TerminalView {
     @objc func inputSubmitted() {
         let text = inputField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty || !pendingAttachments.isEmpty else { return }
+
+        // Dismiss welcome chips when user sends their first message
+        if let chips = welcomeChipsView {
+            transcriptStack.removeArrangedSubview(chips)
+            chips.removeFromSuperview()
+            welcomeChipsView = nil
+        }
 
         let attachments = pendingAttachments
         inputField.stringValue = ""

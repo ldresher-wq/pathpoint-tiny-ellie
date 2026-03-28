@@ -94,26 +94,20 @@ extension WalkerCharacter {
     }
 
     func formatLiveStatus(toolName: String, summary: String) -> String {
-        let trimmedSummary = summary.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmedSummary.isEmpty {
-            return toolName
-        }
-
         let lowered = toolName.lowercased()
         if lowered.contains("planning") {
-            return "Preparing request • \(trimmedSummary)"
+            return "On it…"
         }
         if lowered.contains("search") || lowered.contains("reading") || lowered.contains("browse") {
-            return "Querying archive • \(trimmedSummary)"
+            return "Searching archive"
         }
         if lowered.contains("writing") || lowered.contains("generating") {
-            return "Composing answer • \(trimmedSummary)"
+            return "Writing answer"
         }
         if lowered.contains("running") || lowered.contains("progress") {
-            return "Running step • \(trimmedSummary)"
+            return "Running"
         }
-
-        return "\(toolName) • \(trimmedSummary)"
+        return toolName
     }
 
     func noteLiveStatusEvent() {
@@ -152,10 +146,10 @@ extension WalkerCharacter {
         guard Date().timeIntervalSince(lastEventAt) >= 4.5 else { return }
 
         let fallbackStatuses = [
-            "Preparing request",
-            "Contacting archive",
-            "Reading matches",
-            "Drafting answer"
+            "On it…",
+            "Searching archive",
+            "Reading",
+            "Writing answer"
         ]
 
         let index = min(liveStatusFallbackIndex, fallbackStatuses.count - 1)

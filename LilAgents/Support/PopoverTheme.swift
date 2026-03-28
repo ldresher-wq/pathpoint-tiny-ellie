@@ -180,38 +180,39 @@ struct PopoverTheme {
     )
 
     static let harbor = PopoverTheme(
-        name: "Harbor",
-        popoverBg: NSColor(red: 0.955, green: 0.965, blue: 0.978, alpha: 0.88),
-        popoverBorder: NSColor(red: 0.780, green: 0.820, blue: 0.875, alpha: 0.70),
-        popoverBorderWidth: 0.75,
-        popoverCornerRadius: 22,
-        titleBarBg: NSColor(red: 0.970, green: 0.978, blue: 0.988, alpha: 0.78),
-        titleText: NSColor(red: 0.110, green: 0.145, blue: 0.200, alpha: 1.0),
-        titleFont: NSFont.systemFont(ofSize: 12, weight: .semibold),
+        name: "Lenny",
+        // Warm parchment background — Lenny's brand warmth meets pi.ai's clean openness
+        popoverBg: NSColor(red: 0.980, green: 0.953, blue: 0.908, alpha: 0.97),
+        popoverBorder: NSColor(red: 0.820, green: 0.678, blue: 0.488, alpha: 0.28),
+        popoverBorderWidth: 1.0,
+        popoverCornerRadius: 28,
+        titleBarBg: NSColor(red: 0.968, green: 0.938, blue: 0.890, alpha: 0.55),
+        titleText: NSColor(red: 0.100, green: 0.068, blue: 0.025, alpha: 1.0),
+        titleFont: NSFont.systemFont(ofSize: 13, weight: .semibold),
         titleString: "Lenny",
-        separatorColor: NSColor(red: 0.760, green: 0.800, blue: 0.860, alpha: 0.46),
+        separatorColor: NSColor(red: 0.820, green: 0.710, blue: 0.568, alpha: 0.38),
         font: NSFont.systemFont(ofSize: 14, weight: .regular),
         fontBold: NSFont.systemFont(ofSize: 14, weight: .semibold),
-        textPrimary: NSColor(red: 0.135, green: 0.160, blue: 0.210, alpha: 1.0),
-        textDim: NSColor(red: 0.430, green: 0.490, blue: 0.560, alpha: 1.0),
-        accentColor: NSColor(red: 0.188, green: 0.420, blue: 0.700, alpha: 1.0),
-        errorColor: NSColor(red: 0.720, green: 0.240, blue: 0.220, alpha: 1.0),
-        successColor: NSColor(red: 0.168, green: 0.540, blue: 0.420, alpha: 1.0),
-        inputBg: NSColor(red: 0.986, green: 0.990, blue: 0.996, alpha: 0.94),
-        inputCornerRadius: 14,
-        bubbleBg: NSColor(red: 0.972, green: 0.980, blue: 0.992, alpha: 0.90),
-        bubbleBorder: NSColor(red: 0.740, green: 0.800, blue: 0.875, alpha: 0.38),
-        bubbleText: NSColor(red: 0.350, green: 0.410, blue: 0.490, alpha: 1.0),
-        bubbleCompletionBorder: NSColor(red: 0.168, green: 0.540, blue: 0.420, alpha: 0.45),
-        bubbleCompletionText: NSColor(red: 0.128, green: 0.430, blue: 0.330, alpha: 1.0),
+        textPrimary: NSColor(red: 0.112, green: 0.075, blue: 0.028, alpha: 1.0),
+        textDim: NSColor(red: 0.535, green: 0.448, blue: 0.335, alpha: 1.0),
+        accentColor: NSColor(red: 0.878, green: 0.478, blue: 0.067, alpha: 1.0),  // Lenny orange
+        errorColor: NSColor(red: 0.748, green: 0.218, blue: 0.148, alpha: 1.0),
+        successColor: NSColor(red: 0.228, green: 0.558, blue: 0.388, alpha: 1.0),
+        inputBg: NSColor(red: 1.000, green: 0.992, blue: 0.975, alpha: 0.98),
+        inputCornerRadius: 22,
+        bubbleBg: NSColor(red: 1.000, green: 0.985, blue: 0.960, alpha: 0.82),
+        bubbleBorder: NSColor(red: 0.820, green: 0.710, blue: 0.568, alpha: 0.32),
+        bubbleText: NSColor(red: 0.440, green: 0.360, blue: 0.268, alpha: 1.0),
+        bubbleCompletionBorder: NSColor(red: 0.228, green: 0.698, blue: 0.418, alpha: 0.50),
+        bubbleCompletionText: NSColor(red: 0.148, green: 0.548, blue: 0.318, alpha: 1.0),
         bubbleFont: NSFont.systemFont(ofSize: 11, weight: .medium),
-        bubbleCornerRadius: 12
+        bubbleCornerRadius: 18
     )
 
     static let allThemes: [PopoverTheme] = [.harbor]
     static var current: PopoverTheme = .harbor
-    static var customFontName: String? = ".AppleSystemUIFontRounded"
-    static var customFontSize: CGFloat = 13
+    static var customFontName: String? = nil
+    static var customFontSize: CGFloat = 14
 
     // MARK: - Theme Modifiers
 

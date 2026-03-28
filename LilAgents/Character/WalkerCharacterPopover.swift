@@ -74,6 +74,10 @@ extension WalkerCharacter {
 
         if popoverWindow == nil {
             createPopoverWindow()
+            // Show warm greeting with suggestion chips on first open
+            if claudeSession?.history.isEmpty == true {
+                terminalView?.showWelcomeGreeting()
+            }
         }
 
         refreshPopoverHeader()
@@ -155,9 +159,9 @@ extension WalkerCharacter {
 
     func updateInputPlaceholder() {
         if let expert = focusedExpert {
-            terminalView?.updatePlaceholder("Ask \(expert.name) a follow-up")
+            terminalView?.updatePlaceholder("Ask \(expert.name) a follow-up...")
         } else {
-            terminalView?.updatePlaceholder("Ask about product, growth, pricing, or AI")
+            terminalView?.updatePlaceholder("What's on your mind?")
         }
     }
 }

@@ -61,6 +61,54 @@ extension WalkerCharacter {
         }
     }
 
+    func beginHorizontalDrag(at event: NSEvent) {
+        isDraggingHorizontally = true
+        usesExpandedHorizontalRange = true
+        isWalking = false
+        isPaused = true
+        pauseEndTime = CACurrentMediaTime() + 8.0
+        setFacing(.front)
+        continueHorizontalDrag(with: event)
+    }
+
+    func continueHorizontalDrag(with event: NSEvent) {
+        guard isDraggingHorizontally,
+              let controller,
+              let metrics = controller.currentDockMetrics()
+        else { return }
+
+        let bottomPadding = displayHeight * 0.15
+        let pointerLocation = NSEvent.mouseLocation
+        let horizontalMetrics = horizontalRangeMetrics(
+            screen: metrics.screen,
+            dockX: metrics.dockX,
+            dockWidth: metrics.dockWidth
+        )
+        let visualX = pointerLocation.x - displayWidth / 2 - flipXOffset
+        let rawProgress = horizontalMetrics.travelDistance > 0
+            ? (visualX - horizontalMetrics.minX) / horizontalMetrics.travelDistance
+            : 0
+        positionProgress = min(max(rawProgress, 0), 1)
+
+        let y = metrics.dockTopY - bottomPadding + yOffset
+        window.setFrameOrigin(NSPoint(
+            x: horizontalMetrics.minX + horizontalMetrics.travelDistance * positionProgress + flipXOffset,
+            y: y
+        ))
+        updatePopoverPosition()
+        updateThinkingBubble()
+        updateExpertNameTag()
+    }
+
+    func endHorizontalDrag() {
+        isDraggingHorizontally = false
+        pauseEndTime = CACurrentMediaTime() + Double.random(in: 4.0...8.0)
+    }
+
+    func cancelHorizontalDrag() {
+        isDraggingHorizontally = false
+    }
+
     func configureCompanionAvatar(expert: ResponderExpert, position: CGFloat) {
         representedExpert = expert
         isCompanionAvatar = true

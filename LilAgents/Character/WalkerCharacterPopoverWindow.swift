@@ -51,39 +51,41 @@ extension WalkerCharacter {
         tintView.autoresizingMask = [.width, .height]
         container.addSubview(tintView)
 
-        let titleBarHeight: CGFloat = 64
+        let titleBarHeight: CGFloat = 52
         let titleBar = NSView(frame: NSRect(x: 0, y: popoverHeight - titleBarHeight, width: popoverWidth, height: titleBarHeight))
         titleBar.wantsLayer = true
-        titleBar.layer?.backgroundColor = t.titleBarBg.withAlphaComponent(0.55).cgColor
+        titleBar.layer?.backgroundColor = t.titleBarBg.withAlphaComponent(0.50).cgColor
         container.addSubview(titleBar)
 
         let titleLabel = NSTextField(labelWithString: focusedExpert?.name ?? t.titleString)
-        titleLabel.font = NSFont.systemFont(ofSize: 21, weight: .semibold)
+        titleLabel.font = NSFont.systemFont(ofSize: 17, weight: .semibold)
         titleLabel.textColor = t.titleText
-        titleLabel.frame = NSRect(x: 24, y: 27, width: popoverWidth - 220, height: 26)
+        titleLabel.frame = NSRect(x: 22, y: 17, width: popoverWidth - 200, height: 22)
         titleBar.addSubview(titleLabel)
         popoverTitleLabel = titleLabel
 
         let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Archive-grounded answers" : "Focused follow-up mode")
-        subtitle.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
-        subtitle.textColor = t.textDim
-        subtitle.frame = NSRect(x: 24, y: 11, width: popoverWidth - 220, height: 16)
+        subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
+        subtitle.textColor = t.textDim.withAlphaComponent(0.75)
+        subtitle.frame = NSRect(x: 22, y: 5, width: popoverWidth - 200, height: 14)
         titleBar.addSubview(subtitle)
         popoverSubtitleLabel = subtitle
 
-        let returnPill = NSButton(title: "", target: self, action: #selector(returnToGenieTapped))
-        returnPill.frame = NSRect(x: popoverWidth - 150, y: 18, width: 126, height: 28)
+        let returnPill = HoverButton(title: "", target: self, action: #selector(returnToGenieTapped))
+        returnPill.frame = NSRect(x: popoverWidth - 142, y: 14, width: 118, height: 26)
         returnPill.isBordered = false
         returnPill.wantsLayer = true
-        returnPill.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.88).cgColor
-        returnPill.layer?.cornerRadius = 14
+        returnPill.normalBg = t.inputBg.withAlphaComponent(0.90).cgColor
+        returnPill.hoverBg = t.accentColor.withAlphaComponent(0.08).cgColor
+        returnPill.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.90).cgColor
+        returnPill.layer?.cornerRadius = 13
         returnPill.layer?.borderWidth = 0.75
-        returnPill.layer?.borderColor = t.separatorColor.withAlphaComponent(0.50).cgColor
+        returnPill.layer?.borderColor = t.separatorColor.withAlphaComponent(0.55).cgColor
         returnPill.attributedTitle = NSAttributedString(
-            string: "Back to Lenny",
+            string: "← Back to Lenny",
             attributes: [
-                .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
-                .foregroundColor: t.titleText
+                .font: NSFont.systemFont(ofSize: 11, weight: .medium),
+                .foregroundColor: t.accentColor
             ]
         )
         returnPill.isHidden = focusedExpert == nil
@@ -92,7 +94,7 @@ extension WalkerCharacter {
 
         let sep = NSView(frame: NSRect(x: 0, y: popoverHeight - titleBarHeight - 1, width: popoverWidth, height: 0.5))
         sep.wantsLayer = true
-        sep.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.35).cgColor
+        sep.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.30).cgColor
         container.addSubview(sep)
 
         let terminal = TerminalView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight - titleBarHeight - 1))

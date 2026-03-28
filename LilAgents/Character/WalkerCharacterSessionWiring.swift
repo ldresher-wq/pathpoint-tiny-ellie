@@ -3,7 +3,15 @@ import AppKit
 extension WalkerCharacter {
     func wireSession(_ session: ClaudeSession) {
         session.onText = { [weak self] text in
-            self?.terminalView?.appendStreamingText(text)
+            guard let self, let tv = self.terminalView else { return }
+            // Emit the speaker label before the very first chunk of a response
+            if !tv.isStreaming {
+                tv.isStreaming = true
+                tv.currentAssistantText = ""
+                let speakerName = self.focusedExpert?.name ?? tv.theme.titleString
+                tv.beginAssistantTurn(name: speakerName)
+            }
+            tv.appendStreamingText(text)
         }
 
         session.onTurnComplete = { [weak self] in

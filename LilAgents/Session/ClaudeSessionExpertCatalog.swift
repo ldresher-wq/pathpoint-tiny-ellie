@@ -121,13 +121,37 @@ extension ClaudeSession {
     }
 
     func cleanedAssistantText(_ text: String) -> String {
-        text
+        var cleaned = text
             .replacingOccurrences(
                 of: #"\s*<LIL_AGENTS_EXPERTS>[\s\S]*?</LIL_AGENTS_EXPERTS>\s*"#,
                 with: "\n",
                 options: .regularExpression
             )
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Strip structural JSON remnants if the model output malformed JSON chunks
+        // e.g. leading `{ "answer_markdown": "`
+        cleaned = cleaned.replacingOccurrences(
+            of: #"^\s*\{\s*"answer_markdown"\s*:\s*""#,
+            with: "",
+            options: .regularExpression
+        )
+        // e.g. trailing `", "suggested_experts": [...] }`
+        cleaned = cleaned.replacingOccurrences(
+            of: #"\",?\s*"suggested_experts"[\s\S]*$"#,
+            with: "",
+            options: .regularExpression
+        )
+        cleaned = cleaned.replacingOccurrences(
+            of: #"\",?\s*"suggest_expert_prompt"[\s\S]*$"#,
+            with: "",
+            options: .regularExpression
+        )
+        
+        // Unescape escaped quotes and newlines if it still looks like a JSON string block
+        cleaned = cleaned.replacingOccurrences(of: "\\\"", with: "\"")
+        cleaned = cleaned.replacingOccurrences(of: "\\n", with: "\n")
+
+        return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     func markdownBoldedNames(from text: String) -> [String] {

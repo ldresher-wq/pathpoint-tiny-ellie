@@ -38,7 +38,7 @@ extension TerminalView {
             expertSuggestionContainer.frame = NSRect(x: Layout.padding, y: bottomCursor, width: width, height: 0)
         } else {
             let buttonCount = CGFloat(expertSuggestionStack.arrangedSubviews.count)
-            let stackHeight = max(34, buttonCount * 34 + max(0, buttonCount - 1) * expertSuggestionStack.spacing)
+            let stackHeight = max(28, buttonCount * 28 + max(0, buttonCount - 1) * expertSuggestionStack.spacing)
             let suggestionHeight = 14 + 16 + 10 + stackHeight + 14
             let suggestionY = bottomCursor + Layout.interSectionSpacing
             expertSuggestionContainer.frame = NSRect(x: Layout.padding, y: suggestionY, width: width, height: suggestionHeight)

@@ -21,28 +21,28 @@ extension TerminalView {
 
             let button = NSButton(title: "", target: self, action: #selector(expertSuggestionButtonTapped(_:)))
             button.isBordered = false
-            button.bezelStyle = .regularSquare
             button.wantsLayer = true
             button.layer?.backgroundColor = t.bubbleBg.cgColor
-            button.layer?.cornerRadius = 12
-            button.layer?.borderWidth = 0.75
-            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.50).cgColor
+            button.layer?.cornerRadius = 14
+            button.layer?.borderWidth = 1
+            button.layer?.borderColor = t.accentColor.withAlphaComponent(0.2).cgColor
+            
+            let pstyle = NSMutableParagraphStyle()
+            pstyle.alignment = .center
+            
             button.attributedTitle = NSAttributedString(
                 string: expert.name,
                 attributes: [
-                    .font: NSFont.systemFont(ofSize: 11.5, weight: .semibold),
-                    .foregroundColor: t.titleText
+                    .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
+                    .foregroundColor: t.accentColor,
+                    .paragraphStyle: pstyle
                 ]
             )
             button.setButtonType(.momentaryPushIn)
-            button.imagePosition = .noImage
             button.identifier = NSUserInterfaceItemIdentifier(identifier)
-            button.contentTintColor = t.titleText
-            button.alignment = .left
-            button.font = NSFont.systemFont(ofSize: 12, weight: .semibold)
             button.translatesAutoresizingMaskIntoConstraints = false
             expertSuggestionStack.addArrangedSubview(button)
-            button.heightAnchor.constraint(equalToConstant: 34).isActive = true
+            button.heightAnchor.constraint(equalToConstant: 28).isActive = true
         }
 
         setPanelVisibility(expertSuggestionContainer, hidden: false)

@@ -13,6 +13,7 @@ Main goals covered:
 - remove automatic expert/avatar switching during active responses
 - replace auto-switching with post-response clickable expert suggestions
 - move expert suggestions into a dedicated visible button bar after transcript-based rendering proved too fragile
+- redesign the popover around a single default visual system with a larger transcript and simpler UI
 
 ## Architecture Changes
 
@@ -113,9 +114,9 @@ Later follow-up fixes also addressed:
 
 Updated expert handling to support:
 - extracting expert candidates from assistant freeform text
-- generic avatar fallback when a named expert does not have a dedicated bundled avatar
+- restricting suggestions to names that resolve to bundled avatar assets
 
-This was important because some archive-derived names appeared in answers but did not always have a matching avatar asset.
+The current behavior is intentionally stricter: if there is no matching bundled avatar, the app does not surface that expert in the suggestion UI.
 
 ### `LilAgents/TerminalView.swift`
 
@@ -131,6 +132,11 @@ Added:
 - visible expert suggestion container UI
 - clickable expert suggestion buttons
 
+Later in the day this was redesigned into:
+- a larger transcript-first layout
+- a simpler composer panel
+- a compact stacked expert-suggestion panel instead of fragile chip-style pills
+
 ### `LilAgents/TerminalView+Transcript.swift`
 
 Updated transcript rendering and scroll sizing behavior.
@@ -144,6 +150,17 @@ Changed session wiring so:
 - the app does not auto-focus a new expert mid-turn
 - visible expert suggestion buttons appear only after the answer finishes
 - selecting a suggestion explicitly opens that expert
+
+Later UI work also changed:
+- larger popover sizing
+- simplified onboarding and header copy
+- reduced decorative chrome in favor of a more native macOS utility-window feel
+
+### `LilAgents/PopoverTheme.swift`
+
+The visual system was simplified to a single default theme:
+- old multi-theme experimentation remains in code for now, but only one theme is active
+- the default palette moved away from the earlier orange treatment toward a cleaner slate/blue system
 
 ## Behavior Changes
 
@@ -180,10 +197,10 @@ Later follow-up work addressed:
 - auto-switch removal
 - structured JSON output for expert suggestion parsing
 - assistant-text expert inference
-- generic avatar fallback
+- stricter avatar-backed suggestion filtering
 - safer subprocess working directory
 - more diagnostic logging
-- transcript visibility issues by moving suggestions into a dedicated button bar
+- transcript visibility issues by moving suggestions into a dedicated panel and then refining that panel into a stacked list after chip rendering clipped in AppKit
 
 One important interpretation note from the logs:
 - at least one `log.md` the user shared was clearly produced by an older binary because it still showed stale behaviors after the fixes had already been made
@@ -202,6 +219,7 @@ xcodebuild -project lil-agents.xcodeproj -scheme LilAgents -sdk macosx -configur
 - If the app is not fully restarted after a rebuild, logs can reflect stale binaries and make debugging misleading.
 - Starter-pack retrieval quality is intentionally narrower than the full archive and may produce weaker answers for people or topics not included in the bundled subset.
 - The codebase still contains both transcript-link suggestion plumbing and the newer button-bar suggestion UI; if the suggestion system is simplified later, that duplication is a good cleanup target.
+- The active popover design is materially cleaner than the old one, but visual tuning still depends on live screenshot review because AppKit spacing and text rendering are sensitive to runtime metrics.
 
 ## Documentation Update
 
@@ -212,3 +230,4 @@ xcodebuild -project lil-agents.xcodeproj -scheme LilAgents -sdk macosx -configur
 - settings and debug logging
 - post-response expert suggestion flow instead of automatic handoff
 - the final visible expert-button bar UI
+- the later single-theme popover redesign with a larger transcript and simplified suggestion panel

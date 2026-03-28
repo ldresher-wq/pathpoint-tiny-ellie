@@ -11,7 +11,8 @@ class TerminalView: NSView {
     let expertSuggestionContainer = NSView()
     let expertSuggestionLabel = NSTextField(labelWithString: "")
     let expertSuggestionStack = NSStackView()
-    let attachButton = NSButton(title: "Attach", target: nil, action: nil)
+    let attachButton = NSButton(title: "", target: nil, action: nil)
+    let sendButton = NSButton(title: "", target: nil, action: nil)
     let returnButton = NSButton(title: "Return to Genie", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?

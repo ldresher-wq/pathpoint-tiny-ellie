@@ -20,17 +20,21 @@ extension TerminalView {
         ensureNewline()
         let para = messageSpacing
         let attributed = NSMutableAttributedString()
-        attributed.append(NSAttributedString(string: "> ", attributes: [
-            .font: t.fontBold, .foregroundColor: t.accentColor, .paragraphStyle: para
+        attributed.append(NSAttributedString(string: "You\n", attributes: [
+            .font: NSFont.systemFont(ofSize: max(11, t.font.pointSize - 2), weight: .semibold),
+            .foregroundColor: t.textDim,
+            .paragraphStyle: para
         ]))
         let visibleText = text.isEmpty ? "(with attachments)" : text
-        attributed.append(NSAttributedString(string: "\(visibleText)\n", attributes: [
+        attributed.append(NSAttributedString(string: "\(visibleText)\n\n", attributes: [
             .font: t.fontBold, .foregroundColor: t.textPrimary, .paragraphStyle: para
         ]))
         if !attachments.isEmpty {
             let attachmentText = attachments.map(\.displayName).joined(separator: ", ")
-            attributed.append(NSAttributedString(string: "  attached: \(attachmentText)\n", attributes: [
-                .font: t.font, .foregroundColor: t.textDim, .paragraphStyle: para
+            attributed.append(NSAttributedString(string: "Attached: \(attachmentText)\n", attributes: [
+                .font: NSFont.systemFont(ofSize: max(11, t.font.pointSize - 2), weight: .medium),
+                .foregroundColor: t.textDim,
+                .paragraphStyle: para
             ]))
         }
         textView.textStorage?.append(attributed)
@@ -65,9 +69,18 @@ extension TerminalView {
 
     func appendStatus(_ text: String) {
         let t = theme
-        textView.textStorage?.append(NSAttributedString(string: text + "\n", attributes: [
-            .font: t.fontBold, .foregroundColor: t.accentColor
-        ]))
+        ensureNewline()
+        let para = NSMutableParagraphStyle()
+        para.alignment = .center
+        para.paragraphSpacingBefore = 2
+        textView.textStorage?.append(NSAttributedString(
+            string: "· \(text) ·\n",
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 10, weight: .medium),
+                .foregroundColor: t.textDim.withAlphaComponent(0.6),
+                .paragraphStyle: para
+            ]
+        ))
         scrollToBottom()
     }
 

@@ -15,8 +15,10 @@ Current behavior:
 - The app can surface relevant experts after a response completes.
 - Expert switching is no longer automatic.
 - Suggested experts now appear in a dedicated visible suggestion bar with buttons.
+- Expert suggestions only appear for names that match bundled avatar assets.
 - Clicking a suggested expert button opens that expert's own dialog above that avatar.
 - The app maintains separate follow-up threads for Lenny and each guest.
+- The popover currently uses one default visual style instead of multiple selectable themes.
 
 ## Top-Level Structure
 
@@ -76,10 +78,10 @@ Current behavior:
 
 ### Popover / terminal UI
 - `LilAgents/TerminalView.swift`
-  Thin shell for the chat UI view, including deferred expert suggestions and the visible expert button bar.
+  Thin shell for the chat UI view, including deferred expert suggestions and the visible expert panel.
 
 - `LilAgents/TerminalView+Setup.swift`
-  View creation, layout, controls, status bar, expert suggestion button bar, input field, attachment label, drag/drop registration.
+  View creation, layout, controls, status bar, expert suggestion panel, input field, attachment label, drag/drop registration.
 
 - `LilAgents/TerminalView+Transcript.swift`
   Transcript appending, replay, user/assistant/status/error lines, and transcript sizing/scroll behavior.
@@ -95,7 +97,7 @@ Current behavior:
 
 ### Theme / support
 - `LilAgents/PopoverTheme.swift`
-  Theme definitions, colors, typography, and character-color adjustments.
+  Theme definitions, colors, typography, and character-color adjustments. The app currently ships with a single default theme.
 
 - `LilAgents/CharacterContentView.swift`
   Transparent clickable character host view with alpha-aware hit testing.
@@ -153,12 +155,14 @@ These are old assets from the original app and are no longer the main runtime ch
 3. The app does not auto-switch to another expert.
 4. After the response completes, the popover shows a dedicated expert suggestion bar with visible buttons.
 5. Clicking one of those buttons opens that expert's own dialog above that avatar.
+6. Suggestions only surface when the expert name resolves to a bundled avatar.
 
 ## 4. Follow-up mode
 - Each guest has their own conversation history.
 - Lenny has a separate thread.
 - Switching avatars restores the correct thread and context.
 - Expert suggestions are staged until the end of the turn so the current speaker does not change mid-response.
+- The popover UI is now content-first: larger transcript, simplified header copy, single default theme, and a compact suggestion panel instead of decorative chrome.
 
 ## Navigation Guide
 

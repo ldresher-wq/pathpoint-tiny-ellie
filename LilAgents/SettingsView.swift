@@ -6,90 +6,144 @@ struct SettingsView: View {
     @AppStorage(AppSettings.debugLoggingEnabledKey) private var debugLoggingEnabled = true
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Archive Source")
-                        .font(.headline)
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(alignment: .leading, spacing: 12) {
 
+                // Archive Source
+                SettingsSection(icon: "archivebox.fill", title: "Archive Source") {
                     Picker("Source", selection: $archiveAccessMode) {
-                        Text("Starter pack (local free search)").tag(AppSettings.ArchiveAccessMode.starterPack.rawValue)
-                        Text("Official Lenny MCP").tag(AppSettings.ArchiveAccessMode.officialMCP.rawValue)
+                        Text("Starter pack  —  local free search")
+                            .tag(AppSettings.ArchiveAccessMode.starterPack.rawValue)
+                        Text("Official Lenny MCP")
+                            .tag(AppSettings.ArchiveAccessMode.officialMCP.rawValue)
                     }
                     .pickerStyle(.radioGroup)
+                    .labelsHidden()
 
-                    Text("Starter pack searches the bundled free archive locally. Official MCP uses your own Lenny access through Claude Code or Codex.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text("Starter pack searches the bundled free archive locally on device. Official MCP uses your own Lenny access through Claude Code or Codex.")
+                        .settingsCaption()
                 }
 
-                Divider()
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Official MCP")
-                        .font(.headline)
-
-                    SecureField("Optional official Lenny MCP bearer token", text: $officialToken)
+                // MCP Configuration
+                SettingsSection(icon: "key.fill", title: "Official MCP") {
+                    SecureField("Optional bearer token", text: $officialToken)
                         .textFieldStyle(.roundedBorder)
 
-                    Text("If this field is blank, the app expects you to configure Lenny MCP directly in your Claude Code or Codex client. If you paste your own bearer token here, the app can inject the official MCP server directly.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text("Leave blank to use your CLI MCP configuration. Paste your bearer token here to let the app inject the official MCP server directly.")
+                        .settingsCaption()
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Claude Code")
-                            .font(.caption.weight(.semibold))
-                        Text("`claude mcp add lennysdata --transport http https://mcp.lennysdata.com/mcp --header \"Authorization: Bearer <your-token>\"`")
-                            .font(.caption.monospaced())
-
-                        Text("Codex")
-                            .font(.caption.weight(.semibold))
-                        Text("`codex mcp add lennysdata --url https://mcp.lennysdata.com/mcp`")
-                            .font(.caption.monospaced())
-                        Text("`codex mcp login lennysdata`")
-                            .font(.caption.monospaced())
+                        SettingsCodeBlock(
+                            label: "Claude Code",
+                            code: "claude mcp add lennysdata --transport http https://mcp.lennysdata.com/mcp --header \"Authorization: Bearer <your-token>\""
+                        )
+                        SettingsCodeBlock(
+                            label: "Codex  (two steps)",
+                            code: "codex mcp add lennysdata --url https://mcp.lennysdata.com/mcp\ncodex mcp login lennysdata"
+                        )
                     }
 
-                    HStack {
-                        Text(statusText)
+                    HStack(alignment: .center) {
+                        Label(statusText, systemImage: statusIcon)
                             .font(.caption)
                             .foregroundStyle(.secondary)
+                            .lineLimit(1)
 
-                        Spacer()
+                        Spacer(minLength: 8)
 
                         if !officialToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Button("Clear") {
-                                officialToken = ""
-                            }
+                            Button("Clear token") { officialToken = "" }
+                                .controlSize(.small)
+                                .buttonStyle(.bordered)
                         }
                     }
                 }
 
-                Divider()
-
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Debug Logging")
-                        .font(.headline)
-
+                // Debug Logging
+                SettingsSection(icon: "ant.fill", title: "Debug Logging") {
                     Toggle("Print verbose session logs to the Xcode console", isOn: $debugLoggingEnabled)
 
-                    Text("When enabled, the app logs backend selection, archive mode, local search hits, MCP setup, CLI arguments, prompt bodies, raw subprocess output, and parsed responses. Sensitive tokens are redacted.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                    Text("Logs backend selection, archive mode, MCP setup, CLI arguments, and parsed responses. Sensitive tokens are redacted in all output.")
+                        .settingsCaption()
                 }
             }
+            .padding(16)
         }
-        .padding(20)
         .frame(width: 560, alignment: .topLeading)
     }
 
     private var statusText: String {
         let trimmed = officialToken.trimmingCharacters(in: .whitespacesAndNewlines)
         if archiveAccessMode == AppSettings.ArchiveAccessMode.starterPack.rawValue {
-            return "Currently using the bundled free starter pack."
+            return "Using bundled starter pack"
         }
-        return trimmed.isEmpty
-            ? "Official MCP mode enabled. The app will use your CLI MCP configuration."
-            : "Official MCP mode enabled with your custom bearer token."
+        return trimmed.isEmpty ? "Official MCP via CLI config" : "Official MCP with bearer token"
+    }
+
+    private var statusIcon: String {
+        archiveAccessMode == AppSettings.ArchiveAccessMode.starterPack.rawValue
+            ? "internaldrive.fill" : "network"
+    }
+}
+
+// MARK: - Reusable section card
+
+private struct SettingsSection<Content: View>: View {
+    let icon: String
+    let title: String
+    @ViewBuilder let content: () -> Content
+
+    var body: some View {
+        GroupBox {
+            VStack(alignment: .leading, spacing: 10) {
+                content()
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        } label: {
+            Label(title, systemImage: icon)
+                .font(.headline)
+                .padding(.bottom, 2)
+        }
+    }
+}
+
+// MARK: - Code block
+
+private struct SettingsCodeBlock: View {
+    let label: String
+    let code: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Text(code)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.primary)
+                .textSelection(.enabled)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(.quaternary.opacity(0.6))
+                .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                        .strokeBorder(.separator.opacity(0.5), lineWidth: 0.75)
+                )
+        }
+    }
+}
+
+// MARK: - Convenience modifier
+
+private extension Text {
+    func settingsCaption() -> some View {
+        self
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }

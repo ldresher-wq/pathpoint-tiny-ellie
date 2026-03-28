@@ -414,7 +414,6 @@ extension ClaudeSession {
         for candidate in knownExpertNames() where normalize(candidate) == normalize(trimmed) {
             return shouldAllowExpertSuggestionName(candidate) ? candidate : nil
         }
-
         return nil
     }
 

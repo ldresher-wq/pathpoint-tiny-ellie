@@ -17,13 +17,9 @@ extension WalkerCharacter {
         terminalView?.inputField.isEditable = false
         terminalView?.updatePlaceholder("")
         let welcome = """
-        hey! i’m LennyTheGenie.
+        Lenny is ready.
 
-        ask me a startup, product, growth, pricing, or AI question and i’ll search Lenny’s archive for the best answers.
-
-        by default i’ll use Claude Code or Codex if either one is configured. if not, i’ll fall back to the direct OpenAI API.
-
-        when the right expert shows up, i’ll hand you off to them. you can always switch back to lenny.
+        Ask about product, growth, pricing, startups, or AI and I’ll pull together the strongest answer from the archive.
         """
         terminalView?.appendStreamingText(welcome)
         terminalView?.endStreaming()
@@ -86,10 +82,6 @@ extension WalkerCharacter {
             terminal.replayHistory(session.history)
         }
 
-        if let expert = focusedExpert {
-            terminalView?.appendStatus("Follow-up mode: \(expert.name)")
-        }
-
         updatePopoverPosition()
         popoverWindow?.orderFrontRegardless()
         popoverWindow?.makeKey()
@@ -142,6 +134,10 @@ extension WalkerCharacter {
         pauseEndTime = CACurrentMediaTime() + delay
     }
 
+    @objc private func returnToGenieTapped() {
+        controller?.returnToGenie()
+    }
+
     private func removeEventMonitors() {
         if let monitor = clickOutsideMonitor {
             NSEvent.removeMonitor(monitor)
@@ -155,9 +151,9 @@ extension WalkerCharacter {
 
     func updateInputPlaceholder() {
         if let expert = focusedExpert {
-            terminalView?.updatePlaceholder("Ask \(expert.name)...")
+            terminalView?.updatePlaceholder("Ask \(expert.name) a follow-up")
         } else {
-            terminalView?.updatePlaceholder("Ask LennyTheGenie...")
+            terminalView?.updatePlaceholder("Ask about product, growth, pricing, or AI")
         }
     }
 
@@ -167,8 +163,8 @@ extension WalkerCharacter {
 
     func createPopoverWindow() {
         let t = resolvedTheme
-        let popoverWidth: CGFloat = 520
-        let popoverHeight: CGFloat = 376
+        let popoverWidth: CGFloat = 640
+        let popoverHeight: CGFloat = 600
 
         let win = KeyableWindow(
             contentRect: CGRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight),
@@ -181,64 +177,90 @@ extension WalkerCharacter {
         win.hasShadow = true
         win.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 10)
         win.collectionBehavior = [.canJoinAllSpaces, .stationary]
+
         let rgbPopoverBackground = t.rgbPopoverBackground
         let brightness = rgbPopoverBackground.redComponent * 0.299 + rgbPopoverBackground.greenComponent * 0.587 + rgbPopoverBackground.blueComponent * 0.114
-        win.appearance = NSAppearance(named: brightness < 0.5 ? .darkAqua : .aqua)
+        let isDark = brightness < 0.5
+        win.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-        let container = NSView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight))
+        let container = NSVisualEffectView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight))
+        container.material = isDark ? .hudWindow : .sidebar
+        container.blendingMode = .behindWindow
+        container.state = .active
         container.wantsLayer = true
-        container.layer?.backgroundColor = t.popoverBg.cgColor
         container.layer?.cornerRadius = t.popoverCornerRadius
         container.layer?.masksToBounds = true
         container.layer?.borderWidth = t.popoverBorderWidth
         container.layer?.borderColor = t.popoverBorder.cgColor
         container.autoresizingMask = [.width, .height]
-        addDecorativeBackdrop(to: container, theme: t, size: CGSize(width: popoverWidth, height: popoverHeight))
 
-        let titleBar = NSView(frame: NSRect(x: 0, y: popoverHeight - 64, width: popoverWidth, height: 64))
+        let tintView = NSView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight))
+        tintView.wantsLayer = true
+        let origAlpha = t.popoverBg.cgColor.alpha
+        tintView.layer?.backgroundColor = t.popoverBg.withAlphaComponent(min(origAlpha * 0.86, 0.92)).cgColor
+        tintView.autoresizingMask = [.width, .height]
+        container.addSubview(tintView)
+
+        let titleBarHeight: CGFloat = 64
+        let titleBar = NSView(frame: NSRect(x: 0, y: popoverHeight - titleBarHeight, width: popoverWidth, height: titleBarHeight))
         titleBar.wantsLayer = true
-        titleBar.layer?.backgroundColor = NSColor.clear.cgColor
+        titleBar.layer?.backgroundColor = t.titleBarBg.withAlphaComponent(0.55).cgColor
         container.addSubview(titleBar)
 
-        let eyebrow = NSTextField(labelWithString: "ARCHIVE-GROUNDED GUIDE")
-        eyebrow.font = NSFont.systemFont(ofSize: 10, weight: .bold)
-        eyebrow.textColor = t.accentColor
-        eyebrow.frame = NSRect(x: 24, y: 42, width: popoverWidth - 160, height: 14)
-        titleBar.addSubview(eyebrow)
-
-        let titleLabel = NSTextField(labelWithString: t.titleString)
-        titleLabel.font = NSFont(name: "Avenir Next Heavy", size: 28) ?? .systemFont(ofSize: 28, weight: .bold)
+        let displayTitle = focusedExpert?.name ?? t.titleString
+        let titleLabel = NSTextField(labelWithString: displayTitle)
+        titleLabel.font = NSFont.systemFont(ofSize: 21, weight: .semibold)
         titleLabel.textColor = t.titleText
-        titleLabel.frame = NSRect(x: 24, y: 12, width: popoverWidth - 180, height: 30)
+        titleLabel.frame = NSRect(x: 24, y: 27, width: popoverWidth - 220, height: 26)
         titleBar.addSubview(titleLabel)
 
-        let subtitle = NSTextField(labelWithString: "Ask one question. Get the archive. Summon the right expert.")
-        subtitle.font = NSFont.systemFont(ofSize: 12, weight: .medium)
+        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Archive-grounded answers" : "Focused follow-up mode")
+        subtitle.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
         subtitle.textColor = t.textDim
-        subtitle.frame = NSRect(x: 24, y: -2, width: popoverWidth - 180, height: 16)
+        subtitle.frame = NSRect(x: 24, y: 11, width: popoverWidth - 220, height: 16)
         titleBar.addSubview(subtitle)
 
-        let badge = NSView(frame: NSRect(x: popoverWidth - 144, y: 18, width: 118, height: 28))
-        badge.wantsLayer = true
-        badge.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.88).cgColor
-        badge.layer?.cornerRadius = 14
-        badge.layer?.borderWidth = 1
-        badge.layer?.borderColor = t.separatorColor.withAlphaComponent(0.45).cgColor
-        titleBar.addSubview(badge)
+        if focusedExpert != nil {
+            let returnPill = NSButton(title: "", target: self, action: #selector(returnToGenieTapped))
+            returnPill.frame = NSRect(x: popoverWidth - 150, y: 18, width: 126, height: 28)
+            returnPill.isBordered = false
+            returnPill.wantsLayer = true
+            returnPill.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.88).cgColor
+            returnPill.layer?.cornerRadius = 14
+            returnPill.layer?.borderWidth = 0.75
+            returnPill.layer?.borderColor = t.separatorColor.withAlphaComponent(0.50).cgColor
+            returnPill.attributedTitle = NSAttributedString(
+                string: "Back to Lenny",
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
+                    .foregroundColor: t.titleText
+                ]
+            )
+            titleBar.addSubview(returnPill)
+        } else {
+            let badge = NSView(frame: NSRect(x: popoverWidth - 146, y: 18, width: 122, height: 28))
+            badge.wantsLayer = true
+            badge.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.88).cgColor
+            badge.layer?.cornerRadius = 14
+            badge.layer?.borderWidth = 0.75
+            badge.layer?.borderColor = t.separatorColor.withAlphaComponent(0.44).cgColor
+            titleBar.addSubview(badge)
 
-        let badgeLabel = NSTextField(labelWithString: focusedExpert?.name ?? "Genie Mode")
-        badgeLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        badgeLabel.textColor = t.titleText
-        badgeLabel.alignment = .center
-        badgeLabel.frame = NSRect(x: 8, y: 6, width: 102, height: 16)
-        badge.addSubview(badgeLabel)
+            let badgeLabel = NSTextField(labelWithString: "Ready to answer")
+            badgeLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+            badgeLabel.textColor = t.textDim
+            badgeLabel.alignment = .center
+            badgeLabel.frame = NSRect(x: 8, y: 6, width: 106, height: 16)
+            badge.addSubview(badgeLabel)
+        }
 
-        let sep = NSView(frame: NSRect(x: 24, y: popoverHeight - 66, width: popoverWidth - 48, height: 1))
+        // Hairline separator
+        let sep = NSView(frame: NSRect(x: 0, y: popoverHeight - titleBarHeight - 1, width: popoverWidth, height: 0.5))
         sep.wantsLayer = true
-        sep.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.55).cgColor
+        sep.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.35).cgColor
         container.addSubview(sep)
 
-        let terminal = TerminalView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight - 68))
+        let terminal = TerminalView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight - titleBarHeight - 1))
         terminal.characterColor = characterColor
         terminal.themeOverride = themeOverride
         terminal.autoresizingMask = [.width, .height]
@@ -252,39 +274,12 @@ extension WalkerCharacter {
         terminal.onSelectExpert = { [weak self] expert in
             self?.controller?.openDialog(for: expert)
         }
-        terminal.setReturnToLennyVisible(focusedExpert != nil)
+        terminal.setReturnToLennyVisible(false)
         container.addSubview(terminal)
 
         win.contentView = container
         popoverWindow = win
         terminalView = terminal
-    }
-
-    private func addDecorativeBackdrop(to container: NSView, theme t: PopoverTheme, size: CGSize) {
-        guard let layer = container.layer else { return }
-
-        let glow = CAGradientLayer()
-        glow.frame = CGRect(origin: .zero, size: size)
-        glow.colors = [
-            t.titleBarBg.withAlphaComponent(0.92).cgColor,
-            t.popoverBg.withAlphaComponent(0.0).cgColor
-        ]
-        glow.startPoint = CGPoint(x: 0.15, y: 1.0)
-        glow.endPoint = CGPoint(x: 0.72, y: 0.2)
-        layer.addSublayer(glow)
-
-        let orbSpecs: [(CGRect, NSColor)] = [
-            (CGRect(x: size.width - 132, y: size.height - 104, width: 92, height: 92), t.accentColor.withAlphaComponent(0.07)),
-            (CGRect(x: -24, y: size.height - 92, width: 86, height: 86), t.titleBarBg.withAlphaComponent(0.24)),
-            (CGRect(x: size.width - 86, y: 16, width: 56, height: 56), t.successColor.withAlphaComponent(0.05))
-        ]
-
-        for spec in orbSpecs {
-            let orb = CAShapeLayer()
-            orb.path = CGPath(ellipseIn: spec.0, transform: nil)
-            orb.fillColor = spec.1.cgColor
-            layer.addSublayer(orb)
-        }
     }
 
     private func wireSession(_ session: ClaudeSession) {
@@ -302,7 +297,6 @@ extension WalkerCharacter {
             self.showCompletionBubble()
             if self.focusedExpert == nil, !stagedExperts.isEmpty {
                 let names = stagedExperts.map(\.name).joined(separator: ", ")
-                self.terminalView?.appendStatus("Expert suggestions ready: \(names)")
                 self.terminalView?.setExpertSuggestions(stagedExperts)
                 SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")
             } else {
@@ -334,12 +328,7 @@ extension WalkerCharacter {
         session.onExpertsUpdated = { [weak self] experts in
             guard let self else { return }
             self.terminalView?.deferredExpertSuggestions = experts
-            self.terminalView?.setExpertSuggestions(experts)
             let names = experts.map(\.name).joined(separator: ", ")
-            let summary = experts.isEmpty
-                ? "Staged expert suggestions: 0"
-                : "Staged expert suggestions until response completes: \(experts.count) (\(names))"
-            self.terminalView?.appendStatus(summary)
             SessionDebugLogger.log("ui", "onExpertsUpdated received \(experts.count) expert(s): \(names)")
         }
     }

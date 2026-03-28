@@ -6,40 +6,28 @@ extension TerminalView {
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
 
-        let inputHeight: CGFloat = 40
-        let attachmentHeight: CGFloat = 24
-        let expertSuggestionHeight: CGFloat = 54
-        let topControlHeight: CGFloat = 62
-        let padding: CGFloat = 18
-        let attachButtonWidth: CGFloat = 98
-        let transcriptTopInset: CGFloat = 10
-        let composerBottomInset: CGFloat = 12
-        let attachmentGap: CGFloat = 8
-        let scrollHeight = frame.height - inputHeight - attachmentHeight - expertSuggestionHeight - topControlHeight - padding - 24
+        let padding: CGFloat = 16
+        let topInset: CGFloat = 12
+        let topControlHeight: CGFloat = 30
+        let expertSuggestionHeight: CGFloat = 102
+        let attachmentHeight: CGFloat = 20
+        let composerHeight: CGFloat = 56
+        let bottomInset: CGFloat = 14
+        let interSectionSpacing: CGFloat = 10
+        let panelRadius = max(t.inputCornerRadius, 12)
 
-        let transcriptPanel = NSView(frame: NSRect(
-            x: padding,
-            y: inputHeight + attachmentHeight + composerBottomInset + attachmentGap,
-            width: frame.width - padding * 2,
-            height: scrollHeight + 8
-        ))
-        transcriptPanel.autoresizingMask = [.width, .height]
-        transcriptPanel.wantsLayer = true
-        transcriptPanel.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.74).cgColor
-        transcriptPanel.layer?.borderColor = t.separatorColor.withAlphaComponent(0.32).cgColor
-        transcriptPanel.layer?.borderWidth = 1
-        transcriptPanel.layer?.cornerRadius = 26
-        transcriptPanel.layer?.shadowColor = NSColor.black.withAlphaComponent(0.08).cgColor
-        transcriptPanel.layer?.shadowOpacity = 1
-        transcriptPanel.layer?.shadowRadius = 24
-        transcriptPanel.layer?.shadowOffset = CGSize(width: 0, height: -5)
-        addSubview(transcriptPanel)
+        let composerY = bottomInset
+        let attachmentY = composerY + composerHeight + 4
+        let suggestionY = attachmentY + attachmentHeight + interSectionSpacing
+        let scrollY = suggestionY + expertSuggestionHeight + interSectionSpacing
+        let topControlY = frame.height - topInset - topControlHeight
+        let scrollHeight = max(160, topControlY - 8 - scrollY)
 
         scrollView.frame = NSRect(
-            x: padding + 14,
-            y: inputHeight + attachmentHeight + composerBottomInset + attachmentGap + transcriptTopInset,
-            width: frame.width - (padding + 14) * 2,
-            height: scrollHeight - 10
+            x: padding,
+            y: scrollY,
+            width: frame.width - padding * 2,
+            height: scrollHeight
         )
         scrollView.autoresizingMask = [.width, .height]
         scrollView.hasVerticalScroller = true
@@ -47,6 +35,7 @@ extension TerminalView {
         scrollView.hasHorizontalScroller = false
         scrollView.borderType = .noBorder
         scrollView.drawsBackground = false
+        scrollView.contentInsets = NSEdgeInsets(top: 2, left: 0, bottom: 8, right: 0)
 
         textView.frame = scrollView.contentView.bounds
         textView.autoresizingMask = [.width]
@@ -56,9 +45,10 @@ extension TerminalView {
         textView.textColor = t.textPrimary
         textView.font = t.font
         textView.isRichText = true
-        textView.textContainerInset = NSSize(width: 10, height: 12)
+        textView.textContainerInset = NSSize(width: 18, height: 16)
         let defaultPara = NSMutableParagraphStyle()
-        defaultPara.paragraphSpacing = 10
+        defaultPara.paragraphSpacing = 12
+        defaultPara.lineSpacing = 3
         textView.defaultParagraphStyle = defaultPara
         textView.textContainer?.widthTracksTextView = true
         textView.textContainer?.heightTracksTextView = false
@@ -73,42 +63,18 @@ extension TerminalView {
             .foregroundColor: t.accentColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue
         ]
-
         scrollView.documentView = textView
         addSubview(scrollView)
 
-        returnButton.frame = NSRect(
-            x: frame.width - 152,
-            y: frame.height - 48,
-            width: 126,
-            height: 32
-        )
-        returnButton.autoresizingMask = [.minXMargin, .minYMargin]
-        returnButton.isBordered = false
-        returnButton.wantsLayer = true
-        returnButton.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.92).cgColor
-        returnButton.layer?.cornerRadius = 16
-        returnButton.layer?.borderWidth = 1
-        returnButton.layer?.borderColor = t.separatorColor.withAlphaComponent(0.55).cgColor
-        returnButton.font = NSFont.systemFont(ofSize: 11, weight: .bold)
-        returnButton.contentTintColor = t.titleText
-        returnButton.target = self
-        returnButton.action = #selector(returnToLennyTapped)
-        returnButton.isHidden = true
-        addSubview(returnButton)
-
         liveStatusContainer.frame = NSRect(
             x: padding,
-            y: frame.height - 48,
-            width: frame.width - padding * 2 - 158,
-            height: 32
+            y: topControlY,
+            width: frame.width - padding * 2,
+            height: topControlHeight
         )
         liveStatusContainer.autoresizingMask = [.width, .minYMargin]
-        liveStatusContainer.wantsLayer = true
-        liveStatusContainer.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.82).cgColor
-        liveStatusContainer.layer?.cornerRadius = 16
-        liveStatusContainer.layer?.borderWidth = 1
-        liveStatusContainer.layer?.borderColor = t.separatorColor.withAlphaComponent(0.42).cgColor
+        stylePanel(liveStatusContainer, background: t.inputBg.withAlphaComponent(0.92), border: t.separatorColor.withAlphaComponent(0.34), radius: topControlHeight / 2)
+        liveStatusContainer.alphaValue = 0
         liveStatusContainer.isHidden = true
         addSubview(liveStatusContainer)
 
@@ -118,61 +84,49 @@ extension TerminalView {
         liveStatusSpinner.isDisplayedWhenStopped = false
         liveStatusContainer.addSubview(liveStatusSpinner)
 
-        liveStatusLabel.frame = NSRect(x: 36, y: 7, width: liveStatusContainer.frame.width - 48, height: 18)
+        liveStatusLabel.frame = NSRect(x: 34, y: 7, width: liveStatusContainer.frame.width - 46, height: 16)
         liveStatusLabel.autoresizingMask = [.width]
-        liveStatusLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        liveStatusLabel.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
         liveStatusLabel.textColor = t.textDim
         liveStatusLabel.lineBreakMode = .byTruncatingTail
         liveStatusContainer.addSubview(liveStatusLabel)
 
         expertSuggestionContainer.frame = NSRect(
             x: padding,
-            y: inputHeight + attachmentHeight + composerBottomInset + 4,
+            y: suggestionY,
             width: frame.width - padding * 2,
             height: expertSuggestionHeight
         )
         expertSuggestionContainer.autoresizingMask = [.width, .maxYMargin]
-        expertSuggestionContainer.wantsLayer = true
-        expertSuggestionContainer.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.9).cgColor
-        expertSuggestionContainer.layer?.cornerRadius = 18
-        expertSuggestionContainer.layer?.borderWidth = 1
-        expertSuggestionContainer.layer?.borderColor = t.separatorColor.withAlphaComponent(0.35).cgColor
+        stylePanel(expertSuggestionContainer, background: t.inputBg.withAlphaComponent(0.96), border: t.separatorColor.withAlphaComponent(0.34), radius: panelRadius)
+        expertSuggestionContainer.alphaValue = 0
         expertSuggestionContainer.isHidden = true
         addSubview(expertSuggestionContainer)
 
-        expertSuggestionLabel.frame = NSRect(
-            x: 14,
-            y: 31,
-            width: expertSuggestionContainer.frame.width - 28,
-            height: 16
-        )
+        expertSuggestionLabel.frame = NSRect(x: 14, y: expertSuggestionHeight - 28, width: expertSuggestionContainer.frame.width - 28, height: 16)
         expertSuggestionLabel.autoresizingMask = [.width]
-        expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .bold)
-        expertSuggestionLabel.textColor = t.accentColor
-        expertSuggestionLabel.stringValue = "I found a few people who seem stronger on this topic."
+        expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        expertSuggestionLabel.textColor = t.textDim
+        expertSuggestionLabel.stringValue = "Open an expert for a more specific follow-up."
         expertSuggestionContainer.addSubview(expertSuggestionLabel)
 
-        expertSuggestionStack.orientation = .horizontal
+        expertSuggestionStack.orientation = .vertical
         expertSuggestionStack.alignment = .leading
-        expertSuggestionStack.distribution = .fillProportionally
-        expertSuggestionStack.spacing = 8
+        expertSuggestionStack.distribution = .fillEqually
+        expertSuggestionStack.spacing = 6
         expertSuggestionStack.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-        expertSuggestionStack.frame = NSRect(
-            x: 14,
-            y: 8,
-            width: expertSuggestionContainer.frame.width - 28,
-            height: 20
-        )
+        expertSuggestionStack.frame = NSRect(x: 14, y: 12, width: expertSuggestionContainer.frame.width - 28, height: 56)
         expertSuggestionStack.autoresizingMask = [.width]
         expertSuggestionContainer.addSubview(expertSuggestionStack)
 
         attachmentLabel.frame = NSRect(
-            x: padding + 8, y: inputHeight + composerBottomInset + 1,
-            width: frame.width - padding * 2 - 8,
+            x: padding + 2,
+            y: attachmentY,
+            width: frame.width - padding * 2 - 4,
             height: attachmentHeight
         )
         attachmentLabel.autoresizingMask = [.width]
-        attachmentLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        attachmentLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         attachmentLabel.textColor = t.textDim
         attachmentLabel.lineBreakMode = .byTruncatingMiddle
         attachmentLabel.isHidden = true
@@ -180,26 +134,59 @@ extension TerminalView {
 
         let composerPanel = NSView(frame: NSRect(
             x: padding,
-            y: composerBottomInset,
+            y: composerY,
             width: frame.width - padding * 2,
-            height: inputHeight + 14
+            height: composerHeight
         ))
         composerPanel.autoresizingMask = [.width, .maxYMargin]
-        composerPanel.wantsLayer = true
-        composerPanel.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.95).cgColor
-        composerPanel.layer?.cornerRadius = 24
-        composerPanel.layer?.borderWidth = 1
-        composerPanel.layer?.borderColor = t.separatorColor.withAlphaComponent(0.30).cgColor
-        composerPanel.layer?.shadowColor = NSColor.black.withAlphaComponent(0.05).cgColor
-        composerPanel.layer?.shadowOpacity = 1
-        composerPanel.layer?.shadowRadius = 18
-        composerPanel.layer?.shadowOffset = CGSize(width: 0, height: -3)
+        stylePanel(composerPanel, background: t.inputBg.withAlphaComponent(0.98), border: t.separatorColor.withAlphaComponent(0.40), radius: panelRadius + 4)
         addSubview(composerPanel)
 
+        let sendButtonSize: CGFloat = 34
+        let attachButtonSize: CGFloat = 28
+        let rightInset: CGFloat = 12
+        let sendY = (composerHeight - sendButtonSize) / 2
+        let attachY = (composerHeight - attachButtonSize) / 2
+        let sendX = composerPanel.frame.width - rightInset - sendButtonSize
+        let attachX = sendX - 8 - attachButtonSize
+
+        sendButton.frame = NSRect(x: sendX, y: sendY, width: sendButtonSize, height: sendButtonSize)
+        sendButton.autoresizingMask = [.minXMargin]
+        sendButton.isBordered = false
+        sendButton.wantsLayer = true
+        sendButton.layer?.backgroundColor = t.accentColor.cgColor
+        sendButton.layer?.cornerRadius = sendButtonSize / 2
+        if let img = NSImage(systemSymbolName: "arrow.up", accessibilityDescription: "Send message") {
+            let config = NSImage.SymbolConfiguration(pointSize: 11, weight: .bold)
+            sendButton.image = img.withSymbolConfiguration(config)
+        }
+        sendButton.imageScaling = .scaleProportionallyDown
+        sendButton.contentTintColor = .white
+        sendButton.target = self
+        sendButton.action = #selector(inputSubmitted)
+        composerPanel.addSubview(sendButton)
+
+        attachButton.frame = NSRect(x: attachX, y: attachY, width: attachButtonSize, height: attachButtonSize)
+        attachButton.autoresizingMask = [.minXMargin]
+        attachButton.isBordered = false
+        attachButton.wantsLayer = true
+        attachButton.layer?.backgroundColor = t.bubbleBg.withAlphaComponent(0.85).cgColor
+        attachButton.layer?.cornerRadius = attachButtonSize / 2
+        if let img = NSImage(systemSymbolName: "paperclip", accessibilityDescription: "Attach file") {
+            let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+            attachButton.image = img.withSymbolConfiguration(config)
+        }
+        attachButton.imageScaling = .scaleProportionallyDown
+        attachButton.contentTintColor = t.textDim
+        attachButton.target = self
+        attachButton.action = #selector(attachButtonTapped)
+        composerPanel.addSubview(attachButton)
+
         inputField.frame = NSRect(
-            x: padding + 16, y: composerBottomInset + 7,
-            width: frame.width - padding * 3 - attachButtonWidth - 14,
-            height: inputHeight
+            x: 14,
+            y: 8,
+            width: attachX - 24,
+            height: composerHeight - 16
         )
         inputField.autoresizingMask = [.width]
         inputField.focusRingType = .none
@@ -221,24 +208,7 @@ extension TerminalView {
         inputField.cell = paddedCell
         inputField.target = self
         inputField.action = #selector(inputSubmitted)
-        addSubview(inputField)
-
-        attachButton.frame = NSRect(
-            x: frame.width - padding - attachButtonWidth - 10,
-            y: composerBottomInset + 7,
-            width: attachButtonWidth,
-            height: inputHeight
-        )
-        attachButton.autoresizingMask = [.minXMargin]
-        attachButton.isBordered = false
-        attachButton.wantsLayer = true
-        attachButton.layer?.backgroundColor = t.accentColor.cgColor
-        attachButton.layer?.cornerRadius = 18
-        attachButton.font = NSFont.systemFont(ofSize: 11, weight: .bold)
-        attachButton.contentTintColor = NSColor.white
-        attachButton.target = self
-        attachButton.action = #selector(attachButtonTapped)
-        addSubview(attachButton)
+        composerPanel.addSubview(inputField)
 
         registerForDraggedTypes([.fileURL])
     }
@@ -289,7 +259,7 @@ extension TerminalView {
         }
 
         guard !experts.isEmpty else {
-            expertSuggestionContainer.isHidden = true
+            setPanelVisibility(expertSuggestionContainer, hidden: true)
             return
         }
 
@@ -298,36 +268,45 @@ extension TerminalView {
             let identifier = normalizeExpertSuggestionID(expert.name)
             expertSuggestionTargets[identifier] = expert
 
-            let button = NSButton(title: expert.name, target: self, action: #selector(expertSuggestionButtonTapped(_:)))
+            let button = NSButton(title: "", target: self, action: #selector(expertSuggestionButtonTapped(_:)))
             button.isBordered = false
             button.bezelStyle = .regularSquare
             button.wantsLayer = true
-            button.layer?.backgroundColor = t.accentColor.withAlphaComponent(0.14).cgColor
-            button.layer?.cornerRadius = 10
-            button.contentTintColor = t.accentColor
-            button.font = NSFont.systemFont(ofSize: 11, weight: .bold)
+            button.layer?.backgroundColor = t.bubbleBg.cgColor
+            button.layer?.cornerRadius = 12
+            button.layer?.borderWidth = 0.75
+            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.50).cgColor
+            button.attributedTitle = NSAttributedString(
+                string: expert.name,
+                attributes: [
+                    .font: NSFont.systemFont(ofSize: 11.5, weight: .semibold),
+                    .foregroundColor: t.titleText
+                ]
+            )
             button.setButtonType(.momentaryPushIn)
             button.imagePosition = .noImage
             button.identifier = NSUserInterfaceItemIdentifier(identifier)
-            button.sizeToFit()
+            button.contentTintColor = t.titleText
+            button.alignment = .left
+            button.frame.size.height = 25
             expertSuggestionStack.addArrangedSubview(button)
         }
 
-        expertSuggestionContainer.isHidden = false
+        setPanelVisibility(expertSuggestionContainer, hidden: false)
     }
 
     func setLiveStatus(_ text: String, isBusy: Bool, isError: Bool = false) {
         let t = theme
-        liveStatusContainer.isHidden = text.isEmpty
         guard !text.isEmpty else {
-            liveStatusSpinner.stopAnimation(nil)
+            clearLiveStatus()
             return
         }
 
         liveStatusContainer.layer?.borderColor = (isError ? t.errorColor : t.separatorColor.withAlphaComponent(0.42)).cgColor
-        liveStatusContainer.layer?.backgroundColor = (isError ? t.errorColor.withAlphaComponent(0.10) : t.inputBg.withAlphaComponent(0.88)).cgColor
+        liveStatusContainer.layer?.backgroundColor = (isError ? t.errorColor.withAlphaComponent(0.08) : t.inputBg.withAlphaComponent(0.96)).cgColor
         liveStatusLabel.textColor = isError ? t.errorColor : (isBusy ? t.accentColor : t.successColor)
         liveStatusLabel.stringValue = text
+        setPanelVisibility(liveStatusContainer, hidden: false)
 
         if isBusy {
             liveStatusSpinner.startAnimation(nil)
@@ -339,7 +318,7 @@ extension TerminalView {
     func clearLiveStatus() {
         liveStatusLabel.stringValue = ""
         liveStatusSpinner.stopAnimation(nil)
-        liveStatusContainer.isHidden = true
+        setPanelVisibility(liveStatusContainer, hidden: true)
     }
 
     @objc func expertSuggestionButtonTapped(_ sender: NSButton) {
@@ -359,6 +338,34 @@ extension TerminalView {
         let raw = String(scalars)
         return raw.replacingOccurrences(of: "-+", with: "-", options: .regularExpression)
             .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+    }
+
+    private func stylePanel(_ view: NSView, background: NSColor, border: NSColor, radius: CGFloat) {
+        view.wantsLayer = true
+        view.layer?.backgroundColor = background.cgColor
+        view.layer?.cornerRadius = radius
+        view.layer?.borderWidth = 0.75
+        view.layer?.borderColor = border.cgColor
+    }
+
+    private func setPanelVisibility(_ view: NSView, hidden: Bool) {
+        if hidden {
+            guard !view.isHidden else { return }
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.16
+                view.animator().alphaValue = 0
+            } completionHandler: {
+                view.isHidden = true
+            }
+        } else {
+            guard view.isHidden else { return }
+            view.alphaValue = 0
+            view.isHidden = false
+            NSAnimationContext.runAnimationGroup { context in
+                context.duration = 0.16
+                view.animator().alphaValue = 1
+            }
+        }
     }
 }
 

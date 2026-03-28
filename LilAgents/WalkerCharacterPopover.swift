@@ -21,6 +21,8 @@ extension WalkerCharacter {
 
         ask me a startup, product, growth, pricing, or AI question and i’ll search Lenny’s archive for the best answers.
 
+        by default i’ll use Claude Code or Codex if either one is configured. if not, i’ll fall back to the direct OpenAI API.
+
         when the right expert shows up, i’ll hand you off to them. you can always switch back to lenny.
         """
         terminalView?.appendStreamingText(welcome)
@@ -247,6 +249,9 @@ extension WalkerCharacter {
         terminal.onReturnToLenny = { [weak self] in
             self?.controller?.returnToGenie()
         }
+        terminal.onSelectExpert = { [weak self] expert in
+            self?.controller?.openDialog(for: expert)
+        }
         terminal.setReturnToLennyVisible(focusedExpert != nil)
         container.addSubview(terminal)
 
@@ -288,10 +293,22 @@ extension WalkerCharacter {
         }
 
         session.onTurnComplete = { [weak self] in
-            self?.terminalView?.endStreaming()
-            self?.terminalView?.clearLiveStatus()
-            self?.playCompletionSound()
-            self?.showCompletionBubble()
+            guard let self else { return }
+            let stagedExperts = self.terminalView?.deferredExpertSuggestions ?? []
+            SessionDebugLogger.log("ui", "onTurnComplete fired. focusedExpert=\(self.focusedExpert?.name ?? "none") stagedExperts=\(stagedExperts.map(\.name).joined(separator: ", "))")
+            self.terminalView?.endStreaming()
+            self.terminalView?.clearLiveStatus()
+            self.playCompletionSound()
+            self.showCompletionBubble()
+            if self.focusedExpert == nil, !stagedExperts.isEmpty {
+                let names = stagedExperts.map(\.name).joined(separator: ", ")
+                self.terminalView?.appendStatus("Expert suggestions ready: \(names)")
+                self.terminalView?.setExpertSuggestions(stagedExperts)
+                SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")
+            } else {
+                self.terminalView?.setExpertSuggestions([])
+            }
+            self.terminalView?.deferredExpertSuggestions = []
         }
 
         session.onError = { [weak self] text in
@@ -316,19 +333,14 @@ extension WalkerCharacter {
 
         session.onExpertsUpdated = { [weak self] experts in
             guard let self else { return }
-            self.controller?.updateExperts(experts)
-            let expertSummary: String
-            if experts.isEmpty {
-                expertSummary = "Guest avatars: 0"
-            } else {
-                let names = experts.map(\.name).joined(separator: ", ")
-                expertSummary = "Guest avatars: \(experts.count) (\(names))"
-            }
-            self.terminalView?.appendStatus(expertSummary)
-            if self.focusedExpert == nil, let first = experts.first {
-                self.controller?.focus(on: first)
-                self.terminalView?.appendStatus("Handed off to \(first.name)")
-            }
+            self.terminalView?.deferredExpertSuggestions = experts
+            self.terminalView?.setExpertSuggestions(experts)
+            let names = experts.map(\.name).joined(separator: ", ")
+            let summary = experts.isEmpty
+                ? "Staged expert suggestions: 0"
+                : "Staged expert suggestions until response completes: \(experts.count) (\(names))"
+            self.terminalView?.appendStatus(summary)
+            SessionDebugLogger.log("ui", "onExpertsUpdated received \(experts.count) expert(s): \(names)")
         }
     }
 

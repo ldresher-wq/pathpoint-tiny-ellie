@@ -8,13 +8,14 @@ extension TerminalView {
 
         let inputHeight: CGFloat = 40
         let attachmentHeight: CGFloat = 24
+        let expertSuggestionHeight: CGFloat = 54
         let topControlHeight: CGFloat = 62
         let padding: CGFloat = 18
         let attachButtonWidth: CGFloat = 98
         let transcriptTopInset: CGFloat = 10
         let composerBottomInset: CGFloat = 12
         let attachmentGap: CGFloat = 8
-        let scrollHeight = frame.height - inputHeight - attachmentHeight - topControlHeight - padding - 20
+        let scrollHeight = frame.height - inputHeight - attachmentHeight - expertSuggestionHeight - topControlHeight - padding - 24
 
         let transcriptPanel = NSView(frame: NSRect(
             x: padding,
@@ -60,9 +61,14 @@ extension TerminalView {
         defaultPara.paragraphSpacing = 10
         textView.defaultParagraphStyle = defaultPara
         textView.textContainer?.widthTracksTextView = true
+        textView.textContainer?.heightTracksTextView = false
+        textView.textContainer?.containerSize = NSSize(width: scrollView.contentSize.width, height: .greatestFiniteMagnitude)
+        textView.minSize = NSSize(width: 0, height: scrollView.contentSize.height)
+        textView.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.isAutomaticLinkDetectionEnabled = false
+        textView.delegate = self
         textView.linkTextAttributes = [
             .foregroundColor: t.accentColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue
@@ -118,6 +124,47 @@ extension TerminalView {
         liveStatusLabel.textColor = t.textDim
         liveStatusLabel.lineBreakMode = .byTruncatingTail
         liveStatusContainer.addSubview(liveStatusLabel)
+
+        expertSuggestionContainer.frame = NSRect(
+            x: padding,
+            y: inputHeight + attachmentHeight + composerBottomInset + 4,
+            width: frame.width - padding * 2,
+            height: expertSuggestionHeight
+        )
+        expertSuggestionContainer.autoresizingMask = [.width, .maxYMargin]
+        expertSuggestionContainer.wantsLayer = true
+        expertSuggestionContainer.layer?.backgroundColor = t.inputBg.withAlphaComponent(0.9).cgColor
+        expertSuggestionContainer.layer?.cornerRadius = 18
+        expertSuggestionContainer.layer?.borderWidth = 1
+        expertSuggestionContainer.layer?.borderColor = t.separatorColor.withAlphaComponent(0.35).cgColor
+        expertSuggestionContainer.isHidden = true
+        addSubview(expertSuggestionContainer)
+
+        expertSuggestionLabel.frame = NSRect(
+            x: 14,
+            y: 31,
+            width: expertSuggestionContainer.frame.width - 28,
+            height: 16
+        )
+        expertSuggestionLabel.autoresizingMask = [.width]
+        expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .bold)
+        expertSuggestionLabel.textColor = t.accentColor
+        expertSuggestionLabel.stringValue = "I found a few people who seem stronger on this topic."
+        expertSuggestionContainer.addSubview(expertSuggestionLabel)
+
+        expertSuggestionStack.orientation = .horizontal
+        expertSuggestionStack.alignment = .leading
+        expertSuggestionStack.distribution = .fillProportionally
+        expertSuggestionStack.spacing = 8
+        expertSuggestionStack.edgeInsets = NSEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        expertSuggestionStack.frame = NSRect(
+            x: 14,
+            y: 8,
+            width: expertSuggestionContainer.frame.width - 28,
+            height: 20
+        )
+        expertSuggestionStack.autoresizingMask = [.width]
+        expertSuggestionContainer.addSubview(expertSuggestionStack)
 
         attachmentLabel.frame = NSRect(
             x: padding + 8, y: inputHeight + composerBottomInset + 1,
@@ -234,6 +281,41 @@ extension TerminalView {
         returnButton.isHidden = !visible
     }
 
+    func setExpertSuggestions(_ experts: [ResponderExpert]) {
+        expertSuggestionTargets.removeAll()
+        expertSuggestionStack.arrangedSubviews.forEach { view in
+            expertSuggestionStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        guard !experts.isEmpty else {
+            expertSuggestionContainer.isHidden = true
+            return
+        }
+
+        let t = theme
+        for expert in experts {
+            let identifier = normalizeExpertSuggestionID(expert.name)
+            expertSuggestionTargets[identifier] = expert
+
+            let button = NSButton(title: expert.name, target: self, action: #selector(expertSuggestionButtonTapped(_:)))
+            button.isBordered = false
+            button.bezelStyle = .regularSquare
+            button.wantsLayer = true
+            button.layer?.backgroundColor = t.accentColor.withAlphaComponent(0.14).cgColor
+            button.layer?.cornerRadius = 10
+            button.contentTintColor = t.accentColor
+            button.font = NSFont.systemFont(ofSize: 11, weight: .bold)
+            button.setButtonType(.momentaryPushIn)
+            button.imagePosition = .noImage
+            button.identifier = NSUserInterfaceItemIdentifier(identifier)
+            button.sizeToFit()
+            expertSuggestionStack.addArrangedSubview(button)
+        }
+
+        expertSuggestionContainer.isHidden = false
+    }
+
     func setLiveStatus(_ text: String, isBusy: Bool, isError: Bool = false) {
         let t = theme
         liveStatusContainer.isHidden = text.isEmpty
@@ -258,5 +340,38 @@ extension TerminalView {
         liveStatusLabel.stringValue = ""
         liveStatusSpinner.stopAnimation(nil)
         liveStatusContainer.isHidden = true
+    }
+
+    @objc func expertSuggestionButtonTapped(_ sender: NSButton) {
+        guard let identifier = sender.identifier?.rawValue,
+              let expert = expertSuggestionTargets[identifier] else {
+            return
+        }
+
+        onSelectExpert?(expert)
+    }
+
+    private func normalizeExpertSuggestionID(_ name: String) -> String {
+        let lowered = name.lowercased()
+        let scalars = lowered.unicodeScalars.map { scalar -> Character in
+            CharacterSet.alphanumerics.contains(scalar) ? Character(String(scalar)) : "-"
+        }
+        let raw = String(scalars)
+        return raw.replacingOccurrences(of: "-+", with: "-", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
+    }
+}
+
+extension TerminalView: NSTextViewDelegate {
+    func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
+        guard let url = link as? URL,
+              url.scheme == "lilagents-expert",
+              let host = url.host,
+              let expert = expertSuggestionTargets[host] else {
+            return false
+        }
+
+        onSelectExpert?(expert)
+        return true
     }
 }

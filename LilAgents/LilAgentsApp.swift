@@ -7,7 +7,9 @@ struct LilAgentsApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
     var body: some Scene {
-        Settings { EmptyView() }
+        Settings {
+            SettingsView()
+        }
     }
 }
 
@@ -17,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var expertStatusItems: [NSStatusItem] = []
     var visibleExperts: [ResponderExpert] = []
     var focusedExpert: ResponderExpert?
+    var settingsWindow: NSWindow?
     var char1Item: NSMenuItem?
     var backToLennyItem: NSMenuItem?
     let updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
@@ -94,6 +97,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         displayItem.submenu = displayMenu
         menu.addItem(displayItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
+        menu.addItem(settingsItem)
 
         menu.addItem(NSMenuItem.separator())
 
@@ -184,6 +192,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @objc func toggleSounds(_ sender: NSMenuItem) {
         WalkerCharacter.soundsEnabled.toggle()
         sender.state = WalkerCharacter.soundsEnabled ? .on : .off
+    }
+
+    @objc func openSettings() {
+        NSApp.activate(ignoringOtherApps: true)
+        if settingsWindow == nil {
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 600, height: 460),
+                styleMask: [.titled, .closable, .miniaturizable],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "Settings"
+            let hostingController = NSHostingController(rootView: SettingsView())
+            window.contentViewController = hostingController
+            window.setContentSize(NSSize(width: 600, height: 460))
+            window.center()
+            window.isReleasedWhenClosed = false
+            settingsWindow = window
+        }
+
+        settingsWindow?.makeKeyAndOrderFront(nil)
     }
 
     @objc func quitApp() {

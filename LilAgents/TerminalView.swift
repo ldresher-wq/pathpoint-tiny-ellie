@@ -8,10 +8,14 @@ class TerminalView: NSView {
     let liveStatusSpinner = NSProgressIndicator()
     let liveStatusLabel = NSTextField(labelWithString: "")
     let attachmentLabel = NSTextField(labelWithString: "")
+    let expertSuggestionContainer = NSView()
+    let expertSuggestionLabel = NSTextField(labelWithString: "")
+    let expertSuggestionStack = NSStackView()
     let attachButton = NSButton(title: "Attach", target: nil, action: nil)
     let returnButton = NSButton(title: "Return to Genie", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?
+    var onSelectExpert: ((ResponderExpert) -> Void)?
 
     var characterColor: NSColor?
     var themeOverride: PopoverTheme?
@@ -19,6 +23,8 @@ class TerminalView: NSView {
     var isStreaming = false
     var placeholderText = "Ask LennyTheGenie..."
     var pendingAttachments: [SessionAttachment] = []
+    var expertSuggestionTargets: [String: ResponderExpert] = [:]
+    var deferredExpertSuggestions: [ResponderExpert] = []
 
     override init(frame: NSRect) {
         super.init(frame: frame)

@@ -38,6 +38,11 @@
 		A10000010000000000000037 /* ClaudeSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000037 /* ClaudeSessionState.swift */; };
 		A10000010000000000000038 /* ClaudeSessionExpertResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */; };
 		A10000010000000000000039 /* ClaudeSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000039 /* ClaudeSessionTransport.swift */; };
+		A10000010000000000000040 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000040 /* AppSettings.swift */; };
+		A10000010000000000000041 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000041 /* SettingsView.swift */; };
+		A10000010000000000000042 /* LocalArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000042 /* LocalArchive.swift */; };
+		A10000010000000000000044 /* SessionDebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000044 /* SessionDebugLogger.swift */; };
+		A10000010000000000000043 /* StarterArchive in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000043 /* StarterArchive */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -72,6 +77,11 @@
 		A10000020000000000000037 /* ClaudeSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionState.swift; sourceTree = "<group>"; };
 		A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionExpertResolution.swift; sourceTree = "<group>"; };
 		A10000020000000000000039 /* ClaudeSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionTransport.swift; sourceTree = "<group>"; };
+		A10000020000000000000040 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		A10000020000000000000041 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		A10000020000000000000042 /* LocalArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalArchive.swift; sourceTree = "<group>"; };
+		A10000020000000000000044 /* SessionDebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDebugLogger.swift; sourceTree = "<group>"; };
+		A10000020000000000000043 /* StarterArchive */ = {isa = PBXFileReference; lastKnownFileType = folder; path = StarterArchive; sourceTree = "<group>"; };
 		A10000030000000000000001 /* lil agents.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "lil agents.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -107,6 +117,10 @@
 				A10000020000000000000037 /* ClaudeSessionState.swift */,
 				A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */,
 				A10000020000000000000039 /* ClaudeSessionTransport.swift */,
+				A10000020000000000000040 /* AppSettings.swift */,
+				A10000020000000000000041 /* SettingsView.swift */,
+				A10000020000000000000042 /* LocalArchive.swift */,
+				A10000020000000000000044 /* SessionDebugLogger.swift */,
 				A10000020000000000000023 /* TerminalView.swift */,
 				A10000020000000000000026 /* PaddedTextFieldCell.swift */,
 				A10000020000000000000027 /* TerminalViewSetup.swift */,
@@ -128,6 +142,7 @@
 				A10000120000000000000002 /* ExpertAvatars */,
 				A10000120000000000000003 /* fall-smoke-dust.lottie */,
 				A10000120000000000000004 /* fall-smoke-dust.json */,
+				A10000020000000000000043 /* StarterArchive */,
 				A10000020000000000000003 /* Info.plist */,
 				A10000020000000000000004 /* LilAgents.entitlements */,
 			);
@@ -216,6 +231,7 @@
 				A10000110000000000000002 /* ExpertAvatars in Resources */,
 				A10000110000000000000003 /* fall-smoke-dust.lottie in Resources */,
 				A10000110000000000000004 /* fall-smoke-dust.json in Resources */,
+				A10000010000000000000043 /* StarterArchive in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -234,6 +250,10 @@
 				A10000010000000000000037 /* ClaudeSessionState.swift in Sources */,
 				A10000010000000000000038 /* ClaudeSessionExpertResolution.swift in Sources */,
 				A10000010000000000000039 /* ClaudeSessionTransport.swift in Sources */,
+				A10000010000000000000040 /* AppSettings.swift in Sources */,
+				A10000010000000000000041 /* SettingsView.swift in Sources */,
+				A10000010000000000000042 /* LocalArchive.swift in Sources */,
+				A10000010000000000000044 /* SessionDebugLogger.swift in Sources */,
 				A10000010000000000000023 /* TerminalView.swift in Sources */,
 				A10000010000000000000026 /* PaddedTextFieldCell.swift in Sources */,
 				A10000010000000000000027 /* TerminalViewSetup.swift in Sources */,

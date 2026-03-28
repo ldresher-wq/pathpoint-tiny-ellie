@@ -71,6 +71,45 @@ extension TerminalView {
         scrollToBottom()
     }
 
+    func appendExpertSuggestion(_ experts: [ResponderExpert]) {
+        guard !experts.isEmpty else { return }
+
+        let t = theme
+        ensureNewline()
+
+        let prompt = NSMutableAttributedString(string: "I found a few people who seem stronger on this topic. Spin one up:\n", attributes: [
+            .font: t.fontBold,
+            .foregroundColor: t.accentColor
+        ])
+
+        for expert in experts {
+            let identifier = normalizeExpertSuggestionID(expert.name)
+            expertSuggestionTargets[identifier] = expert
+
+            let line = NSMutableAttributedString(string: "  • ", attributes: [
+                .font: t.font,
+                .foregroundColor: t.accentColor
+            ])
+
+            line.append(NSAttributedString(string: expert.name, attributes: [
+                .font: t.fontBold,
+                .foregroundColor: t.accentColor,
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .link: URL(string: "lilagents-expert://\(identifier)") as Any
+            ]))
+
+            line.append(NSAttributedString(string: " — click to switch the conversation to this expert\n", attributes: [
+                .font: t.font,
+                .foregroundColor: t.textDim
+            ]))
+
+            prompt.append(line)
+        }
+
+        textView.textStorage?.append(prompt)
+        scrollToBottom()
+    }
+
     func appendToolUse(toolName: String, summary: String) {
         endStreaming()
         setLiveStatus(summary.isEmpty ? toolName : "\(toolName): \(summary)", isBusy: true, isError: false)
@@ -106,6 +145,30 @@ extension TerminalView {
     }
 
     private func scrollToBottom() {
+        resizeTranscriptToFitContent()
         textView.scrollToEndOfDocument(nil)
+    }
+
+    private func resizeTranscriptToFitContent() {
+        guard let textContainer = textView.textContainer,
+              let layoutManager = textView.layoutManager else { return }
+
+        layoutManager.ensureLayout(for: textContainer)
+        let usedRect = layoutManager.usedRect(for: textContainer)
+        let targetHeight = max(scrollView.contentSize.height, ceil(usedRect.height + textView.textContainerInset.height * 2 + 12))
+
+        if abs(textView.frame.height - targetHeight) > 1 {
+            textView.frame.size.height = targetHeight
+        }
+    }
+
+    private func normalizeExpertSuggestionID(_ name: String) -> String {
+        let lowered = name.lowercased()
+        let scalars = lowered.unicodeScalars.map { scalar -> Character in
+            CharacterSet.alphanumerics.contains(scalar) ? Character(String(scalar)) : "-"
+        }
+        let raw = String(scalars)
+        return raw.replacingOccurrences(of: "-+", with: "-", options: .regularExpression)
+            .trimmingCharacters(in: CharacterSet(charactersIn: "-"))
     }
 }

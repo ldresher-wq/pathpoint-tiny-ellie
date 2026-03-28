@@ -8,6 +8,7 @@ extension TerminalView {
         let p = NSMutableParagraphStyle()
         p.lineSpacing = 3
         p.paragraphSpacing = 4
+        p.tailIndent = -16 // Padding from right edge
         return p
     }
 
@@ -29,24 +30,27 @@ extension TerminalView {
         labelPara.alignment = .right
         labelPara.paragraphSpacingBefore = 14
         labelPara.paragraphSpacing = 3
+        labelPara.tailIndent = -16
+        
         let labelAttrs: [NSAttributedString.Key: Any] = [
-            .font: NSFont.systemFont(ofSize: 10.5, weight: .medium),
+            .font: NSFont.systemFont(ofSize: 10.5, weight: .bold),
             .foregroundColor: t.textDim,
             .paragraphStyle: labelPara
         ]
         textView.textStorage?.append(NSAttributedString(string: "You\n", attributes: labelAttrs))
 
-        // Message bubble: right-aligned, accent bg
+        // Message text: right-aligned
         let bubblePara = NSMutableParagraphStyle()
         bubblePara.alignment = .right
         bubblePara.paragraphSpacing = 2
         bubblePara.lineSpacing = 2
+        bubblePara.tailIndent = -16
+        
         let visibleText = text.isEmpty ? "(with attachments)" : text
         let bubbleAttrs: [NSAttributedString.Key: Any] = [
             .font: t.fontBold,
             .foregroundColor: t.textPrimary,
-            .paragraphStyle: bubblePara,
-            .backgroundColor: t.accentColor.withAlphaComponent(0.13)
+            .paragraphStyle: bubblePara
         ]
         textView.textStorage?.append(NSAttributedString(string: "\(visibleText)\n", attributes: bubbleAttrs))
 
@@ -56,6 +60,7 @@ extension TerminalView {
             let attachPara = NSMutableParagraphStyle()
             attachPara.alignment = .right
             attachPara.paragraphSpacing = 10
+            attachPara.tailIndent = -16
             textView.textStorage?.append(NSAttributedString(string: "📎 \(attachText)\n", attributes: [
                 .font: NSFont.systemFont(ofSize: 10.5, weight: .regular),
                 .foregroundColor: t.textDim,

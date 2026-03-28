@@ -34,6 +34,7 @@ extension TerminalView {
         let defaultPara = NSMutableParagraphStyle()
         defaultPara.paragraphSpacing = 12
         defaultPara.lineSpacing = 3
+        defaultPara.tailIndent = -16
         textView.defaultParagraphStyle = defaultPara
         textView.textContainer?.widthTracksTextView = true
         textView.textContainer?.heightTracksTextView = false

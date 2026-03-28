@@ -24,7 +24,9 @@ extension WalkerCharacter {
             self.playCompletionSound()
             self.showCompletionBubble()
             self.updateExpertNameTag()
-            if self.focusedExpert == nil, !stagedExperts.isEmpty {
+            if let expert = self.focusedExpert {
+                self.terminalView?.setPickedExpert(expert)
+            } else if !stagedExperts.isEmpty {
                 let names = stagedExperts.map(\.name).joined(separator: ", ")
                 self.terminalView?.setExpertSuggestions(stagedExperts)
                 SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")

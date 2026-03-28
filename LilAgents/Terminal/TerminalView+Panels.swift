@@ -14,6 +14,7 @@ extension TerminalView {
             return
         }
 
+        expertSuggestionLabel.stringValue = "Open an expert for a more specific follow-up."
         let t = theme
         for expert in experts {
             let identifier = normalizeExpertSuggestionID(expert.name)
@@ -23,18 +24,18 @@ extension TerminalView {
             button.isBordered = false
             button.wantsLayer = true
             button.layer?.backgroundColor = t.bubbleBg.cgColor
-            button.layer?.cornerRadius = 14
+            button.layer?.cornerRadius = 8
             button.layer?.borderWidth = 1
-            button.layer?.borderColor = t.accentColor.withAlphaComponent(0.2).cgColor
+            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.4).cgColor
             
             let pstyle = NSMutableParagraphStyle()
-            pstyle.alignment = .center
+            pstyle.alignment = .left
             
             button.attributedTitle = NSAttributedString(
-                string: expert.name,
+                string: "   \(expert.name)",
                 attributes: [
-                    .font: NSFont.systemFont(ofSize: 11, weight: .semibold),
-                    .foregroundColor: t.accentColor,
+                    .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+                    .foregroundColor: t.textPrimary,
                     .paragraphStyle: pstyle
                 ]
             )
@@ -42,8 +43,54 @@ extension TerminalView {
             button.identifier = NSUserInterfaceItemIdentifier(identifier)
             button.translatesAutoresizingMaskIntoConstraints = false
             expertSuggestionStack.addArrangedSubview(button)
-            button.heightAnchor.constraint(equalToConstant: 28).isActive = true
+            
+            NSLayoutConstraint.activate([
+                button.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor),
+                button.heightAnchor.constraint(equalToConstant: 36)
+            ])
         }
+
+        setPanelVisibility(expertSuggestionContainer, hidden: false)
+        relayoutPanels()
+    }
+
+    func setPickedExpert(_ expert: ResponderExpert) {
+        expertSuggestionTargets.removeAll()
+        expertSuggestionStack.arrangedSubviews.forEach { view in
+            expertSuggestionStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        let t = theme
+        expertSuggestionLabel.stringValue = "\(expert.name) picked"
+
+        let button = NSButton(title: "", target: self, action: #selector(returnToLennyTapped))
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = t.inputBg.cgColor
+        button.layer?.cornerRadius = 8
+        button.layer?.borderWidth = 1
+        button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.4).cgColor
+        
+        let pstyle = NSMutableParagraphStyle()
+        pstyle.alignment = .left
+
+        button.attributedTitle = NSAttributedString(
+            string: "   End conversation and select another expert",
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 13, weight: .medium),
+                .foregroundColor: t.textDim,
+                .paragraphStyle: pstyle
+            ]
+        )
+        button.setButtonType(.momentaryPushIn)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        expertSuggestionStack.addArrangedSubview(button)
+        
+        NSLayoutConstraint.activate([
+            button.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor),
+            button.heightAnchor.constraint(equalToConstant: 36)
+        ])
 
         setPanelVisibility(expertSuggestionContainer, hidden: false)
         relayoutPanels()

@@ -25,7 +25,7 @@ extension WalkerCharacter {
             self.showCompletionBubble()
             self.updateExpertNameTag()
             if self.focusedExpert != nil {
-                self.terminalView?.hideExpertSuggestions(clearState: false)
+                self.terminalView?.hideExpertSuggestions()
             } else if !stagedExperts.isEmpty {
                 let names = stagedExperts.map(\.name).joined(separator: ", ")
                 self.terminalView?.setExpertSuggestions(stagedExperts)

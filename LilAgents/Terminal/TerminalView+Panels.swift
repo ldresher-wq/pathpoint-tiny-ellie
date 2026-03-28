@@ -13,11 +13,9 @@ extension TerminalView {
         renderExpertSuggestions()
     }
 
-    func hideExpertSuggestions(clearState: Bool = true) {
-        if clearState {
-            currentExpertSuggestions = []
-            expertSuggestionsCollapsed = false
-        }
+    func hideExpertSuggestions() {
+        currentExpertSuggestions = []
+        expertSuggestionsCollapsed = false
         expertSuggestionTargets.removeAll()
         expertSuggestionStack.arrangedSubviews.forEach { view in
             expertSuggestionStack.removeArrangedSubview(view)

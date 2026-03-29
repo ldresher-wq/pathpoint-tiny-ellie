@@ -12,7 +12,26 @@ class CharacterContentView: NSView {
     private let dragThreshold: CGFloat = 4
 
     override func menu(for event: NSEvent) -> NSMenu? {
-        character?.contextMenu()
+        guard let character else { return nil }
+
+        let menu = NSMenu()
+
+        let dontMoveItem = NSMenuItem(title: "Don't move", action: #selector(toggleMovementLocked(_:)), keyEquivalent: "")
+        dontMoveItem.target = self
+        dontMoveItem.state = character.movementLocked ? .on : .off
+        menu.addItem(dontMoveItem)
+
+        menu.addItem(NSMenuItem.separator())
+
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(AppDelegate.openSettings), keyEquivalent: "")
+        settingsItem.target = NSApp.delegate
+        menu.addItem(settingsItem)
+
+        let quitItem = NSMenuItem(title: "Quit Lil-Lenny", action: #selector(AppDelegate.quitApp), keyEquivalent: "")
+        quitItem.target = NSApp.delegate
+        menu.addItem(quitItem)
+
+        return menu
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? {
@@ -92,6 +111,13 @@ class CharacterContentView: NSView {
     override func rightMouseDown(with event: NSEvent) {
         mouseDownPoint = nil
         didDrag = false
-        character?.showContextMenu(with: event, in: self)
+        if let menu = menu(for: event) {
+            NSMenu.popUpContextMenu(menu, with: event, for: self)
+        }
+    }
+
+    @objc private func toggleMovementLocked(_ sender: NSMenuItem) {
+        guard let character else { return }
+        character.setMovementLocked(!character.movementLocked)
     }
 }

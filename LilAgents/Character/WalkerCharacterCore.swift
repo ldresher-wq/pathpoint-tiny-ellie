@@ -63,24 +63,16 @@ extension WalkerCharacter {
         }
     }
 
-    func contextMenu() -> NSMenu {
-        let menu = NSMenu()
-
-        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(AppDelegate.openSettings), keyEquivalent: "")
-        settingsItem.target = NSApp.delegate
-        menu.addItem(settingsItem)
-
-        menu.addItem(NSMenuItem.separator())
-
-        let quitItem = NSMenuItem(title: "Quit Lil-Lenny", action: #selector(AppDelegate.quitApp), keyEquivalent: "")
-        quitItem.target = NSApp.delegate
-        menu.addItem(quitItem)
-
-        return menu
-    }
-
-    func showContextMenu(with event: NSEvent, in view: NSView) {
-        NSMenu.popUpContextMenu(contextMenu(), with: event, for: view)
+    func setMovementLocked(_ locked: Bool) {
+        movementLocked = locked
+        if locked {
+            isWalking = false
+            isPaused = true
+            pauseEndTime = .greatestFiniteMagnitude
+            setFacing(.front)
+        } else if !isIdleForPopover && !isDraggingHorizontally {
+            pauseEndTime = CACurrentMediaTime() + Double.random(in: 1.5...3.5)
+        }
     }
 
     func beginHorizontalDrag(at event: NSEvent) {
@@ -178,7 +170,10 @@ extension WalkerCharacter {
 
         guard let session = claudeSession, let terminalView else { return }
         let activeHistory = session.history(for: focusedExpert)
-        let transcriptAlreadyRendered = !terminalView.transcriptStack.arrangedSubviews.isEmpty
+        let conversationKey = session.key(for: focusedExpert)
+        let transcriptAlreadyRendered =
+            terminalView.renderedConversationKey == conversationKey &&
+            !terminalView.transcriptStack.arrangedSubviews.isEmpty
 
         if let expert = focusedExpert {
             if activeHistory.isEmpty {
@@ -188,6 +183,7 @@ extension WalkerCharacter {
             } else {
                 terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: expert))
             }
+            terminalView.renderedConversationKey = conversationKey
             terminalView.hideExpertSuggestions(clearState: false)
             return
         }
@@ -199,6 +195,7 @@ extension WalkerCharacter {
         } else {
             terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: nil))
         }
+        terminalView.renderedConversationKey = conversationKey
 
         let persistedEntries = session.expertSuggestionEntries(for: nil)
         guard persistedEntries.isEmpty else {

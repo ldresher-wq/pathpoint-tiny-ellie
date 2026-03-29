@@ -23,6 +23,7 @@ final class WalkerCharacter {
     var isWalking = false
     var isPaused = true
     var pauseEndTime: CFTimeInterval = 0
+    var movementLocked = false
     var goingRight = true
     var walkStartPos: CGFloat = 0.0
     var walkEndPos: CGFloat = 0.0

@@ -40,6 +40,7 @@ class TerminalView: NSView {
     var currentExpertSuggestions: [ResponderExpert] = []
     var lastPickedExpert: ResponderExpert?
     var transcriptSuggestionView: NSView?
+    var renderedConversationKey: String?
     var expertSuggestionsCollapsed = false
     var liveStatusAvatarTimer: Timer?
     var liveStatusAvatarPaths: [String] = []

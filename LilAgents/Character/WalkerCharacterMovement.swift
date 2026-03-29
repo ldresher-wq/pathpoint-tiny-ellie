@@ -121,6 +121,20 @@ extension WalkerCharacter {
             return
         }
 
+        if movementLocked {
+            isWalking = false
+            isPaused = true
+            pauseEndTime = .greatestFiniteMagnitude
+            setFacing(.front)
+            let x = horizontalMetrics.minX + currentTravelDistance * positionProgress + flipXOffset
+            let bottomPadding = displayHeight * 0.15
+            let y = dockTopY - bottomPadding + yOffset
+            window.setFrameOrigin(NSPoint(x: x, y: y))
+            updateThinkingBubble()
+            updateExpertNameTag()
+            return
+        }
+
         let now = CACurrentMediaTime()
 
         if isPaused {

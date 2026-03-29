@@ -98,6 +98,7 @@ extension WalkerCharacter {
         let font = t.bubbleFont
         let textSize = (text as NSString).size(withAttributes: [.font: font])
         let bubbleW = max(ceil(textSize.width) + padding * 2, 48)
+        let bubbleRadius = h / 2
 
         let charFrame = window.frame
         let x = charFrame.midX - bubbleW / 2
@@ -110,7 +111,7 @@ extension WalkerCharacter {
         if let container = thinkingBubbleWindow?.contentView {
             container.frame = NSRect(x: 0, y: 0, width: bubbleW, height: h)
             container.layer?.backgroundColor = t.bubbleBg.cgColor
-            container.layer?.cornerRadius = t.bubbleCornerRadius
+            container.layer?.cornerRadius = bubbleRadius
             container.layer?.borderColor = borderColor
             if let label = container.viewWithTag(100) as? NSTextField {
                 label.font = font
@@ -169,7 +170,7 @@ extension WalkerCharacter {
         let container = NSView(frame: NSRect(x: 0, y: 0, width: w, height: h))
         container.wantsLayer = true
         container.layer?.backgroundColor = t.bubbleBg.cgColor
-        container.layer?.cornerRadius = t.bubbleCornerRadius
+        container.layer?.cornerRadius = h / 2
         container.layer?.borderWidth = 1
         container.layer?.borderColor = t.bubbleBorder.cgColor
 

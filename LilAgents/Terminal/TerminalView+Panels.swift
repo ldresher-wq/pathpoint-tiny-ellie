@@ -191,6 +191,7 @@ extension TerminalView {
         } else {
             stopLiveStatusAvatarShuffle()
         }
+        refreshComposerContentLayout(showingStatus: true)
     }
 
     func clearLiveStatus() {
@@ -203,6 +204,7 @@ extension TerminalView {
         inputField.isHidden = false
         sendButton.isHidden = false
         attachButton.isHidden = false
+        refreshComposerContentLayout(showingStatus: false)
     }
 
     func normalizeExpertSuggestionID(_ name: String) -> String {
@@ -222,11 +224,13 @@ extension TerminalView {
         }
         guard !liveStatusAvatarPaths.isEmpty else {
             liveStatusAvatarView.isHidden = true
+            refreshComposerContentLayout(showingStatus: true)
             return
         }
 
         liveStatusAvatarView.isHidden = false
         advanceLiveStatusAvatar()
+        refreshComposerContentLayout(showingStatus: true)
 
         if liveStatusAvatarTimer == nil {
             liveStatusAvatarTimer = Timer.scheduledTimer(withTimeInterval: 0.18, repeats: true) { [weak self] _ in
@@ -245,6 +249,7 @@ extension TerminalView {
         liveStatusAvatarIndex = 0
         liveStatusAvatarView.image = nil
         liveStatusAvatarView.isHidden = true
+        refreshComposerContentLayout(showingStatus: true)
     }
 
     func advanceLiveStatusAvatar() {

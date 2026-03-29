@@ -7,8 +7,9 @@ extension TerminalView {
         layer?.backgroundColor = NSColor.clear.cgColor
 
         // Corner radius design system:
-        //   Window: 18  ·  Composer/attachment pills: 15  ·  Inner panels: 15  ·  Buttons: circle
-        let composerRadius: CGFloat = 15
+        //   Window: 18  ·  Composer shell: full pill  ·  Attachment strip: full pill  ·  Buttons: circle
+        let composerRadius = Layout.composerHeight / 2
+        let attachmentRadius = Layout.attachmentStripHeight / 2
         scrollView.frame = NSRect(
             x: Layout.padding,
             y: 120,
@@ -90,7 +91,7 @@ extension TerminalView {
             attachmentStrip,
             background: t.inputBg.withAlphaComponent(0.96),
             border: t.separatorColor.withAlphaComponent(0.36),
-            radius: composerRadius
+            radius: attachmentRadius
         )
         attachmentStrip.isHidden = true
         addSubview(attachmentStrip)
@@ -245,7 +246,44 @@ extension TerminalView {
         composerPanel.addSubview(liveStatusLabel)
 
         registerForDraggedTypes([.fileURL, .URL, .string, .tiff, .png])
+        refreshComposerContentLayout()
         relayoutPanels()
+    }
+
+    func refreshComposerContentLayout(showingStatus: Bool? = nil) {
+        guard let composerPanel = inputField.superview else { return }
+
+        let isShowingStatus = showingStatus ?? !liveStatusLabel.isHidden
+        let controlButtonSize: CGFloat = 34
+        let rightInset: CGFloat = 11
+        let sideInset: CGFloat = 16
+        let controlGap: CGFloat = 10
+
+        let sendY = (Layout.composerHeight - controlButtonSize) / 2
+        let sendX = composerPanel.bounds.width - rightInset - controlButtonSize
+        let attachX = sendX - controlGap - controlButtonSize
+
+        sendButton.frame = NSRect(x: sendX, y: sendY, width: controlButtonSize, height: controlButtonSize)
+        attachButton.frame = NSRect(x: attachX, y: sendY, width: controlButtonSize, height: controlButtonSize)
+
+        inputField.frame = NSRect(
+            x: sideInset,
+            y: 8,
+            width: max(80, attachX - sideInset - 8),
+            height: Layout.composerHeight - 16
+        )
+
+        liveStatusSpinner.frame = NSRect(x: sideInset, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
+        liveStatusAvatarView.frame = NSRect(x: sideInset, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)
+
+        let statusLeading: CGFloat = liveStatusAvatarView.isHidden ? 16 : 52
+        let statusTrailingInset: CGFloat = isShowingStatus ? 16 : (rightInset + controlButtonSize + 8)
+        liveStatusLabel.frame = NSRect(
+            x: statusLeading,
+            y: (Layout.composerHeight - 18) / 2,
+            width: max(80, composerPanel.bounds.width - statusLeading - statusTrailingInset),
+            height: 18
+        )
     }
 
     @objc func inputSubmitted() {

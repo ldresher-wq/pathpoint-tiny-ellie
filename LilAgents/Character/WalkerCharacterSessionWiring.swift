@@ -107,18 +107,25 @@ extension WalkerCharacter {
             .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
+        func combine(prefix: String, summary: String) -> String {
+            guard !summary.isEmpty else { return prefix }
+            if summary.hasPrefix(prefix) || summary.contains(":") {
+                return summary
+            }
+            return "\(prefix): \(summary)"
+        }
+
         if lowered.contains("planning") {
             return trimmedSummary.isEmpty ? "On it…" : trimmedSummary
         }
         if lowered.contains("calling model") {
-            return trimmedSummary.isEmpty ? "Calling model" : "Calling Model: \(trimmedSummary)"
+            return combine(prefix: "Calling Model", summary: trimmedSummary)
         }
         if lowered.contains("calling mcp tool") {
-            return trimmedSummary.isEmpty ? "Calling MCP tool" : "Calling MCP Tool: \(trimmedSummary)"
+            return combine(prefix: "Calling MCP Tool", summary: trimmedSummary)
         }
         if lowered.contains("search") || lowered.contains("reading") || lowered.contains("browse") {
-            if trimmedSummary.isEmpty { return toolName }
-            return "\(toolName): \(trimmedSummary)"
+            return combine(prefix: toolName, summary: trimmedSummary)
         }
         if lowered.contains("writing") || lowered.contains("generating") {
             return trimmedSummary.isEmpty ? "Writing answer" : trimmedSummary
@@ -126,7 +133,7 @@ extension WalkerCharacter {
         if lowered.contains("running") || lowered.contains("progress") || lowered.contains("thinking") {
             return trimmedSummary.isEmpty ? toolName : trimmedSummary
         }
-        return trimmedSummary.isEmpty ? toolName : "\(toolName): \(trimmedSummary)"
+        return combine(prefix: toolName, summary: trimmedSummary)
     }
 
     func compactLiveStatus(_ status: String) -> String {

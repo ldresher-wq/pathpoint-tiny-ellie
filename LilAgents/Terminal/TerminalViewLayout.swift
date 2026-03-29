@@ -51,6 +51,7 @@ extension TerminalView {
         
         resizeTranscriptToFitContent()
         layoutAttachmentPreviewDocument()
+        refreshComposerContentLayout()
     }
 
     func stylePanel(_ view: NSView, background: NSColor, border: NSColor, radius: CGFloat) {

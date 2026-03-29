@@ -17,9 +17,9 @@ extension WalkerCharacter {
         terminalView?.inputField.isEditable = false
         terminalView?.updatePlaceholder("")
         let welcome = """
-        Lenny is ready.
+        Ask Lenny about product, growth, pricing, startups, or AI.
 
-        Ask about product, growth, pricing, startups, or AI and I’ll pull together the strongest answer from the archive.
+        I’ll pull together the strongest answer I can from the archive.
         """
         terminalView?.appendStreamingText(welcome)
         terminalView?.endStreaming()
@@ -251,9 +251,9 @@ extension WalkerCharacter {
 
     func updateInputPlaceholder() {
         if let expert = focusedExpert {
-            terminalView?.updatePlaceholder("Ask \(expert.name) a follow-up...")
+            terminalView?.updatePlaceholder("Ask \(expert.name) a follow-up")
         } else {
-            terminalView?.updatePlaceholder("What's on your mind?")
+            terminalView?.updatePlaceholder("Ask a question or drop in a file")
         }
     }
 }

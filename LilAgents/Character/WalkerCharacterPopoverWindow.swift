@@ -7,7 +7,7 @@ extension WalkerCharacter {
 
     func refreshPopoverHeader() {
         popoverTitleLabel?.stringValue = focusedExpert?.name ?? resolvedTheme.titleString
-        popoverSubtitleLabel?.stringValue = focusedExpert == nil ? "Archive-grounded answers" : "Focused follow-up mode"
+        popoverSubtitleLabel?.stringValue = focusedExpert == nil ? "Answers grounded in Lenny's archive" : "Specialist follow-up"
         popoverReturnButton?.isHidden = focusedExpert == nil
     }
 
@@ -55,14 +55,14 @@ extension WalkerCharacter {
         let titleLabel = NSTextField(labelWithString: focusedExpert?.name ?? t.titleString)
         titleLabel.font = NSFont.systemFont(ofSize: 17, weight: .semibold)
         titleLabel.textColor = t.titleText
-        titleLabel.frame = NSRect(x: 20, y: 17, width: popoverWidth - 212, height: 22)
+        titleLabel.frame = NSRect(x: 20, y: 17, width: popoverWidth - 244, height: 22)
         titleBar.addSubview(titleLabel)
         popoverTitleLabel = titleLabel
 
-        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Archive-grounded answers" : "Focused follow-up mode")
+        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Answers grounded in Lenny's archive" : "Specialist follow-up")
         subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         subtitle.textColor = t.textDim.withAlphaComponent(0.75)
-        subtitle.frame = NSRect(x: 20, y: 5, width: popoverWidth - 212, height: 14)
+        subtitle.frame = NSRect(x: 20, y: 5, width: popoverWidth - 244, height: 14)
         titleBar.addSubview(subtitle)
         popoverSubtitleLabel = subtitle
 
@@ -71,6 +71,26 @@ extension WalkerCharacter {
         let closeButtonX = popoverWidth - 12 - controlButtonSize
         let pinButtonX = closeButtonX - buttonSpacing - controlButtonSize
         let expandButtonX = pinButtonX - buttonSpacing - controlButtonSize
+        let settingsButtonX = expandButtonX - buttonSpacing - controlButtonSize
+
+        let settingsButton = HoverButton(title: "", target: NSApp.delegate, action: #selector(AppDelegate.openSettings))
+        settingsButton.frame = NSRect(x: settingsButtonX, y: (titleBarHeight - controlButtonSize) / 2, width: controlButtonSize, height: controlButtonSize)
+        settingsButton.isBordered = false
+        settingsButton.wantsLayer = true
+        settingsButton.normalBg = t.separatorColor.withAlphaComponent(0.10).cgColor
+        settingsButton.hoverBg = t.separatorColor.withAlphaComponent(0.22).cgColor
+        settingsButton.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.10).cgColor
+        settingsButton.layer?.cornerRadius = controlButtonSize / 2
+        if let image = NSImage(systemSymbolName: "gearshape", accessibilityDescription: "Open settings") {
+            let config = NSImage.SymbolConfiguration(pointSize: 10, weight: .medium)
+            settingsButton.image = image.withSymbolConfiguration(config)
+        }
+        settingsButton.imageScaling = .scaleProportionallyDown
+        settingsButton.contentTintColor = t.textDim
+        settingsButton.toolTip = "Open settings"
+        titleBar.addSubview(settingsButton)
+        popoverSettingsButton = settingsButton
+
         let expandButton = HoverButton(title: "", target: self, action: #selector(expandToggleTapped))
         expandButton.frame = NSRect(x: expandButtonX, y: (titleBarHeight - controlButtonSize) / 2, width: controlButtonSize, height: controlButtonSize)
         expandButton.isBordered = false
@@ -85,6 +105,7 @@ extension WalkerCharacter {
         }
         expandButton.imageScaling = .scaleProportionallyDown
         expandButton.contentTintColor = t.textDim
+        expandButton.toolTip = "Expand"
         titleBar.addSubview(expandButton)
         popoverExpandButton = expandButton
 
@@ -98,6 +119,7 @@ extension WalkerCharacter {
         pinButton.layer?.cornerRadius = controlButtonSize / 2
         pinButton.imageScaling = .scaleProportionallyDown
         pinButton.contentTintColor = t.textDim
+        pinButton.toolTip = "Pin"
         titleBar.addSubview(pinButton)
         popoverPinButton = pinButton
 
@@ -115,12 +137,13 @@ extension WalkerCharacter {
         }
         closeButton.imageScaling = .scaleProportionallyDown
         closeButton.contentTintColor = t.textDim
+        closeButton.toolTip = "Close"
         titleBar.addSubview(closeButton)
         popoverCloseButton = closeButton
 
         let returnPill = HoverButton(title: "", target: self, action: #selector(returnToGenieTapped))
         let returnPillWidth: CGFloat = 118
-        returnPill.frame = NSRect(x: expandButtonX - 8 - returnPillWidth, y: 14, width: returnPillWidth, height: 26)
+        returnPill.frame = NSRect(x: settingsButtonX - 8 - returnPillWidth, y: 14, width: returnPillWidth, height: 26)
         returnPill.isBordered = false
         returnPill.wantsLayer = true
         returnPill.normalBg = t.inputBg.withAlphaComponent(0.90).cgColor
@@ -130,12 +153,13 @@ extension WalkerCharacter {
         returnPill.layer?.borderWidth = 0.75
         returnPill.layer?.borderColor = t.separatorColor.withAlphaComponent(0.55).cgColor
         returnPill.attributedTitle = NSAttributedString(
-            string: "← Back to Lenny",
+            string: "Back to Lenny",
             attributes: [
                 .font: NSFont.systemFont(ofSize: 11, weight: .medium),
                 .foregroundColor: t.accentColor
             ]
         )
+        returnPill.toolTip = "Return to Lenny"
         returnPill.isHidden = focusedExpert == nil
         titleBar.addSubview(returnPill)
         popoverReturnButton = returnPill

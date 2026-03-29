@@ -108,8 +108,8 @@ extension TerminalView {
         panel.canChooseDirectories = false
         panel.canChooseFiles = true
         panel.resolvesAliases = true
-        panel.title = "Add Attachments"
-        panel.message = "Choose screenshots, PDFs, CSVs, docs, code, or links to send with your question."
+        panel.title = "Add Context"
+        panel.message = "Choose files you want Lenny to use in the answer, like screenshots, PDFs, spreadsheets, notes, or code."
         panel.allowedContentTypes = SessionAttachment.supportedContentTypes
 
         guard panel.runModal() == .OK else { return }

@@ -66,7 +66,7 @@ extension TerminalView {
         expertSuggestionLabel.autoresizingMask = [.width]
         expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         expertSuggestionLabel.textColor = t.textDim
-        expertSuggestionLabel.stringValue = "Open an expert for a more specific follow-up."
+        expertSuggestionLabel.stringValue = "Pick a specialist for a more specific follow-up."
         expertSuggestionLabel.isHidden = true
         expertSuggestionContainer.addSubview(expertSuggestionLabel)
 
@@ -128,7 +128,7 @@ extension TerminalView {
         attachmentHintLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         attachmentHintLabel.textColor = t.textDim
         attachmentHintLabel.alignment = .center
-        attachmentHintLabel.stringValue = "Drop screenshots, PDFs, code, CSVs, or links here"
+        attachmentHintLabel.stringValue = "Drop files, screenshots, code, or links here"
         attachmentHintLabel.isHidden = true
         attachmentStrip.addSubview(attachmentHintLabel)
 
@@ -163,6 +163,7 @@ extension TerminalView {
         }
         sendButton.imageScaling = .scaleProportionallyDown
         sendButton.contentTintColor = .white
+        sendButton.toolTip = "Send"
         sendButton.target = self
         sendButton.action = #selector(inputSubmitted)
         composerPanel.addSubview(sendButton)
@@ -181,6 +182,7 @@ extension TerminalView {
         }
         attachButton.imageScaling = .scaleProportionallyDown
         attachButton.contentTintColor = t.textDim
+        attachButton.toolTip = "Add attachment"
         attachButton.target = self
         attachButton.action = #selector(attachButtonTapped)
         composerPanel.addSubview(attachButton)

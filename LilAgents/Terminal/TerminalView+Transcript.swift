@@ -226,7 +226,7 @@ class ExpertSuggestionCardView: NSView {
             shell.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
 
-        let titleLabel = NSTextField(labelWithString: "Open an expert for a more specific follow-up")
+        let titleLabel = NSTextField(labelWithString: "Want a more specific take? Pick a specialist.")
         titleLabel.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
         titleLabel.textColor = theme.textDim
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -378,7 +378,7 @@ class CompactSuggestionView: NSView {
         let preferredWidth = shell.widthAnchor.constraint(equalTo: widthAnchor, constant: -56)
         preferredWidth.priority = .defaultHigh
 
-        let summary = NSTextField(labelWithString: "Following up with \(entry.pickedExpert?.name ?? "an expert")")
+        let summary = NSTextField(labelWithString: "Now chatting with \(entry.pickedExpert?.name ?? "your specialist")")
         summary.font = NSFont.systemFont(ofSize: 12.5, weight: .medium)
         summary.textColor = theme.textDim
         summary.translatesAutoresizingMaskIntoConstraints = false
@@ -394,7 +394,7 @@ class CompactSuggestionView: NSView {
         button.layer?.borderWidth = 1
         button.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.42).cgColor
         button.attributedTitle = NSAttributedString(
-            string: "Change",
+            string: "Switch",
             attributes: [
                 .font: NSFont.systemFont(ofSize: 12, weight: .medium),
                 .foregroundColor: theme.textPrimary
@@ -628,7 +628,7 @@ extension TerminalView {
         clearTranscriptSuggestionView()
         hideWelcomeSuggestionsPanel()
         let t = theme
-        let greeting = "Hey! I'm Lenny — your guide to product, growth, and startup strategy.\n\nI pull answers from my newsletter and podcast archive so you don't have to read everything. What's on your mind?"
+        let greeting = "I'm Lenny. I pull from my newsletter and podcast archive to help with product, growth, pricing, startups, and AI.\n\nWhat are you working through?"
         let attrText = NSAttributedString(string: greeting, attributes: [
             .font: t.font,
             .foregroundColor: t.textPrimary,
@@ -645,7 +645,7 @@ extension TerminalView {
         clearTranscriptSuggestionView()
         hideWelcomeSuggestionsPanel()
 
-        let greeting = "Hey, I'm \(expert.name). How can I help?"
+        let greeting = "I'm \(expert.name). What would you like to dig into?"
         let attrText = NSAttributedString(string: greeting, attributes: [
             .font: theme.font,
             .foregroundColor: theme.textPrimary,
@@ -660,7 +660,7 @@ extension TerminalView {
 
     func appendUser(_ text: String, attachments: [SessionAttachment] = []) {
         let t = theme
-        let visibleText = text.isEmpty ? "(with attachments)" : text
+        let visibleText = text.isEmpty ? "Sent with attachment" : text
         let attrText = NSMutableAttributedString(string: visibleText, attributes: [
             .font: t.fontBold,
             .foregroundColor: t.textPrimary

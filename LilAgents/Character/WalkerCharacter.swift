@@ -49,6 +49,7 @@ final class WalkerCharacter {
     var popoverTitleLabel: NSTextField?
     var popoverSubtitleLabel: NSTextField?
     var popoverReturnButton: NSButton?
+    var popoverSettingsButton: HoverButton?
     var popoverExpandButton: HoverButton?
     var popoverPinButton: HoverButton?
     var popoverCloseButton: HoverButton?

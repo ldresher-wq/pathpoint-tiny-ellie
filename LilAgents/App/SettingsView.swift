@@ -12,9 +12,9 @@ struct SettingsView: View {
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 12) {
-                SettingsSection(icon: "bolt.horizontal.fill", title: "AI Transport") {
+                SettingsSection(icon: "bolt.horizontal.fill", title: "How Lenny Answers") {
                     Picker("Transport", selection: $preferredTransport) {
-                        Text("Auto select")
+                        Text("Choose automatically")
                             .tag(AppSettings.PreferredTransport.automatic.rawValue)
                         Text("Claude Code")
                             .tag(AppSettings.PreferredTransport.claudeCode.rawValue)
@@ -26,7 +26,7 @@ struct SettingsView: View {
                     .pickerStyle(.radioGroup)
                     .labelsHidden()
 
-                    Text("Auto select prefers Claude Code first, then Codex, then direct OpenAI API fallback. Choose a specific transport to force that path instead.")
+                    Text("Automatic mode tries Claude Code first, then Codex, then the OpenAI API. Pick a single transport only if you want to force that path.")
                         .settingsCaption()
 
                     HStack(alignment: .center) {
@@ -38,7 +38,7 @@ struct SettingsView: View {
                     }
                 }
 
-                SettingsSection(icon: "slider.horizontal.3", title: "Models") {
+                SettingsSection(icon: "slider.horizontal.3", title: "Model Choices") {
                     VStack(alignment: .leading, spacing: 10) {
                         LabeledModelPicker(
                             title: "Claude Code",
@@ -59,7 +59,7 @@ struct SettingsView: View {
                         )
                     }
 
-                    Text("Claude and Codex use their CLI model flags when selected. OpenAI API uses the exact model shown here.")
+                    Text("These choices apply only when that transport is active. Claude and Codex use their CLI model flags. OpenAI uses the exact API model shown here.")
                         .settingsCaption()
 
                     HStack(alignment: .center) {
@@ -72,26 +72,26 @@ struct SettingsView: View {
                 }
 
                 // Archive Source
-                SettingsSection(icon: "archivebox.fill", title: "Archive Source") {
+                SettingsSection(icon: "archivebox.fill", title: "Archive Access") {
                     Picker("Source", selection: $archiveAccessMode) {
-                        Text("Starter pack  —  local free search")
+                        Text("Starter pack — local sample archive")
                             .tag(AppSettings.ArchiveAccessMode.starterPack.rawValue)
-                        Text("Official Lenny MCP")
+                        Text("Official Lenny archive")
                             .tag(AppSettings.ArchiveAccessMode.officialMCP.rawValue)
                     }
                     .pickerStyle(.radioGroup)
                     .labelsHidden()
 
-                    Text("Starter pack searches the bundled free archive locally on device. Official MCP uses your own Lenny access through Claude Code or Codex.")
+                    Text("Starter pack searches the bundled archive on your Mac. The official archive uses your own Lenny access through Claude Code, Codex, or a bearer token.")
                         .settingsCaption()
                 }
 
                 // MCP Configuration
-                SettingsSection(icon: "key.fill", title: "Official MCP") {
+                SettingsSection(icon: "key.fill", title: "Official Archive Setup") {
                     SecureField("Optional bearer token", text: $officialToken)
                         .textFieldStyle(.roundedBorder)
 
-                    Text("Leave blank to use your CLI MCP configuration. Paste your bearer token here to let the app inject the official MCP server directly.")
+                    Text("Leave this blank if you already set up the archive in Claude Code or Codex. Paste a bearer token only if you want the app to connect directly.")
                         .settingsCaption()
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -100,7 +100,7 @@ struct SettingsView: View {
                             code: "claude mcp add lennysdata --transport http https://mcp.lennysdata.com/mcp --header \"Authorization: Bearer <your-token>\""
                         )
                         SettingsCodeBlock(
-                            label: "Codex  (two steps)",
+                            label: "Codex (two steps)",
                             code: "codex mcp add lennysdata --url https://mcp.lennysdata.com/mcp\ncodex mcp login lennysdata"
                         )
                     }
@@ -114,7 +114,7 @@ struct SettingsView: View {
                         Spacer(minLength: 8)
 
                         if !officialToken.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                            Button("Clear token") { officialToken = "" }
+                            Button("Clear Token") { officialToken = "" }
                                 .controlSize(.small)
                                 .buttonStyle(.bordered)
                         }
@@ -122,10 +122,10 @@ struct SettingsView: View {
                 }
 
                 // Debug Logging
-                SettingsSection(icon: "ant.fill", title: "Debug Logging") {
-                    Toggle("Print verbose session logs to the Xcode console", isOn: $debugLoggingEnabled)
+                SettingsSection(icon: "ant.fill", title: "Debug Logs") {
+                    Toggle("Show detailed session logs in Xcode", isOn: $debugLoggingEnabled)
 
-                    Text("Logs backend selection, archive mode, MCP setup, CLI arguments, and parsed responses. Sensitive tokens are redacted in all output.")
+                    Text("Includes backend selection, archive mode, MCP setup, CLI arguments, and parsed responses. Sensitive tokens are redacted.")
                         .settingsCaption()
                 }
             }
@@ -137,9 +137,9 @@ struct SettingsView: View {
     private var statusText: String {
         let trimmed = officialToken.trimmingCharacters(in: .whitespacesAndNewlines)
         if archiveAccessMode == AppSettings.ArchiveAccessMode.starterPack.rawValue {
-            return "Using bundled starter pack"
+            return "Using the starter pack on this device"
         }
-        return trimmed.isEmpty ? "Official MCP via CLI config" : "Official MCP with bearer token"
+        return trimmed.isEmpty ? "Using the official archive through your CLI setup" : "Using the official archive with a bearer token"
     }
 
     private var statusIcon: String {
@@ -150,31 +150,31 @@ struct SettingsView: View {
     private var transportStatusText: String {
         switch AppSettings.PreferredTransport(rawValue: preferredTransport) ?? .automatic {
         case .automatic:
-            return "Default transport: auto-select Claude, then Codex, then OpenAI API."
+            return "Lenny will choose Claude Code first, then Codex, then the OpenAI API."
         case .claudeCode:
-            return "Default transport: Claude Code only. Requires Claude login or ANTHROPIC_API_KEY."
+            return "Lenny will use Claude Code only. This requires a Claude login or `ANTHROPIC_API_KEY`."
         case .codex:
-            return "Default transport: Codex only. Requires Codex login or OPENAI_API_KEY."
+            return "Lenny will use Codex only. This requires a Codex login or `OPENAI_API_KEY`."
         case .openAIAPI:
-            return "Default transport: direct OpenAI Responses API only. Requires OPENAI_API_KEY."
+            return "Lenny will use the OpenAI API only. This requires `OPENAI_API_KEY`."
         }
     }
 
     private var activeModelStatusText: String {
         let transport = AppSettings.PreferredTransport(rawValue: preferredTransport) ?? .automatic
-        let claude = AppSettings.ClaudeModel(rawValue: preferredClaudeModel)?.label ?? "Claude default"
-        let codex = AppSettings.CodexModel(rawValue: preferredCodexModel)?.label ?? "Codex default"
+        let claude = AppSettings.ClaudeModel(rawValue: preferredClaudeModel)?.label ?? "Claude"
+        let codex = AppSettings.CodexModel(rawValue: preferredCodexModel)?.label ?? "Codex"
         let openAI = AppSettings.OpenAIModel(rawValue: preferredOpenAIModel)?.label ?? "GPT-5 nano"
 
         switch transport {
         case .automatic:
-            return "Auto mode will use Claude: \(claude), Codex: \(codex), OpenAI API: \(openAI)."
+            return "Automatic mode is set to Claude: \(claude), Codex: \(codex), OpenAI API: \(openAI)."
         case .claudeCode:
-            return "Claude Code will use: \(claude)."
+            return "Claude Code is set to \(claude)."
         case .codex:
-            return "Codex will use: \(codex)."
+            return "Codex is set to \(codex)."
         case .openAIAPI:
-            return "OpenAI API will use: \(openAI)."
+            return "OpenAI is set to \(openAI)."
         }
     }
 

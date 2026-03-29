@@ -47,16 +47,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem?.button {
             button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "figure.walk", accessibilityDescription: "LennyTheGenie")
+            button.toolTip = "Open Lenny"
         }
 
         let menu = NSMenu()
 
-        let char1Item = NSMenuItem(title: "LennyTheGenie", action: #selector(toggleChar1), keyEquivalent: "1")
+        let char1Item = NSMenuItem(title: "Show Lenny", action: #selector(toggleChar1), keyEquivalent: "1")
         char1Item.state = .on
         menu.addItem(char1Item)
         self.char1Item = char1Item
 
-        let backToLennyItem = NSMenuItem(title: "Return to Genie", action: #selector(backToLenny), keyEquivalent: "")
+        let backToLennyItem = NSMenuItem(title: "Back to Lenny", action: #selector(backToLenny), keyEquivalent: "")
         backToLennyItem.isEnabled = false
         menu.addItem(backToLennyItem)
         self.backToLennyItem = backToLennyItem
@@ -237,7 +238,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 backing: .buffered,
                 defer: false
             )
-            window.title = "Settings"
+            window.title = "Lenny Settings"
             let hostingController = NSHostingController(rootView: SettingsView())
             window.contentViewController = hostingController
             window.setContentSize(NSSize(width: 600, height: 460))
@@ -265,7 +266,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 button.imagePosition = .imageLeading
                 button.title = initials(for: expert.name)
                 button.imageScaling = .scaleProportionallyUpOrDown
-                button.toolTip = "Follow up with \(expert.name)"
+                button.toolTip = "Switch to \(expert.name)"
                 button.tag = index
                 button.target = self
                 button.action = #selector(selectExpert(_:))
@@ -316,10 +317,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func updateFocusedExpert(_ expert: ResponderExpert?) {
         focusedExpert = expert
-        char1Item?.title = expert?.name ?? "LennyTheGenie"
+        char1Item?.title = expert?.name ?? "Show Lenny"
         backToLennyItem?.isEnabled = expert != nil
         if let button = statusItem?.button {
-            button.toolTip = expert == nil ? "LennyTheGenie" : "Current guide: \(expert!.name)"
+            button.toolTip = expert == nil ? "Open Lenny" : "Current guide: \(expert!.name)"
         }
     }
 }

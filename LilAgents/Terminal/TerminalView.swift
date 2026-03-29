@@ -19,7 +19,7 @@ class TerminalView: NSView {
     let expertSuggestionStack = NSStackView()
     let attachButton = HoverButton(title: "", target: nil, action: nil)
     let sendButton = HoverButton(title: "", target: nil, action: nil)
-    let returnButton = NSButton(title: "Return to Genie", target: nil, action: nil)
+    let returnButton = NSButton(title: "Back to Lenny", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?
@@ -32,7 +32,7 @@ class TerminalView: NSView {
     var themeOverride: PopoverTheme?
     var currentAssistantText = ""
     var isStreaming = false
-    var placeholderText = "What's on your mind?"
+    var placeholderText = "Ask a question or drop in a file"
     var welcomeChipsView: WelcomeChipsView?
     var pendingAttachments: [SessionAttachment] = []
     var expertSuggestionTargets: [String: ResponderExpert] = [:]

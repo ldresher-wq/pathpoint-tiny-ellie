@@ -7,7 +7,7 @@ extension WalkerCharacter {
 
     func refreshPopoverHeader() {
         popoverTitleLabel?.stringValue = focusedExpert?.name ?? resolvedTheme.titleString
-        popoverSubtitleLabel?.stringValue = focusedExpert == nil ? "Answers grounded in Lenny's archive" : "Specialist follow-up"
+        popoverSubtitleLabel?.stringValue = focusedExpert == nil ? "Your desktop shortcut to LennyData." : "Specialist follow-up"
         popoverReturnButton?.isHidden = focusedExpert == nil
     }
 
@@ -59,7 +59,7 @@ extension WalkerCharacter {
         titleBar.addSubview(titleLabel)
         popoverTitleLabel = titleLabel
 
-        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Answers grounded in Lenny's archive" : "Specialist follow-up")
+        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Your desktop shortcut to LennyData." : "Specialist follow-up")
         subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         subtitle.textColor = t.textDim.withAlphaComponent(0.75)
         subtitle.frame = NSRect(x: 20, y: 5, width: popoverWidth - 244, height: 14)
@@ -153,13 +153,13 @@ extension WalkerCharacter {
         returnPill.layer?.borderWidth = 0.75
         returnPill.layer?.borderColor = t.separatorColor.withAlphaComponent(0.55).cgColor
         returnPill.attributedTitle = NSAttributedString(
-            string: "Back to Lenny",
+            string: "Back to Lil-Lenny",
             attributes: [
                 .font: NSFont.systemFont(ofSize: 11, weight: .medium),
                 .foregroundColor: t.accentColor
             ]
         )
-        returnPill.toolTip = "Return to Lenny"
+        returnPill.toolTip = "Return to Lil-Lenny"
         returnPill.isHidden = focusedExpert == nil
         titleBar.addSubview(returnPill)
         popoverReturnButton = returnPill

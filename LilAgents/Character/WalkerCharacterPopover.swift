@@ -17,9 +17,9 @@ extension WalkerCharacter {
         terminalView?.inputField.isEditable = false
         terminalView?.updatePlaceholder("")
         let welcome = """
-        Ask Lenny about product, growth, pricing, startups, or AI.
+        Ask Lil-Lenny anything about product, growth, leadership, pricing, startups, or AI.
 
-        I’ll pull together the strongest answer I can from the archive.
+        Your desktop shortcut to LennyData.
         """
         terminalView?.appendStreamingText(welcome)
         terminalView?.endStreaming()

@@ -485,7 +485,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LilAgents/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Lenny;
+				INFOPLIST_KEY_CFBundleDisplayName = "Lil-Lenny";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSMainNibFile = "";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -495,7 +495,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hbshih.lenny;
-				PRODUCT_NAME = Lenny;
+				PRODUCT_NAME = "Lil-Lenny";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

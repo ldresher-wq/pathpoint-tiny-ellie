@@ -19,7 +19,7 @@ class TerminalView: NSView {
     let expertSuggestionStack = NSStackView()
     let attachButton = HoverButton(title: "", target: nil, action: nil)
     let sendButton = HoverButton(title: "", target: nil, action: nil)
-    let returnButton = NSButton(title: "Back to Lenny", target: nil, action: nil)
+    let returnButton = NSButton(title: "Back to Lil-Lenny", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?

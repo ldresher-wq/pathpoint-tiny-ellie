@@ -53,18 +53,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
     func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem?.button {
-            button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "figure.walk", accessibilityDescription: "Lenny")
-            button.toolTip = "Open Lenny"
+            button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "figure.walk", accessibilityDescription: "Lil-Lenny")
+            button.toolTip = "Open Lil-Lenny"
         }
 
         let menu = NSMenu()
 
-        let char1Item = NSMenuItem(title: "Show Lenny", action: #selector(toggleChar1), keyEquivalent: "1")
+        let char1Item = NSMenuItem(title: "Show Lil-Lenny", action: #selector(toggleChar1), keyEquivalent: "1")
         char1Item.state = .on
         menu.addItem(char1Item)
         self.char1Item = char1Item
 
-        let backToLennyItem = NSMenuItem(title: "Back to Lenny", action: #selector(backToLenny), keyEquivalent: "")
+        let backToLennyItem = NSMenuItem(title: "Back to Lil-Lenny", action: #selector(backToLenny), keyEquivalent: "")
         backToLennyItem.isEnabled = false
         menu.addItem(backToLennyItem)
         self.backToLennyItem = backToLennyItem
@@ -253,7 +253,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
                 backing: .buffered,
                 defer: false
             )
-            window.title = "Lenny Settings"
+            window.title = "Lil-Lenny Settings"
             let hostingController = NSHostingController(rootView: SettingsView())
             window.contentViewController = hostingController
             window.setContentSize(NSSize(width: 600, height: 460))
@@ -338,10 +338,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
 
     private func updateFocusedExpert(_ expert: ResponderExpert?) {
         focusedExpert = expert
-        char1Item?.title = expert?.name ?? "Show Lenny"
+        char1Item?.title = expert?.name ?? "Show Lil-Lenny"
         backToLennyItem?.isEnabled = expert != nil
         if let button = statusItem?.button {
-            button.toolTip = expert == nil ? "Open Lenny" : "Current guide: \(expert!.name)"
+            button.toolTip = expert == nil ? "Open Lil-Lenny" : "Current guide: \(expert!.name)"
         }
     }
 

@@ -703,12 +703,12 @@ extension TerminalView {
         clearTranscriptSuggestionView()
         hideWelcomeSuggestionsPanel()
         let t = theme
-        let greeting = "I'm Lenny. I pull from my newsletter and podcast archive to help with product, growth, pricing, startups, and AI.\n\nWhat are you working through?"
+        let greeting = "I'm Lil-Lenny. Ask me anything about product, growth, leadership, pricing, startups, or AI.\n\nYour desktop shortcut to LennyData."
         let attrText = NSAttributedString(string: greeting, attributes: [
             .font: t.font,
             .foregroundColor: t.textPrimary,
         ])
-        let bubble = ChatBubbleView(text: attrText, isUser: false, speakerName: "Lenny", theme: t)
+        let bubble = ChatBubbleView(text: attrText, isUser: false, speakerName: "Lil-Lenny", theme: t)
         transcriptStack.addArrangedSubview(bubble)
         bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
 

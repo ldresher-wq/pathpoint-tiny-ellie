@@ -195,13 +195,13 @@ class WelcomeChipsView: NSView {
 }
 
 class ExpertSuggestionCardView: NSView {
-    var onExpertTapped: ((ResponderExpert) -> Void)?
+    var onExpertTapped: ((UUID, ResponderExpert) -> Void)?
     private let theme: PopoverTheme
-    private let experts: [ResponderExpert]
+    private let entry: ExpertSuggestionEntry
 
-    init(theme: PopoverTheme, experts: [ResponderExpert]) {
+    init(theme: PopoverTheme, entry: ExpertSuggestionEntry) {
         self.theme = theme
-        self.experts = experts
+        self.entry = entry
         super.init(frame: .zero)
         setupViews()
     }
@@ -251,7 +251,7 @@ class ExpertSuggestionCardView: NSView {
             list.bottomAnchor.constraint(equalTo: shell.bottomAnchor)
         ])
 
-        for expert in experts {
+        for expert in entry.experts {
             let chip = makeExpertChip(for: expert)
             list.addArrangedSubview(chip)
             chip.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true
@@ -345,19 +345,19 @@ class ExpertSuggestionCardView: NSView {
 
     @objc private func expertTapped(_ sender: NSButton) {
         guard let name = sender.identifier?.rawValue,
-              let expert = experts.first(where: { $0.name == name }) else { return }
-        onExpertTapped?(expert)
+              let expert = entry.experts.first(where: { $0.name == name }) else { return }
+        onExpertTapped?(entry.id, expert)
     }
 }
 
 class CompactSuggestionView: NSView {
-    var onRetap: (() -> Void)?
+    var onRetap: ((UUID) -> Void)?
     private let theme: PopoverTheme
-    private let pickedExpertName: String
+    private let entry: ExpertSuggestionEntry
 
-    init(theme: PopoverTheme, pickedExpertName: String) {
+    init(theme: PopoverTheme, entry: ExpertSuggestionEntry) {
         self.theme = theme
-        self.pickedExpertName = pickedExpertName
+        self.entry = entry
         super.init(frame: .zero)
         setupViews()
     }
@@ -378,7 +378,7 @@ class CompactSuggestionView: NSView {
         let preferredWidth = shell.widthAnchor.constraint(equalTo: widthAnchor, constant: -56)
         preferredWidth.priority = .defaultHigh
 
-        let summary = NSTextField(labelWithString: "You chose \(pickedExpertName)")
+        let summary = NSTextField(labelWithString: "Following up with \(entry.pickedExpert?.name ?? "an expert")")
         summary.font = NSFont.systemFont(ofSize: 12.5, weight: .medium)
         summary.textColor = theme.textDim
         summary.translatesAutoresizingMaskIntoConstraints = false
@@ -394,7 +394,7 @@ class CompactSuggestionView: NSView {
         button.layer?.borderWidth = 1
         button.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.42).cgColor
         button.attributedTitle = NSAttributedString(
-            string: "Edit",
+            string: "Change",
             attributes: [
                 .font: NSFont.systemFont(ofSize: 12, weight: .medium),
                 .foregroundColor: theme.textPrimary
@@ -425,7 +425,7 @@ class CompactSuggestionView: NSView {
     }
 
     @objc private func retap() {
-        onRetap?()
+        onRetap?(entry.id)
     }
 }
 
@@ -598,6 +598,32 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
 }
 
 extension TerminalView {
+    func expertSuggestionCardHeight(for expertCount: Int) -> CGFloat {
+        let count = CGFloat(expertCount)
+        return 30 + (count * 54) + max(0, count - 1) * 8
+    }
+
+    private func appendSuggestionEntryView(_ entry: ExpertSuggestionEntry) {
+        if entry.isCollapsed, entry.pickedExpert != nil {
+            let compact = CompactSuggestionView(theme: theme, entry: entry)
+            compact.onRetap = { [weak self] entryID in
+                self?.onEditExpertSuggestion?(entryID)
+            }
+            transcriptStack.addArrangedSubview(compact)
+            compact.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+            compact.heightAnchor.constraint(equalToConstant: 46).isActive = true
+            return
+        }
+
+        let suggestionsView = ExpertSuggestionCardView(theme: theme, entry: entry)
+        suggestionsView.onExpertTapped = { [weak self] entryID, expert in
+            self?.onSelectExpertSuggestion?(entryID, expert)
+        }
+        transcriptStack.addArrangedSubview(suggestionsView)
+        suggestionsView.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        suggestionsView.heightAnchor.constraint(equalToConstant: expertSuggestionCardHeight(for: entry.experts.count)).isActive = true
+    }
+
     func showWelcomeGreeting() {
         clearTranscriptSuggestionView()
         hideWelcomeSuggestionsPanel()
@@ -720,14 +746,19 @@ extension TerminalView {
     }
 
     func replayHistory(_ messages: [ClaudeSession.Message]) {
+        replayConversation(messages, expertSuggestions: [])
+    }
+
+    func replayConversation(_ messages: [ClaudeSession.Message], expertSuggestions: [ExpertSuggestionEntry]) {
         let t = theme
         transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         transcriptSuggestionView = nil
         hideWelcomeSuggestionsPanel()
         currentAssistantText = ""
         var lastRole: ClaudeSession.Message.Role?
+        let suggestionsByAnchor = Dictionary(grouping: expertSuggestions, by: \.anchorHistoryCount)
         
-        for msg in messages {
+        for (index, msg) in messages.enumerated() {
             switch msg.role {
             case .user:
                 appendUser(msg.text)
@@ -745,6 +776,13 @@ extension TerminalView {
                 continue
             }
             lastRole = msg.role
+
+            let anchorHistoryCount = index + 1
+            if let entries = suggestionsByAnchor[anchorHistoryCount] {
+                for entry in entries {
+                    appendSuggestionEntryView(entry)
+                }
+            }
         }
 
         if lastRole == .assistant {

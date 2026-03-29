@@ -116,8 +116,14 @@ extension TerminalView {
         expertSuggestionTargets.removeAll()
 
         if expertSuggestionsCollapsed, let picked = lastPickedExpert {
-            let compact = CompactSuggestionView(theme: theme, pickedExpertName: picked.name)
-            compact.onRetap = { [weak self] in
+            let entry = ExpertSuggestionEntry(
+                anchorHistoryCount: 0,
+                experts: currentExpertSuggestions.isEmpty ? [picked] : currentExpertSuggestions,
+                pickedExpert: picked,
+                isCollapsed: true
+            )
+            let compact = CompactSuggestionView(theme: theme, entry: entry)
+            compact.onRetap = { [weak self] _ in
                 guard let self else { return }
                 self.expertSuggestionsCollapsed = false
                 self.renderTranscriptSuggestions()
@@ -132,8 +138,9 @@ extension TerminalView {
 
         guard !currentExpertSuggestions.isEmpty else { return }
 
-        let suggestionsView = ExpertSuggestionCardView(theme: theme, experts: currentExpertSuggestions)
-        suggestionsView.onExpertTapped = { [weak self] expert in
+        let entry = ExpertSuggestionEntry(anchorHistoryCount: 0, experts: currentExpertSuggestions)
+        let suggestionsView = ExpertSuggestionCardView(theme: theme, entry: entry)
+        suggestionsView.onExpertTapped = { [weak self] _, expert in
             guard let self else { return }
             self.lastPickedExpert = expert
             self.expertSuggestionsCollapsed = true
@@ -141,9 +148,7 @@ extension TerminalView {
         }
         transcriptStack.addArrangedSubview(suggestionsView)
         suggestionsView.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
-        let expertCount = CGFloat(currentExpertSuggestions.count)
-        let transcriptCardHeight = 30 + (expertCount * 54) + max(0, expertCount - 1) * 8
-        suggestionsView.heightAnchor.constraint(equalToConstant: transcriptCardHeight).isActive = true
+        suggestionsView.heightAnchor.constraint(equalToConstant: expertSuggestionCardHeight(for: currentExpertSuggestions.count)).isActive = true
         transcriptSuggestionView = suggestionsView
         scrollToBottom()
     }

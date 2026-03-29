@@ -27,12 +27,18 @@ extension WalkerCharacter {
             self.updateExpertNameTag()
             if self.focusedExpert != nil {
                 self.terminalView?.hideExpertSuggestions(clearState: false)
-            } else if !stagedExperts.isEmpty {
-                let names = stagedExperts.map(\.name).joined(separator: ", ")
-                self.terminalView?.setExpertSuggestions(stagedExperts)
-                SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")
             } else {
-                self.terminalView?.setExpertSuggestions([])
+                if !stagedExperts.isEmpty {
+                    let names = stagedExperts.map(\.name).joined(separator: ", ")
+                    self.claudeSession?.appendExpertSuggestionEntry(stagedExperts, for: nil)
+                    SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")
+                }
+                if let session = self.claudeSession {
+                    self.terminalView?.replayConversation(
+                        session.history(for: nil),
+                        expertSuggestions: session.expertSuggestionEntries(for: nil)
+                    )
+                }
             }
             self.terminalView?.deferredExpertSuggestions = []
         }

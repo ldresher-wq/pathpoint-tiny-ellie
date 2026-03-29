@@ -105,6 +105,29 @@ struct SessionAttachment: Equatable {
 struct ConversationState {
     var previousResponseID: String?
     var history: [ClaudeSession.Message] = []
+    var expertSuggestionEntries: [ExpertSuggestionEntry] = []
+}
+
+struct ExpertSuggestionEntry: Equatable {
+    let id: UUID
+    let anchorHistoryCount: Int
+    let experts: [ResponderExpert]
+    var pickedExpert: ResponderExpert?
+    var isCollapsed: Bool
+
+    init(
+        id: UUID = UUID(),
+        anchorHistoryCount: Int,
+        experts: [ResponderExpert],
+        pickedExpert: ResponderExpert? = nil,
+        isCollapsed: Bool = false
+    ) {
+        self.id = id
+        self.anchorHistoryCount = anchorHistoryCount
+        self.experts = experts
+        self.pickedExpert = pickedExpert
+        self.isCollapsed = isCollapsed
+    }
 }
 
 struct SearchEnvelope: Decodable {

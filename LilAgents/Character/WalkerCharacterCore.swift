@@ -163,7 +163,7 @@ extension WalkerCharacter {
             if activeHistory.isEmpty {
                 terminalView.showExpertGreeting(for: expert)
             } else {
-                terminalView.replayHistory(activeHistory)
+                terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: expert))
             }
             terminalView.hideExpertSuggestions(clearState: false)
             return
@@ -172,7 +172,13 @@ extension WalkerCharacter {
         if activeHistory.isEmpty {
             terminalView.showWelcomeGreeting()
         } else {
-            terminalView.replayHistory(activeHistory)
+            terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: nil))
+        }
+
+        let persistedEntries = session.expertSuggestionEntries(for: nil)
+        guard persistedEntries.isEmpty else {
+            terminalView.hideExpertSuggestions(clearState: false)
+            return
         }
 
         let controllerSuggestions = controller?.suggestedExperts ?? []

@@ -1,3 +1,5 @@
+import Foundation
+
 extension ClaudeSession {
     var history: [Message] { history(for: focusedExpert) }
 
@@ -16,6 +18,49 @@ extension ClaudeSession {
         var state = conversations[key] ?? ConversationState()
         state.history.append(message)
         conversations[key] = state
+    }
+
+    func expertSuggestionEntries(for expert: ResponderExpert?) -> [ExpertSuggestionEntry] {
+        conversations[key(for: expert)]?.expertSuggestionEntries ?? []
+    }
+
+    func appendExpertSuggestionEntry(_ experts: [ResponderExpert], for expert: ResponderExpert?) {
+        guard !experts.isEmpty else { return }
+
+        let conversationKey = key(for: expert)
+        var state = conversations[conversationKey] ?? ConversationState()
+
+        if let lastEntry = state.expertSuggestionEntries.last,
+           lastEntry.anchorHistoryCount == state.history.count,
+           lastEntry.experts.map(\.name) == experts.map(\.name) {
+            conversations[conversationKey] = state
+            return
+        }
+
+        state.expertSuggestionEntries.append(ExpertSuggestionEntry(
+            anchorHistoryCount: state.history.count,
+            experts: experts
+        ))
+        conversations[conversationKey] = state
+    }
+
+    func collapseExpertSuggestionEntry(_ entryID: UUID, pickedExpert: ResponderExpert, for expert: ResponderExpert?) {
+        let conversationKey = key(for: expert)
+        guard var state = conversations[conversationKey],
+              let index = state.expertSuggestionEntries.firstIndex(where: { $0.id == entryID }) else { return }
+
+        state.expertSuggestionEntries[index].pickedExpert = pickedExpert
+        state.expertSuggestionEntries[index].isCollapsed = true
+        conversations[conversationKey] = state
+    }
+
+    func expandExpertSuggestionEntry(_ entryID: UUID, for expert: ResponderExpert?) {
+        let conversationKey = key(for: expert)
+        guard var state = conversations[conversationKey],
+              let index = state.expertSuggestionEntries.firstIndex(where: { $0.id == entryID }) else { return }
+
+        state.expertSuggestionEntries[index].isCollapsed = false
+        conversations[conversationKey] = state
     }
 
     func finishTurn() {

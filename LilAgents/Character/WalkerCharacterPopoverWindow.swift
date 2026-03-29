@@ -161,6 +161,16 @@ extension WalkerCharacter {
         terminal.onSelectExpert = { [weak self] expert in
             self?.controller?.focus(on: expert)
         }
+        terminal.onSelectExpertSuggestion = { [weak self] entryID, expert in
+            guard let self else { return }
+            self.claudeSession?.collapseExpertSuggestionEntry(entryID, pickedExpert: expert, for: self.focusedExpert)
+            self.controller?.focus(on: expert)
+        }
+        terminal.onEditExpertSuggestion = { [weak self] entryID in
+            guard let self else { return }
+            self.claudeSession?.expandExpertSuggestionEntry(entryID, for: self.focusedExpert)
+            self.restoreTranscriptState()
+        }
         terminal.onTogglePinned = { [weak self] in
             self?.togglePopoverPinned()
         }

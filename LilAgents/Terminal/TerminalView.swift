@@ -23,6 +23,8 @@ class TerminalView: NSView {
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?
+    var onSelectExpertSuggestion: ((UUID, ResponderExpert) -> Void)?
+    var onEditExpertSuggestion: ((UUID) -> Void)?
     var onTogglePinned: (() -> Void)?
     var onCloseRequested: (() -> Void)?
 

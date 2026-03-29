@@ -158,10 +158,13 @@ extension WalkerCharacter {
 
         guard let session = claudeSession, let terminalView else { return }
         let activeHistory = session.history(for: focusedExpert)
+        let transcriptAlreadyRendered = !terminalView.transcriptStack.arrangedSubviews.isEmpty
 
         if let expert = focusedExpert {
             if activeHistory.isEmpty {
-                terminalView.showExpertGreeting(for: expert)
+                if !transcriptAlreadyRendered {
+                    terminalView.showExpertGreeting(for: expert)
+                }
             } else {
                 terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: expert))
             }
@@ -170,7 +173,9 @@ extension WalkerCharacter {
         }
 
         if activeHistory.isEmpty {
-            terminalView.showWelcomeGreeting()
+            if !transcriptAlreadyRendered {
+                terminalView.showWelcomeGreeting()
+            }
         } else {
             terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: nil))
         }

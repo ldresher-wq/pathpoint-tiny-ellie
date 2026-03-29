@@ -55,6 +55,8 @@ extension WalkerCharacter {
             return
         }
         if isIdleForPopover {
+            isPopoverPinned = false
+            syncPopoverPinState()
             closePopover()
         } else {
             openPopover()
@@ -146,24 +148,41 @@ extension WalkerCharacter {
         if !isIdleForPopover {
             openPopover()
         } else {
-            updateInputPlaceholder()
-            terminalView?.setReturnToLennyVisible(expert != nil)
-            if let session = claudeSession {
-                terminalView?.replayHistory(session.history(for: expert))
-            }
-            if expert == nil {
-                let controllerSuggestions = controller?.suggestedExperts ?? []
-                let suggestions = controllerSuggestions.isEmpty
-                    ? (terminalView?.currentExpertSuggestions ?? [])
-                    : controllerSuggestions
-                if suggestions.isEmpty {
-                    terminalView?.hideExpertSuggestions()
-                } else {
-                    terminalView?.setExpertSuggestionsCollapsed(suggestions)
-                }
+            restoreTranscriptState()
+        }
+    }
+
+    func restoreTranscriptState() {
+        updateInputPlaceholder()
+        terminalView?.setReturnToLennyVisible(focusedExpert != nil)
+
+        guard let session = claudeSession, let terminalView else { return }
+        let activeHistory = session.history(for: focusedExpert)
+
+        if let expert = focusedExpert {
+            if activeHistory.isEmpty {
+                terminalView.showExpertGreeting(for: expert)
             } else {
-                terminalView?.hideExpertSuggestions(clearState: false)
+                terminalView.replayHistory(activeHistory)
             }
+            terminalView.hideExpertSuggestions(clearState: false)
+            return
+        }
+
+        if activeHistory.isEmpty {
+            terminalView.showWelcomeGreeting()
+        } else {
+            terminalView.replayHistory(activeHistory)
+        }
+
+        let controllerSuggestions = controller?.suggestedExperts ?? []
+        let suggestions = controllerSuggestions.isEmpty
+            ? terminalView.currentExpertSuggestions
+            : controllerSuggestions
+        if suggestions.isEmpty {
+            terminalView.hideExpertSuggestions()
+        } else {
+            terminalView.setExpertSuggestionsCollapsed(suggestions)
         }
     }
 

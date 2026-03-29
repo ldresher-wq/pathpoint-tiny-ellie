@@ -1,5 +1,32 @@
 import AppKit
 
+private func resolvedExpertAvatarImage(at path: String) -> NSImage? {
+    let resolvedPath = pngAvatarPath(for: path) ?? path
+    return NSImage(contentsOfFile: resolvedPath)
+}
+
+private func pngAvatarPath(for path: String) -> String? {
+    guard path.lowercased().hasSuffix(".webp"),
+          let image = NSImage(contentsOfFile: path),
+          let tiff = image.tiffRepresentation,
+          let bitmap = NSBitmapImageRep(data: tiff),
+          let pngData = bitmap.representation(using: .png, properties: [:]) else {
+        return nil
+    }
+
+    let cacheDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("lil-agents-avatar-cache", isDirectory: true)
+    try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
+
+    let fileName = URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent + ".png"
+    let pngURL = cacheDir.appendingPathComponent(fileName)
+
+    if !FileManager.default.fileExists(atPath: pngURL.path) {
+        try? pngData.write(to: pngURL)
+    }
+
+    return pngURL.path
+}
+
 class FlippedView: NSView {
     override var isFlipped: Bool { true }
 }
@@ -131,10 +158,10 @@ class WelcomeChipsView: NSView {
         addSubview(outerStack)
 
         NSLayoutConstraint.activate([
-            outerStack.topAnchor.constraint(equalTo: topAnchor, constant: 10),
+            outerStack.topAnchor.constraint(equalTo: topAnchor),
             outerStack.leadingAnchor.constraint(equalTo: leadingAnchor),
             outerStack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            outerStack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
+            outerStack.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
         let pairs = stride(from: 0, to: suggestions.count, by: 2).map { i -> [(String, String, String)] in
@@ -167,12 +194,249 @@ class WelcomeChipsView: NSView {
     }
 }
 
+class ExpertSuggestionCardView: NSView {
+    var onExpertTapped: ((ResponderExpert) -> Void)?
+    private let theme: PopoverTheme
+    private let experts: [ResponderExpert]
+
+    init(theme: PopoverTheme, experts: [ResponderExpert]) {
+        self.theme = theme
+        self.experts = experts
+        super.init(frame: .zero)
+        setupViews()
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setupViews() {
+        translatesAutoresizingMaskIntoConstraints = false
+
+        let shell = NSView()
+        shell.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(shell)
+        let preferredWidth = shell.widthAnchor.constraint(equalTo: widthAnchor, constant: -56)
+        preferredWidth.priority = .defaultHigh
+
+        NSLayoutConstraint.activate([
+            shell.topAnchor.constraint(equalTo: topAnchor),
+            shell.leadingAnchor.constraint(equalTo: leadingAnchor),
+            shell.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -56),
+            shell.widthAnchor.constraint(lessThanOrEqualToConstant: 396),
+            preferredWidth,
+            shell.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+
+        let titleLabel = NSTextField(labelWithString: "Open an expert for a more specific follow-up")
+        titleLabel.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
+        titleLabel.textColor = theme.textDim
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(titleLabel)
+
+        let list = NSStackView()
+        list.orientation = .vertical
+        list.alignment = .leading
+        list.distribution = .fill
+        list.spacing = 8
+        list.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(list)
+
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: shell.topAnchor),
+            titleLabel.leadingAnchor.constraint(equalTo: shell.leadingAnchor, constant: 4),
+            titleLabel.trailingAnchor.constraint(equalTo: shell.trailingAnchor, constant: -4),
+
+            list.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 2),
+            list.leadingAnchor.constraint(equalTo: shell.leadingAnchor),
+            list.trailingAnchor.constraint(equalTo: shell.trailingAnchor),
+            list.bottomAnchor.constraint(equalTo: shell.bottomAnchor)
+        ])
+
+        for expert in experts {
+            let chip = makeExpertChip(for: expert)
+            list.addArrangedSubview(chip)
+            chip.widthAnchor.constraint(equalTo: list.widthAnchor).isActive = true
+        }
+    }
+
+    private func makeExpertChip(for expert: ResponderExpert) -> NSView {
+        let button = HoverButton(title: "", target: nil, action: nil)
+        button.isBordered = false
+        button.wantsLayer = true
+        button.normalBg = theme.inputBg.cgColor
+        button.hoverBg = theme.accentColor.withAlphaComponent(0.06).cgColor
+        button.layer?.backgroundColor = theme.inputBg.cgColor
+        button.layer?.cornerRadius = 16
+        button.layer?.borderWidth = 1
+        button.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.52).cgColor
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        let stack = NSStackView()
+        stack.orientation = .horizontal
+        stack.alignment = .centerY
+        stack.spacing = 10
+        stack.edgeInsets = NSEdgeInsets(top: 13, left: 14, bottom: 13, right: 14)
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        button.addSubview(stack)
+
+        NSLayoutConstraint.activate([
+            stack.topAnchor.constraint(equalTo: button.topAnchor),
+            stack.leadingAnchor.constraint(equalTo: button.leadingAnchor),
+            stack.trailingAnchor.constraint(equalTo: button.trailingAnchor),
+            stack.bottomAnchor.constraint(equalTo: button.bottomAnchor),
+            button.heightAnchor.constraint(equalToConstant: 54)
+        ])
+
+        let avatarContainer = NSView()
+        avatarContainer.wantsLayer = true
+        avatarContainer.layer?.backgroundColor = theme.accentColor.withAlphaComponent(0.10).cgColor
+        avatarContainer.layer?.cornerRadius = 12
+        avatarContainer.layer?.masksToBounds = true
+        avatarContainer.layer?.borderWidth = 1
+        avatarContainer.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.40).cgColor
+        avatarContainer.translatesAutoresizingMaskIntoConstraints = false
+        avatarContainer.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        avatarContainer.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        stack.addArrangedSubview(avatarContainer)
+
+        if let image = resolvedExpertAvatarImage(at: expert.avatarPath) {
+            let avatarView = NSImageView()
+            avatarView.image = image
+            avatarView.imageScaling = .scaleAxesIndependently
+            avatarView.translatesAutoresizingMaskIntoConstraints = false
+            avatarContainer.addSubview(avatarView)
+
+            NSLayoutConstraint.activate([
+                avatarView.topAnchor.constraint(equalTo: avatarContainer.topAnchor),
+                avatarView.leadingAnchor.constraint(equalTo: avatarContainer.leadingAnchor),
+                avatarView.trailingAnchor.constraint(equalTo: avatarContainer.trailingAnchor),
+                avatarView.bottomAnchor.constraint(equalTo: avatarContainer.bottomAnchor)
+            ])
+        } else {
+            let icon = NSImageView()
+            if let image = NSImage(systemSymbolName: "person.crop.circle.fill", accessibilityDescription: nil) {
+                let config = NSImage.SymbolConfiguration(pointSize: 12, weight: .medium)
+                icon.image = image.withSymbolConfiguration(config)
+            }
+            icon.contentTintColor = theme.accentColor
+            icon.translatesAutoresizingMaskIntoConstraints = false
+            avatarContainer.addSubview(icon)
+
+            NSLayoutConstraint.activate([
+                icon.centerXAnchor.constraint(equalTo: avatarContainer.centerXAnchor),
+                icon.centerYAnchor.constraint(equalTo: avatarContainer.centerYAnchor),
+                icon.widthAnchor.constraint(equalToConstant: 14),
+                icon.heightAnchor.constraint(equalToConstant: 14)
+            ])
+        }
+
+        let label = NSTextField(labelWithString: expert.name)
+        label.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        label.textColor = theme.textPrimary
+        label.lineBreakMode = .byWordWrapping
+        label.maximumNumberOfLines = 2
+        label.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        stack.addArrangedSubview(label)
+
+        button.target = self
+        button.action = #selector(expertTapped(_:))
+        button.identifier = NSUserInterfaceItemIdentifier(expert.name)
+        return button
+    }
+
+    @objc private func expertTapped(_ sender: NSButton) {
+        guard let name = sender.identifier?.rawValue,
+              let expert = experts.first(where: { $0.name == name }) else { return }
+        onExpertTapped?(expert)
+    }
+}
+
+class CompactSuggestionView: NSView {
+    var onRetap: (() -> Void)?
+    private let theme: PopoverTheme
+    private let pickedExpertName: String
+
+    init(theme: PopoverTheme, pickedExpertName: String) {
+        self.theme = theme
+        self.pickedExpertName = pickedExpertName
+        super.init(frame: .zero)
+        setupViews()
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setupViews() {
+        translatesAutoresizingMaskIntoConstraints = false
+
+        let shell = NSView()
+        shell.wantsLayer = true
+        shell.layer?.backgroundColor = theme.inputBg.cgColor
+        shell.layer?.cornerRadius = 14
+        shell.layer?.borderWidth = 1
+        shell.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.30).cgColor
+        shell.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(shell)
+        let preferredWidth = shell.widthAnchor.constraint(equalTo: widthAnchor, constant: -56)
+        preferredWidth.priority = .defaultHigh
+
+        let summary = NSTextField(labelWithString: "You chose \(pickedExpertName)")
+        summary.font = NSFont.systemFont(ofSize: 12.5, weight: .medium)
+        summary.textColor = theme.textDim
+        summary.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(summary)
+
+        let button = HoverButton(title: "", target: self, action: #selector(retap))
+        button.isBordered = false
+        button.wantsLayer = true
+        button.normalBg = theme.bubbleBg.cgColor
+        button.hoverBg = theme.accentColor.withAlphaComponent(0.08).cgColor
+        button.layer?.backgroundColor = theme.bubbleBg.cgColor
+        button.layer?.cornerRadius = 11
+        button.layer?.borderWidth = 1
+        button.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.42).cgColor
+        button.attributedTitle = NSAttributedString(
+            string: "Edit",
+            attributes: [
+                .font: NSFont.systemFont(ofSize: 12, weight: .medium),
+                .foregroundColor: theme.textPrimary
+            ]
+        )
+        button.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(button)
+
+        NSLayoutConstraint.activate([
+            shell.topAnchor.constraint(equalTo: topAnchor),
+            shell.leadingAnchor.constraint(equalTo: leadingAnchor),
+            shell.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -56),
+            shell.widthAnchor.constraint(lessThanOrEqualToConstant: 396),
+            preferredWidth,
+            shell.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            summary.leadingAnchor.constraint(equalTo: shell.leadingAnchor, constant: 14),
+            summary.centerYAnchor.constraint(equalTo: shell.centerYAnchor),
+
+            button.trailingAnchor.constraint(equalTo: shell.trailingAnchor, constant: -10),
+            button.topAnchor.constraint(equalTo: shell.topAnchor, constant: 8),
+            button.bottomAnchor.constraint(equalTo: shell.bottomAnchor, constant: -8),
+            button.widthAnchor.constraint(equalToConstant: 68),
+
+            summary.trailingAnchor.constraint(lessThanOrEqualTo: button.leadingAnchor, constant: -12),
+            shell.heightAnchor.constraint(equalToConstant: 46)
+        ])
+    }
+
+    @objc private func retap() {
+        onRetap?()
+    }
+}
+
 class ChatBubbleView: NSView, NSTextViewDelegate {
     let textView = NSTextView()
     let headerLabel = NSTextField(labelWithString: "")
     let bubbleBackground = NSView()
     private let isUser: Bool
     private let theme: PopoverTheme
+    private var textWidthConstraint: NSLayoutConstraint?
+    private var textHeightConstraint: NSLayoutConstraint?
 
     init(text: NSAttributedString, isUser: Bool, speakerName: String, theme: PopoverTheme) {
         self.isUser = isUser
@@ -243,10 +507,10 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
 
         if isUser {
             bubbleBackground.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-            bubbleBackground.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 40).isActive = true
+            bubbleBackground.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 56).isActive = true
         } else {
             bubbleBackground.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-            bubbleBackground.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -40).isActive = true
+            bubbleBackground.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -56).isActive = true
         }
     }
 
@@ -286,23 +550,32 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         let targetContentWidth = rect.width
         let paddingWidth: CGFloat = 28 // left+right 14px
 
-        let maxWidth: CGFloat = 500
+        let maxWidth: CGFloat = 380
         let desiredWidth = targetContentWidth + paddingWidth
 
-        // Cleanup old layout constraints
-        textView.constraints.filter { $0.firstAttribute == .width || $0.firstAttribute == .height }.forEach { textView.removeConstraint($0) }
+        if let textWidthConstraint {
+            textView.removeConstraint(textWidthConstraint)
+            self.textWidthConstraint = nil
+        }
+        if let textHeightConstraint {
+            textView.removeConstraint(textHeightConstraint)
+            self.textHeightConstraint = nil
+        }
         
         if desiredWidth >= maxWidth {
             textContainer.containerSize = NSSize(width: maxWidth - paddingWidth, height: CGFloat.greatestFiniteMagnitude)
             layoutManager.ensureLayout(for: textContainer)
             let newRect = layoutManager.usedRect(for: textContainer)
-            textView.widthAnchor.constraint(equalToConstant: maxWidth).isActive = true
-            textView.heightAnchor.constraint(equalToConstant: newRect.height + 24).isActive = true
+            textWidthConstraint = textView.widthAnchor.constraint(equalToConstant: maxWidth)
+            textHeightConstraint = textView.heightAnchor.constraint(equalToConstant: newRect.height + 24)
         } else {
             let finalWidth = max(desiredWidth, 60)
-            textView.widthAnchor.constraint(equalToConstant: finalWidth).isActive = true
-            textView.heightAnchor.constraint(equalToConstant: rect.height + 24).isActive = true
+            textWidthConstraint = textView.widthAnchor.constraint(equalToConstant: finalWidth)
+            textHeightConstraint = textView.heightAnchor.constraint(equalToConstant: rect.height + 24)
         }
+
+        textWidthConstraint?.isActive = true
+        textHeightConstraint?.isActive = true
     }
 
     func textView(_ textView: NSTextView, clickedOnLink link: Any, at charIndex: Int) -> Bool {
@@ -326,6 +599,8 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
 
 extension TerminalView {
     func showWelcomeGreeting() {
+        clearTranscriptSuggestionView()
+        hideWelcomeSuggestionsPanel()
         let t = theme
         let greeting = "Hey! I'm Lenny — your guide to product, growth, and startup strategy.\n\nI pull answers from my newsletter and podcast archive so you don't have to read everything. What's on your mind?"
         let attrText = NSAttributedString(string: greeting, attributes: [
@@ -336,20 +611,24 @@ extension TerminalView {
         transcriptStack.addArrangedSubview(bubble)
         bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
 
-        let chips = WelcomeChipsView(theme: t)
-        chips.onChipTapped = { [weak self] text in
-            guard let self else { return }
-            self.transcriptStack.removeArrangedSubview(chips)
-            chips.removeFromSuperview()
-            self.welcomeChipsView = nil
-            self.inputField.stringValue = text
-            self.inputSubmitted()
-        }
-        transcriptStack.addArrangedSubview(chips)
-        chips.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
-        welcomeChipsView = chips
+        showWelcomeSuggestionsPanel()
+        scrollToTop()
+    }
 
-        // Scroll to top so greeting appears at the top of the window, not the bottom
+    func showExpertGreeting(for expert: ResponderExpert) {
+        clearTranscriptSuggestionView()
+        hideWelcomeSuggestionsPanel()
+
+        let greeting = "Hey, I'm \(expert.name). How can I help?"
+        let attrText = NSAttributedString(string: greeting, attributes: [
+            .font: theme.font,
+            .foregroundColor: theme.textPrimary,
+        ])
+        let bubble = ChatBubbleView(text: attrText, isUser: false, speakerName: expert.name, theme: theme)
+        transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        transcriptStack.addArrangedSubview(bubble)
+        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        currentAssistantText = ""
         scrollToTop()
     }
 
@@ -425,7 +704,9 @@ extension TerminalView {
     }
 
     func appendExpertSuggestion(_ experts: [ResponderExpert]) {
-        // Handled by Panel
+        currentExpertSuggestions = experts
+        expertSuggestionsCollapsed = false
+        renderTranscriptSuggestions()
     }
 
     func appendToolUse(toolName: String, summary: String) {
@@ -441,6 +722,8 @@ extension TerminalView {
     func replayHistory(_ messages: [ClaudeSession.Message]) {
         let t = theme
         transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        transcriptSuggestionView = nil
+        hideWelcomeSuggestionsPanel()
         currentAssistantText = ""
         var lastRole: ClaudeSession.Message.Role?
         

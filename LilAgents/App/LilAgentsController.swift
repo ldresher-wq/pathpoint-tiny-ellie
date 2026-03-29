@@ -58,13 +58,37 @@ class LilAgentsController {
     func updateExperts(_ experts: [ResponderExpert]) {
         currentExperts = experts
         onExpertsChanged?(experts)
-        syncGuestCharacters()
+        if focusedExpert != nil {
+            syncGuestCharacters()
+        } else {
+            hideCompanionAvatars()
+        }
     }
 
     func returnToGenie() {
-        currentExperts.removeAll()
-        onExpertsChanged?([])
         focus(on: nil)
+    }
+
+    func debugExpertSuggestions() -> [ResponderExpert] {
+        let session = ClaudeSession()
+        let names = ["Claire Butler", "Madhavan Ramanujam", "Patrick Campbell"]
+
+        let experts = names.compactMap { name -> ResponderExpert? in
+            guard let avatarPath = session.avatarPath(for: name) ?? session.genericExpertAvatarPath() else { return nil }
+            return ResponderExpert(
+                name: name,
+                avatarPath: avatarPath,
+                archiveContext: "Debug expert suggestion preview for \(name).",
+                responseScript: "Debug expert handoff for \(name)."
+            )
+        }
+
+        updateExperts(experts)
+        return experts
+    }
+
+    func clearDebugExpertSuggestions() {
+        updateExperts([])
     }
 
     func focus(on expert: ResponderExpert?) {
@@ -97,39 +121,17 @@ class LilAgentsController {
     }
 
     private func syncGuestCharacters() {
-        guard let mainCharacter = characters.first else { return }
+        guard focusedExpert == nil else {
+            hideCompanionAvatars()
+            return
+        }
+        hideCompanionAvatars()
+    }
 
-        let visibleGuestNames = Set(currentExperts.prefix(maxVisibleGuestAvatars).map(\.name))
-        let companionExperts = currentExperts
-            .filter { visibleGuestNames.contains($0.name) }
-            .filter { expert in
-                guard let focusedExpert else { return true }
-                return expert != focusedExpert
-            }
-            .prefix(max(0, maxVisibleGuestAvatars - (focusedExpert == nil ? 0 : 1)))
-
-        while characters.count - 1 < companionExperts.count {
-            let companion = WalkerCharacter(videoName: "guest-\(characters.count)")
-            companion.yOffset = -4
-            companion.characterColor = .white
-            companion.controller = self
-            companion.setup()
+    private func hideCompanionAvatars() {
+        guard characters.count > 1 else { return }
+        for companion in characters.dropFirst() {
             companion.hideCompanionAvatar()
-            characters.append(companion)
-        }
-
-        let layoutPositions = companionPositions(count: companionExperts.count, mainPosition: mainCharacter.positionProgress)
-
-        for (index, expert) in companionExperts.enumerated() {
-            let companion = characters[index + 1]
-            companion.controller = self
-            companion.configureCompanionAvatar(expert: expert, position: layoutPositions[index])
-        }
-
-        if characters.count > companionExperts.count + 1 {
-            for companion in characters[(companionExperts.count + 1)...] {
-                companion.hideCompanionAvatar()
-            }
         }
     }
 

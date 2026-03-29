@@ -26,6 +26,7 @@ extension WalkerCharacter {
 
         updatePopoverPosition()
         popoverWindow?.orderFrontRegardless()
+        syncPopoverPinState()
 
         clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: .leftMouseDown) { [weak self] _ in
             self?.closeOnboarding()
@@ -52,6 +53,7 @@ extension WalkerCharacter {
     func openPopover() {
         if let siblings = controller?.characters {
             for sibling in siblings where sibling !== self && sibling.isIdleForPopover {
+                if sibling.isPopoverPinned { continue }
                 sibling.closePopover()
             }
         }
@@ -74,45 +76,21 @@ extension WalkerCharacter {
 
         if popoverWindow == nil {
             createPopoverWindow()
-            // Show warm greeting with suggestion chips on first open
-            if claudeSession?.history.isEmpty == true {
-                terminalView?.showWelcomeGreeting()
-            }
         }
 
         refreshPopoverHeader()
-        updateInputPlaceholder()
-
-        if let terminal = terminalView, let session = claudeSession, !session.history.isEmpty {
-            terminal.replayHistory(session.history)
-        }
+        restoreTranscriptState()
 
         updatePopoverPosition()
         popoverWindow?.orderFrontRegardless()
         popoverWindow?.makeKey()
+        syncPopoverPinState()
 
         if let terminal = terminalView {
             popoverWindow?.makeFirstResponder(terminal.inputField)
         }
 
-        removeEventMonitors()
-
-        clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            guard let self, let popover = self.popoverWindow else { return }
-            let popoverFrame = popover.frame
-            let charFrame = self.window.frame
-            if !popoverFrame.contains(NSEvent.mouseLocation) && !charFrame.contains(NSEvent.mouseLocation) {
-                self.closePopover()
-            }
-        }
-
-        escapeKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            if event.keyCode == 53 {
-                self?.closePopover()
-                return nil
-            }
-            return event
-        }
+        refreshPopoverEventMonitors()
     }
 
     @objc func expandToggleTapped() {
@@ -193,8 +171,71 @@ extension WalkerCharacter {
         let delay = Double.random(in: 2.0...5.0)
         pauseEndTime = CACurrentMediaTime() + delay
     }
+
+    @objc func togglePopoverPinned() {
+        isPopoverPinned.toggle()
+        syncPopoverPinState()
+        refreshPopoverEventMonitors()
+    }
+
+    @objc func closePopoverFromButton() {
+        isPopoverPinned = false
+        syncPopoverPinState()
+        if isOnboarding {
+            closeOnboarding()
+            return
+        }
+        closePopover()
+    }
+
     @objc func returnToGenieTapped() {
         controller?.returnToGenie()
+    }
+
+    func syncPopoverPinState() {
+        if let pinButton = popoverPinButton {
+            let symbolName = isPopoverPinned ? "pin.fill" : "pin"
+            if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: isPopoverPinned ? "Unpin" : "Pin") {
+                let config = NSImage.SymbolConfiguration(pointSize: 10, weight: .medium)
+                pinButton.image = image.withSymbolConfiguration(config)
+            }
+
+            let t = resolvedTheme
+            let normalBg = isPopoverPinned
+                ? t.accentColor.withAlphaComponent(0.22).cgColor
+                : t.separatorColor.withAlphaComponent(0.10).cgColor
+            let hoverBg = isPopoverPinned
+                ? t.accentColor.withAlphaComponent(0.32).cgColor
+                : t.separatorColor.withAlphaComponent(0.22).cgColor
+            pinButton.normalBg = normalBg
+            pinButton.hoverBg = hoverBg
+            pinButton.layer?.backgroundColor = normalBg
+            pinButton.contentTintColor = isPopoverPinned ? t.accentColor : t.textDim
+        }
+
+        terminalView?.isPinnedOpen = isPopoverPinned
+    }
+
+    func refreshPopoverEventMonitors() {
+        removeEventMonitors()
+        guard isIdleForPopover, !isPopoverPinned else { return }
+
+        clickOutsideMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            guard let self, let popover = self.popoverWindow else { return }
+            let popoverFrame = popover.frame
+            let charFrame = self.window.frame
+            if !popoverFrame.contains(NSEvent.mouseLocation) && !charFrame.contains(NSEvent.mouseLocation) {
+                self.closePopover()
+            }
+        }
+
+        escapeKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            if event.keyCode == 53 {
+                self?.closePopover()
+                return nil
+            }
+            return event
+        }
     }
 
     private func removeEventMonitors() {

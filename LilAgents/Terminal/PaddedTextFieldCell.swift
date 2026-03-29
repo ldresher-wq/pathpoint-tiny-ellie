@@ -1,7 +1,7 @@
 import AppKit
 
 class PaddedTextFieldCell: NSTextFieldCell {
-    private let inset = NSSize(width: 8, height: 2)
+    private let inset = NSSize(width: 8, height: 0)
     var fieldBackgroundColor: NSColor?
     var fieldCornerRadius: CGFloat = 4
 
@@ -20,8 +20,19 @@ class PaddedTextFieldCell: NSTextFieldCell {
     }
 
     override func drawingRect(forBounds rect: NSRect) -> NSRect {
-        let base = super.drawingRect(forBounds: rect)
-        return base.insetBy(dx: inset.width, dy: inset.height)
+        centeredTextRect(forBounds: rect)
+    }
+
+    override func titleRect(forBounds rect: NSRect) -> NSRect {
+        centeredTextRect(forBounds: rect)
+    }
+
+    private func centeredTextRect(forBounds rect: NSRect) -> NSRect {
+        let base = super.drawingRect(forBounds: rect).insetBy(dx: inset.width, dy: inset.height)
+        let font = font ?? NSFont.systemFont(ofSize: NSFont.systemFontSize)
+        let textHeight = ceil(font.ascender - font.descender + font.leading)
+        let centeredY = base.origin.y + max(0, floor((base.height - textHeight) / 2) - 1)
+        return NSRect(x: base.origin.x, y: centeredY, width: base.width, height: textHeight)
     }
 
     private func configureEditor(_ textObj: NSText) {
@@ -38,11 +49,11 @@ class PaddedTextFieldCell: NSTextFieldCell {
 
     override func edit(withFrame rect: NSRect, in controlView: NSView, editor textObj: NSText, delegate: Any?, event: NSEvent?) {
         configureEditor(textObj)
-        super.edit(withFrame: rect.insetBy(dx: inset.width, dy: inset.height), in: controlView, editor: textObj, delegate: delegate, event: event)
+        super.edit(withFrame: centeredTextRect(forBounds: rect), in: controlView, editor: textObj, delegate: delegate, event: event)
     }
 
     override func select(withFrame rect: NSRect, in controlView: NSView, editor textObj: NSText, delegate: Any?, start selStart: Int, length selLength: Int) {
         configureEditor(textObj)
-        super.select(withFrame: rect.insetBy(dx: inset.width, dy: inset.height), in: controlView, editor: textObj, delegate: delegate, start: selStart, length: selLength)
+        super.select(withFrame: centeredTextRect(forBounds: rect), in: controlView, editor: textObj, delegate: delegate, start: selStart, length: selLength)
     }
 }

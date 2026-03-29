@@ -50,7 +50,10 @@ final class WalkerCharacter {
     var popoverSubtitleLabel: NSTextField?
     var popoverReturnButton: NSButton?
     var popoverExpandButton: HoverButton?
+    var popoverPinButton: HoverButton?
+    var popoverCloseButton: HoverButton?
     var isPopoverExpanded = false
+    var isPopoverPinned = false
     static let defaultPopoverHeight: CGFloat = 460
 
     var isClaudeBusy: Bool { claudeSession?.isBusy ?? false }

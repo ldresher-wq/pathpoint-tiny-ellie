@@ -1,7 +1,5 @@
 import AppKit
 
-// MARK: - Hoverable button used for all interactive rows
-
 class HoverButton: NSButton {
     var normalBg: CGColor = NSColor.clear.cgColor
     var hoverBg: CGColor = NSColor.clear.cgColor
@@ -37,16 +35,50 @@ class HoverButton: NSButton {
 }
 
 extension TerminalView {
+    func showWelcomeSuggestionsPanel() {
+        expertSuggestionStack.arrangedSubviews.forEach { view in
+            expertSuggestionStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+
+        let chips = WelcomeChipsView(theme: theme)
+        chips.onChipTapped = { [weak self] text in
+            guard let self else { return }
+            self.hideWelcomeSuggestionsPanel()
+            self.inputField.stringValue = text
+            self.inputSubmitted()
+        }
+
+        expertSuggestionLabel.isHidden = true
+        expertSuggestionStack.addArrangedSubview(chips)
+        chips.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor).isActive = true
+        welcomeChipsView = chips
+        expertSuggestionContainer.isHidden = false
+        expertSuggestionContainer.alphaValue = 1
+        relayoutPanels()
+    }
+
+    func hideWelcomeSuggestionsPanel() {
+        expertSuggestionStack.arrangedSubviews.forEach { view in
+            expertSuggestionStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+        }
+        welcomeChipsView = nil
+        expertSuggestionContainer.isHidden = true
+        expertSuggestionContainer.alphaValue = 0
+        relayoutPanels()
+    }
+
     func setExpertSuggestions(_ experts: [ResponderExpert]) {
         currentExpertSuggestions = experts
         expertSuggestionsCollapsed = false
-        renderExpertSuggestions()
+        renderTranscriptSuggestions()
     }
 
     func setExpertSuggestionsCollapsed(_ experts: [ResponderExpert]) {
         currentExpertSuggestions = experts
         expertSuggestionsCollapsed = true
-        renderExpertSuggestions()
+        renderTranscriptSuggestions()
     }
 
     func hideExpertSuggestions(clearState: Bool = true) {
@@ -54,162 +86,66 @@ extension TerminalView {
             currentExpertSuggestions = []
             expertSuggestionsCollapsed = false
         }
-        expertSuggestionTargets.removeAll()
-        expertSuggestionStack.arrangedSubviews.forEach { view in
-            expertSuggestionStack.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-        setPanelVisibility(expertSuggestionContainer, hidden: true)
-        relayoutPanels()
-    }
-
-    private func renderExpertSuggestions() {
-        let experts = currentExpertSuggestions
-        expertSuggestionTargets.removeAll()
-        expertSuggestionStack.arrangedSubviews.forEach { view in
-            expertSuggestionStack.removeArrangedSubview(view)
-            view.removeFromSuperview()
-        }
-
-        guard !experts.isEmpty else {
-            setPanelVisibility(expertSuggestionContainer, hidden: true)
-            relayoutPanels()
-            return
-        }
-
-        expertSuggestionLabel.stringValue = expertSuggestionsCollapsed
-            ? "Suggested experts from this answer"
-            : "Open an expert for a more specific follow-up."
-        let t = theme
-
-        if expertSuggestionsCollapsed {
-            let button = HoverButton(title: "", target: self, action: #selector(expandExpertSuggestionsTapped))
-            button.isBordered = false
-            button.wantsLayer = true
-            button.normalBg = t.inputBg.cgColor
-            button.hoverBg = t.accentColor.withAlphaComponent(0.07).cgColor
-            button.layer?.backgroundColor = t.inputBg.cgColor
-            button.layer?.cornerRadius = 10
-            button.layer?.borderWidth = 1
-            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.45).cgColor
-
-            let pstyle = NSMutableParagraphStyle()
-            pstyle.alignment = .left
-            pstyle.firstLineHeadIndent = 14
-            pstyle.headIndent = 14
-
-            let names = experts.prefix(3).map(\.name).joined(separator: ", ")
-            let title = "\(experts.count) expert\(experts.count == 1 ? "" : "s"): \(names) · Show options"
-            button.attributedTitle = NSAttributedString(
-                string: title,
-                attributes: [
-                    .font: NSFont.systemFont(ofSize: 13, weight: .medium),
-                    .foregroundColor: t.textDim,
-                    .paragraphStyle: pstyle
-                ]
-            )
-            button.setButtonType(.momentaryPushIn)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            expertSuggestionStack.addArrangedSubview(button)
-
-            NSLayoutConstraint.activate([
-                button.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor),
-                button.heightAnchor.constraint(equalToConstant: 36)
-            ])
-
-            setPanelVisibility(expertSuggestionContainer, hidden: false)
-            relayoutPanels()
-            return
-        }
-
-        for expert in experts {
-            let identifier = normalizeExpertSuggestionID(expert.name)
-            expertSuggestionTargets[identifier] = expert
-
-            let button = HoverButton(title: "", target: self, action: #selector(expertSuggestionButtonTapped(_:)))
-            button.isBordered = false
-            button.wantsLayer = true
-            button.normalBg = t.bubbleBg.cgColor
-            button.hoverBg = t.accentColor.withAlphaComponent(0.07).cgColor
-            button.layer?.backgroundColor = t.bubbleBg.cgColor
-            button.layer?.cornerRadius = 10
-            button.layer?.borderWidth = 1
-            button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.40).cgColor
-
-            let pstyle = NSMutableParagraphStyle()
-            pstyle.alignment = .left
-            pstyle.firstLineHeadIndent = 14
-            pstyle.headIndent = 14
-            pstyle.lineBreakMode = .byTruncatingTail
-
-            button.attributedTitle = NSAttributedString(
-                string: expert.name,
-                attributes: [
-                    .font: NSFont.systemFont(ofSize: 13, weight: .medium),
-                    .foregroundColor: t.textPrimary,
-                    .paragraphStyle: pstyle
-                ]
-            )
-            button.setButtonType(.momentaryPushIn)
-            button.identifier = NSUserInterfaceItemIdentifier(identifier)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            expertSuggestionStack.addArrangedSubview(button)
-            
-            NSLayoutConstraint.activate([
-                button.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor),
-                button.heightAnchor.constraint(equalToConstant: 36)
-            ])
-        }
-
-        setPanelVisibility(expertSuggestionContainer, hidden: false)
-        relayoutPanels()
+        clearTranscriptSuggestionView()
     }
 
     func setPickedExpert(_ expert: ResponderExpert) {
-        expertSuggestionTargets.removeAll()
-        expertSuggestionStack.arrangedSubviews.forEach { view in
-            expertSuggestionStack.removeArrangedSubview(view)
+        lastPickedExpert = expert
+        currentExpertSuggestions = []
+        expertSuggestionsCollapsed = false
+        clearTranscriptSuggestionView()
+    }
+
+    func showPickedExpertSummary(_ expert: ResponderExpert, suggestions: [ResponderExpert]) {
+        lastPickedExpert = expert
+        currentExpertSuggestions = suggestions
+        expertSuggestionsCollapsed = true
+        renderTranscriptSuggestions()
+    }
+
+    func clearTranscriptSuggestionView() {
+        if let view = transcriptSuggestionView {
+            transcriptStack.removeArrangedSubview(view)
             view.removeFromSuperview()
+            transcriptSuggestionView = nil
+        }
+    }
+
+    func renderTranscriptSuggestions() {
+        clearTranscriptSuggestionView()
+        expertSuggestionTargets.removeAll()
+
+        if expertSuggestionsCollapsed, let picked = lastPickedExpert {
+            let compact = CompactSuggestionView(theme: theme, pickedExpertName: picked.name)
+            compact.onRetap = { [weak self] in
+                guard let self else { return }
+                self.expertSuggestionsCollapsed = false
+                self.renderTranscriptSuggestions()
+            }
+            transcriptStack.addArrangedSubview(compact)
+            compact.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+            compact.heightAnchor.constraint(equalToConstant: 46).isActive = true
+            transcriptSuggestionView = compact
+            scrollToBottom()
+            return
         }
 
-        let t = theme
-        expertSuggestionLabel.stringValue = "\(expert.name) picked"
+        guard !currentExpertSuggestions.isEmpty else { return }
 
-        let button = HoverButton(title: "", target: self, action: #selector(returnToLennyTapped))
-        button.isBordered = false
-        button.wantsLayer = true
-        button.normalBg = t.inputBg.cgColor
-        button.hoverBg = t.accentColor.withAlphaComponent(0.07).cgColor
-        button.layer?.backgroundColor = t.inputBg.cgColor
-        button.layer?.cornerRadius = 10
-        button.layer?.borderWidth = 1
-        button.layer?.borderColor = t.separatorColor.withAlphaComponent(0.45).cgColor
-
-        let pstyle = NSMutableParagraphStyle()
-        pstyle.alignment = .left
-        pstyle.firstLineHeadIndent = 14
-        pstyle.headIndent = 14
-        pstyle.lineBreakMode = .byTruncatingTail
-
-        button.attributedTitle = NSAttributedString(
-            string: "End conversation · select another expert",
-            attributes: [
-                .font: NSFont.systemFont(ofSize: 13, weight: .medium),
-                .foregroundColor: t.textDim,
-                .paragraphStyle: pstyle
-            ]
-        )
-        button.setButtonType(.momentaryPushIn)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        expertSuggestionStack.addArrangedSubview(button)
-        
-        NSLayoutConstraint.activate([
-            button.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor),
-            button.heightAnchor.constraint(equalToConstant: 36)
-        ])
-
-        setPanelVisibility(expertSuggestionContainer, hidden: false)
-        relayoutPanels()
+        let suggestionsView = ExpertSuggestionCardView(theme: theme, experts: currentExpertSuggestions)
+        suggestionsView.onExpertTapped = { [weak self] expert in
+            guard let self else { return }
+            self.lastPickedExpert = expert
+            self.expertSuggestionsCollapsed = true
+            self.onSelectExpert?(expert)
+        }
+        transcriptStack.addArrangedSubview(suggestionsView)
+        suggestionsView.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        let expertCount = CGFloat(currentExpertSuggestions.count)
+        let transcriptCardHeight = 30 + (expertCount * 54) + max(0, expertCount - 1) * 8
+        suggestionsView.heightAnchor.constraint(equalToConstant: transcriptCardHeight).isActive = true
+        transcriptSuggestionView = suggestionsView
+        scrollToBottom()
     }
 
     func setLiveStatus(_ text: String, isBusy: Bool, isError: Bool = false) {
@@ -219,12 +155,10 @@ extension TerminalView {
             return
         }
 
-        // Hide input area controls
         inputField.isHidden = true
         sendButton.isHidden = true
         attachButton.isHidden = true
 
-        // Build attributed string: status text + dim "close anytime" hint when busy
         let mainColor = isError ? t.errorColor : (isBusy ? t.accentColor : t.successColor)
         let attrStr = NSMutableAttributedString(
             string: text,
@@ -258,29 +192,12 @@ extension TerminalView {
         liveStatusLabel.attributedStringValue = NSAttributedString(string: "")
         liveStatusSpinner.stopAnimation(nil)
         stopLiveStatusAvatarShuffle()
-        
+
         liveStatusSpinner.isHidden = true
         liveStatusLabel.isHidden = true
-        
-        // Show input area controls
         inputField.isHidden = false
         sendButton.isHidden = false
         attachButton.isHidden = false
-    }
-
-    @objc func expertSuggestionButtonTapped(_ sender: NSButton) {
-        guard let identifier = sender.identifier?.rawValue,
-              let expert = expertSuggestionTargets[identifier] else {
-            return
-        }
-
-        setExpertSuggestionsCollapsed(currentExpertSuggestions)
-        onSelectExpert?(expert)
-    }
-
-    @objc func expandExpertSuggestionsTapped() {
-        expertSuggestionsCollapsed = false
-        renderExpertSuggestions()
     }
 
     func normalizeExpertSuggestionID(_ name: String) -> String {
@@ -340,20 +257,17 @@ extension TerminalView {
 
     func randomExpertAvatarPaths(limit: Int) -> [String] {
         guard let resourceURL = Bundle.main.resourceURL else { return [] }
-        let avatarDir = resourceURL.appendingPathComponent("ExpertAvatars", isDirectory: true)
-        guard let files = try? FileManager.default.contentsOfDirectory(
-            at: avatarDir,
+        let directoryURL = resourceURL.appendingPathComponent("ExpertAvatars", isDirectory: true)
+        let urls = (try? FileManager.default.contentsOfDirectory(
+            at: directoryURL,
             includingPropertiesForKeys: nil,
             options: [.skipsHiddenFiles]
-        ) else {
-            return []
-        }
+        )) ?? []
 
-        let candidates = files
-            .filter { $0.pathExtension.lowercased() == "png" }
-            .map(\.path)
+        return urls
+            .filter { ["png", "jpg", "jpeg", "webp"].contains($0.pathExtension.lowercased()) }
             .shuffled()
-        return Array(candidates.prefix(max(1, limit)))
+            .prefix(limit)
+            .map(\.path)
     }
-
 }

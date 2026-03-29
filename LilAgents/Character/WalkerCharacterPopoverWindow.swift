@@ -13,8 +13,9 @@ extension WalkerCharacter {
 
     func createPopoverWindow() {
         let t = resolvedTheme
-        let popoverWidth: CGFloat = 560
+        let popoverWidth: CGFloat = 468
         let popoverHeight: CGFloat = 460
+        let shellCornerRadius: CGFloat = 18
 
         let win = KeyableWindow(
             contentRect: CGRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight),
@@ -33,55 +34,51 @@ extension WalkerCharacter {
         let isDark = brightness < 0.5
         win.appearance = NSAppearance(named: isDark ? .darkAqua : .aqua)
 
-        let container = NSVisualEffectView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight))
-        container.material = isDark ? .hudWindow : .sidebar
-        container.blendingMode = .behindWindow
-        container.state = .active
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight))
         container.wantsLayer = true
-        container.layer?.cornerRadius = t.popoverCornerRadius
+        container.layer?.backgroundColor = t.popoverBg.cgColor
+        container.layer?.cornerRadius = shellCornerRadius
         container.layer?.masksToBounds = true
         container.layer?.borderWidth = t.popoverBorderWidth
         container.layer?.borderColor = t.popoverBorder.cgColor
         container.autoresizingMask = [.width, .height]
 
-        let tintView = NSView(frame: NSRect(x: 0, y: 0, width: popoverWidth, height: popoverHeight))
-        tintView.wantsLayer = true
-        let origAlpha = t.popoverBg.cgColor.alpha
-        tintView.layer?.backgroundColor = t.popoverBg.withAlphaComponent(min(origAlpha * 0.86, 0.92)).cgColor
-        tintView.autoresizingMask = [.width, .height]
-        container.addSubview(tintView)
-
         let titleBarHeight: CGFloat = 52
         let titleBar = NSView(frame: NSRect(x: 0, y: popoverHeight - titleBarHeight, width: popoverWidth, height: titleBarHeight))
         titleBar.wantsLayer = true
-        titleBar.layer?.backgroundColor = t.titleBarBg.withAlphaComponent(0.50).cgColor
+        titleBar.layer?.backgroundColor = t.titleBarBg.cgColor
+        titleBar.layer?.cornerRadius = shellCornerRadius
+        titleBar.layer?.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         titleBar.autoresizingMask = [.width, .minYMargin]
         container.addSubview(titleBar)
 
         let titleLabel = NSTextField(labelWithString: focusedExpert?.name ?? t.titleString)
         titleLabel.font = NSFont.systemFont(ofSize: 17, weight: .semibold)
         titleLabel.textColor = t.titleText
-        titleLabel.frame = NSRect(x: 22, y: 17, width: popoverWidth - 200, height: 22)
+        titleLabel.frame = NSRect(x: 20, y: 17, width: popoverWidth - 212, height: 22)
         titleBar.addSubview(titleLabel)
         popoverTitleLabel = titleLabel
 
         let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Archive-grounded answers" : "Focused follow-up mode")
         subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         subtitle.textColor = t.textDim.withAlphaComponent(0.75)
-        subtitle.frame = NSRect(x: 22, y: 5, width: popoverWidth - 200, height: 14)
+        subtitle.frame = NSRect(x: 20, y: 5, width: popoverWidth - 212, height: 14)
         titleBar.addSubview(subtitle)
         popoverSubtitleLabel = subtitle
 
-        let expandButtonSize: CGFloat = 28
-        let expandButtonX = popoverWidth - 16 - expandButtonSize
+        let controlButtonSize: CGFloat = 28
+        let buttonSpacing: CGFloat = 6
+        let closeButtonX = popoverWidth - 12 - controlButtonSize
+        let pinButtonX = closeButtonX - buttonSpacing - controlButtonSize
+        let expandButtonX = pinButtonX - buttonSpacing - controlButtonSize
         let expandButton = HoverButton(title: "", target: self, action: #selector(expandToggleTapped))
-        expandButton.frame = NSRect(x: expandButtonX, y: (titleBarHeight - expandButtonSize) / 2, width: expandButtonSize, height: expandButtonSize)
+        expandButton.frame = NSRect(x: expandButtonX, y: (titleBarHeight - controlButtonSize) / 2, width: controlButtonSize, height: controlButtonSize)
         expandButton.isBordered = false
         expandButton.wantsLayer = true
         expandButton.normalBg = t.separatorColor.withAlphaComponent(0.10).cgColor
         expandButton.hoverBg = t.separatorColor.withAlphaComponent(0.22).cgColor
         expandButton.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.10).cgColor
-        expandButton.layer?.cornerRadius = expandButtonSize / 2
+        expandButton.layer?.cornerRadius = controlButtonSize / 2
         if let img = NSImage(systemSymbolName: "arrow.up.left.and.arrow.down.right", accessibilityDescription: "Expand") {
             let config = NSImage.SymbolConfiguration(pointSize: 10, weight: .medium)
             expandButton.image = img.withSymbolConfiguration(config)
@@ -90,6 +87,36 @@ extension WalkerCharacter {
         expandButton.contentTintColor = t.textDim
         titleBar.addSubview(expandButton)
         popoverExpandButton = expandButton
+
+        let pinButton = HoverButton(title: "", target: self, action: #selector(togglePopoverPinned))
+        pinButton.frame = NSRect(x: pinButtonX, y: (titleBarHeight - controlButtonSize) / 2, width: controlButtonSize, height: controlButtonSize)
+        pinButton.isBordered = false
+        pinButton.wantsLayer = true
+        pinButton.normalBg = t.separatorColor.withAlphaComponent(0.10).cgColor
+        pinButton.hoverBg = t.separatorColor.withAlphaComponent(0.22).cgColor
+        pinButton.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.10).cgColor
+        pinButton.layer?.cornerRadius = controlButtonSize / 2
+        pinButton.imageScaling = .scaleProportionallyDown
+        pinButton.contentTintColor = t.textDim
+        titleBar.addSubview(pinButton)
+        popoverPinButton = pinButton
+
+        let closeButton = HoverButton(title: "", target: self, action: #selector(closePopoverFromButton))
+        closeButton.frame = NSRect(x: closeButtonX, y: (titleBarHeight - controlButtonSize) / 2, width: controlButtonSize, height: controlButtonSize)
+        closeButton.isBordered = false
+        closeButton.wantsLayer = true
+        closeButton.normalBg = t.separatorColor.withAlphaComponent(0.10).cgColor
+        closeButton.hoverBg = t.errorColor.withAlphaComponent(0.20).cgColor
+        closeButton.layer?.backgroundColor = t.separatorColor.withAlphaComponent(0.10).cgColor
+        closeButton.layer?.cornerRadius = controlButtonSize / 2
+        if let image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Close") {
+            let config = NSImage.SymbolConfiguration(pointSize: 9, weight: .bold)
+            closeButton.image = image.withSymbolConfiguration(config)
+        }
+        closeButton.imageScaling = .scaleProportionallyDown
+        closeButton.contentTintColor = t.textDim
+        titleBar.addSubview(closeButton)
+        popoverCloseButton = closeButton
 
         let returnPill = HoverButton(title: "", target: self, action: #selector(returnToGenieTapped))
         let returnPillWidth: CGFloat = 118
@@ -123,6 +150,7 @@ extension WalkerCharacter {
         terminal.characterColor = characterColor
         terminal.themeOverride = themeOverride
         terminal.autoresizingMask = [.width, .height]
+        terminal.isPinnedOpen = isPopoverPinned
         terminal.onSendMessage = { [weak self] message, attachments in
             self?.claudeSession?.focusedExpert = self?.focusedExpert
             self?.claudeSession?.send(message: message, attachments: attachments)
@@ -131,7 +159,13 @@ extension WalkerCharacter {
             self?.controller?.returnToGenie()
         }
         terminal.onSelectExpert = { [weak self] expert in
-            self?.controller?.openDialog(for: expert)
+            self?.controller?.focus(on: expert)
+        }
+        terminal.onTogglePinned = { [weak self] in
+            self?.togglePopoverPinned()
+        }
+        terminal.onCloseRequested = { [weak self] in
+            self?.closePopoverFromButton()
         }
         terminal.setReturnToLennyVisible(false)
         container.addSubview(terminal)
@@ -140,5 +174,6 @@ extension WalkerCharacter {
         popoverWindow = win
         terminalView = terminal
         refreshPopoverHeader()
+        syncPopoverPinState()
     }
 }

@@ -9,7 +9,11 @@ class TerminalView: NSView {
     let liveStatusSpinner = NSProgressIndicator()
     let liveStatusAvatarView = NSImageView()
     let liveStatusLabel = NSTextField(labelWithString: "")
-    let attachmentLabel = NSTextField(labelWithString: "")
+    let attachmentStrip = NSView()
+    let attachmentScrollView = NSScrollView()
+    let attachmentPreviewDocumentView = NSView()
+    let attachmentPreviewStack = NSStackView()
+    let attachmentHintLabel = NSTextField(labelWithString: "")
     let expertSuggestionContainer = NSView()
     let expertSuggestionLabel = NSTextField(labelWithString: "")
     let expertSuggestionStack = NSStackView()
@@ -19,6 +23,8 @@ class TerminalView: NSView {
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onReturnToLenny: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?
+    var onTogglePinned: (() -> Void)?
+    var onCloseRequested: (() -> Void)?
 
     var characterColor: NSColor?
     var themeOverride: PopoverTheme?
@@ -30,10 +36,14 @@ class TerminalView: NSView {
     var expertSuggestionTargets: [String: ResponderExpert] = [:]
     var deferredExpertSuggestions: [ResponderExpert] = []
     var currentExpertSuggestions: [ResponderExpert] = []
+    var lastPickedExpert: ResponderExpert?
+    var transcriptSuggestionView: NSView?
     var expertSuggestionsCollapsed = false
     var liveStatusAvatarTimer: Timer?
     var liveStatusAvatarPaths: [String] = []
     var liveStatusAvatarIndex = 0
+    var isPinnedOpen = false
+    var isShowingDropTarget = false
 
     override init(frame: NSRect) {
         super.init(frame: frame)

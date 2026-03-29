@@ -100,6 +100,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(NSMenuItem.separator())
 
+        let debugShowExpertsItem = NSMenuItem(title: "Debug Expert Suggestions", action: #selector(showDebugExpertSuggestions), keyEquivalent: "")
+        menu.addItem(debugShowExpertsItem)
+
+        let debugClearExpertsItem = NSMenuItem(title: "Clear Debug Suggestions", action: #selector(clearDebugExpertSuggestions), keyEquivalent: "")
+        menu.addItem(debugClearExpertsItem)
+
+        menu.addItem(NSMenuItem.separator())
+
         let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         menu.addItem(settingsItem)
 
@@ -187,6 +195,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             debugWin.orderFrontRegardless()
             sender.state = .on
         }
+    }
+
+    @objc func showDebugExpertSuggestions() {
+        guard let controller, let char = controller.characters.first else { return }
+
+        if controller.focusedExpert != nil {
+            controller.focus(on: nil)
+        }
+        if !char.isIdleForPopover {
+            char.openPopover()
+        }
+
+        let experts = controller.debugExpertSuggestions()
+        char.terminalView?.setExpertSuggestions(experts)
+        char.updatePopoverPosition()
+        char.popoverWindow?.orderFrontRegardless()
+        char.popoverWindow?.makeKey()
+        if let terminal = char.terminalView {
+            char.popoverWindow?.makeFirstResponder(terminal.inputField)
+        }
+    }
+
+    @objc func clearDebugExpertSuggestions() {
+        guard let controller, let char = controller.characters.first else { return }
+        controller.clearDebugExpertSuggestions()
+        char.terminalView?.hideExpertSuggestions()
     }
 
     @objc func toggleSounds(_ sender: NSMenuItem) {
@@ -277,7 +311,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc func selectExpert(_ sender: NSStatusBarButton) {
         guard sender.tag >= 0, sender.tag < visibleExperts.count else { return }
-        controller?.openDialog(for: visibleExperts[sender.tag])
+        controller?.focus(on: visibleExperts[sender.tag])
     }
 
     private func updateFocusedExpert(_ expert: ResponderExpert?) {

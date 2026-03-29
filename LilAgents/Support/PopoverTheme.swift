@@ -182,11 +182,11 @@ struct PopoverTheme {
     static let harbor = PopoverTheme(
         name: "Lenny",
         // Warm parchment background — Lenny's brand warmth meets pi.ai's clean openness
-        popoverBg: NSColor(red: 0.980, green: 0.953, blue: 0.908, alpha: 0.97),
+        popoverBg: NSColor(red: 0.984, green: 0.958, blue: 0.918, alpha: 1.0),
         popoverBorder: NSColor(red: 0.820, green: 0.678, blue: 0.488, alpha: 0.28),
         popoverBorderWidth: 1.0,
         popoverCornerRadius: 28,
-        titleBarBg: NSColor(red: 0.968, green: 0.938, blue: 0.890, alpha: 0.55),
+        titleBarBg: NSColor(red: 0.978, green: 0.948, blue: 0.904, alpha: 1.0),
         titleText: NSColor(red: 0.100, green: 0.068, blue: 0.025, alpha: 1.0),
         titleFont: NSFont.systemFont(ofSize: 13, weight: .semibold),
         titleString: "Lenny",
@@ -198,9 +198,9 @@ struct PopoverTheme {
         accentColor: NSColor(red: 0.878, green: 0.478, blue: 0.067, alpha: 1.0),  // Lenny orange
         errorColor: NSColor(red: 0.748, green: 0.218, blue: 0.148, alpha: 1.0),
         successColor: NSColor(red: 0.228, green: 0.558, blue: 0.388, alpha: 1.0),
-        inputBg: NSColor(red: 1.000, green: 0.992, blue: 0.975, alpha: 0.98),
+        inputBg: NSColor(red: 0.995, green: 0.985, blue: 0.964, alpha: 1.0),
         inputCornerRadius: 22,
-        bubbleBg: NSColor(red: 1.000, green: 0.985, blue: 0.960, alpha: 0.82),
+        bubbleBg: NSColor(red: 1.000, green: 0.985, blue: 0.960, alpha: 1.0),
         bubbleBorder: NSColor(red: 0.820, green: 0.710, blue: 0.568, alpha: 0.32),
         bubbleText: NSColor(red: 0.440, green: 0.360, blue: 0.268, alpha: 1.0),
         bubbleCompletionBorder: NSColor(red: 0.228, green: 0.698, blue: 0.418, alpha: 0.50),

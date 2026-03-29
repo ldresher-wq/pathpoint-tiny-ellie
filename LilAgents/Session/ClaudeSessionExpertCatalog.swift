@@ -146,10 +146,29 @@ extension ClaudeSession {
             with: "",
             options: .regularExpression
         )
-        
+
         // Unescape escaped quotes and newlines if it still looks like a JSON string block
         cleaned = cleaned.replacingOccurrences(of: "\\\"", with: "\"")
         cleaned = cleaned.replacingOccurrences(of: "\\n", with: "\n")
+
+        // Run a second cleanup pass after unescaping. Some model outputs leak the
+        // structured JSON tail as plain text, for example:
+        // `", "suggested_experts": [], "suggest_expert_prompt": false }`
+        cleaned = cleaned.replacingOccurrences(
+            of: #"\n?\s*",?\s*"suggested_experts"\s*:\s*\[[\s\S]*$"#,
+            with: "",
+            options: .regularExpression
+        )
+        cleaned = cleaned.replacingOccurrences(
+            of: #"\n?\s*",?\s*"suggest_expert_prompt"\s*:\s*(true|false)[\s\S]*$"#,
+            with: "",
+            options: .regularExpression
+        )
+        cleaned = cleaned.replacingOccurrences(
+            of: #"\n?\s*\}\s*$"#,
+            with: "",
+            options: .regularExpression
+        )
 
         return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }

@@ -245,7 +245,7 @@ class ExpertSuggestionCardView: NSView {
             shell.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
 
-        let titleLabel = NSTextField(labelWithString: "Want a more specific take? Pick a specialist.")
+        let titleLabel = NSTextField(labelWithString: "Have follow-up questions? Chat with these experts.")
         titleLabel.font = NSFont.systemFont(ofSize: 11.5, weight: .medium)
         titleLabel.textColor = theme.textDim
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -365,6 +365,7 @@ class ExpertSuggestionCardView: NSView {
     @objc private func expertTapped(_ sender: NSButton) {
         guard let name = sender.identifier?.rawValue,
               let expert = entry.experts.first(where: { $0.name == name }) else { return }
+        WalkerCharacter.playSelectionSound()
         onExpertTapped?(entry.id, expert)
     }
 }
@@ -607,6 +608,7 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
                       let expert = terminal.expertSuggestionTargets[host] else {
                     return false
                 }
+                WalkerCharacter.playSelectionSound()
                 terminal.onSelectExpert?(expert)
                 return true
             }

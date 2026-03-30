@@ -67,7 +67,7 @@ extension TerminalView {
         expertSuggestionLabel.autoresizingMask = [.width]
         expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         expertSuggestionLabel.textColor = t.textDim
-        expertSuggestionLabel.stringValue = "Pick a specialist for a more specific follow-up."
+        expertSuggestionLabel.stringValue = "Have follow-up questions? Chat with these experts."
         expertSuggestionLabel.isHidden = true
         expertSuggestionContainer.addSubview(expertSuggestionLabel)
 

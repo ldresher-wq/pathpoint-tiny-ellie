@@ -89,10 +89,25 @@ extension ClaudeSession {
         Return only valid JSON, with no prose before or after it and no code fences.
         Use this exact shape:
         {
-          "answer_markdown": "markdown answer here",
+          "messages": [
+            {
+              "speaker": "Lil-Lenny",
+              "kind": "lenny",
+              "markdown": "@Elena, I think you have some thoughts on this."
+            },
+            {
+              "speaker": "Elena Verna",
+              "kind": "expert",
+              "markdown": "Here is my perspective..."
+            }
+          ],
           "suggested_experts": ["Name One", "Name Two"],
           "suggest_expert_prompt": true
         }
+        `messages` should be a transcript-ready array of separate speaker messages.
+        Use `kind: "lenny"` for Lil-Lenny orchestration messages and `kind: "expert"` for specialist responses.
+        When one or more experts are relevant, Lil-Lenny should briefly call on them first, then each expert should speak in a separate message.
+        If no specialist is warranted, return a single Lil-Lenny message.
         `suggested_experts` should include up to 3 relevant archive experts you explicitly relied on or cited.
         If there are no useful expert suggestions, return an empty array and set `suggest_expert_prompt` to false.
         When MCP tools are available, prefer a fast routing pass before deep reading:
@@ -107,6 +122,7 @@ extension ClaudeSession {
 
             The user explicitly switched into \(expert.name)'s avatar.
             Answer in first person as \(expert.name).
+            Return exactly one expert message spoken by \(expert.name), unless the user explicitly asks to compare with others.
             If MCP tools are available, check `index.md` for \(expert.name) first, then stay in that person's context unless the user asks to pivot.
             \(expert.responseScript)
             \(expertContextPrompt(expert.archiveContext))
@@ -194,7 +210,8 @@ extension ClaudeSession {
             case .user:
                 return "User: \(trimPromptContext(message.text, limit: 700))"
             case .assistant:
-                return "Assistant: \(trimPromptContext(message.text, limit: 1_400))"
+                let label = message.speaker?.name ?? "Assistant"
+                return "\(label): \(trimPromptContext(message.text, limit: 1_400))"
             case .error:
                 return "System error: \(trimPromptContext(message.text, limit: 500))"
             case .toolUse, .toolResult:
@@ -249,5 +266,28 @@ extension ClaudeSession {
                 return "Document attachment: \(attachment.displayName)\n\(extractedText)"
             }
         }.joined(separator: "\n\n")
+    }
+
+    func assistantMessages(from segments: [AssistantSegment]) -> [Message] {
+        segments.map { segment in
+            Message(
+                role: .assistant,
+                text: segment.markdown,
+                speaker: segment.speaker,
+                followUpExpert: segment.followUpExpert
+            )
+        }
+    }
+
+    func lennySpeaker() -> TranscriptSpeaker {
+        TranscriptSpeaker(name: "Lil-Lenny", avatarPath: nil, kind: .lenny)
+    }
+
+    func systemSpeaker() -> TranscriptSpeaker {
+        TranscriptSpeaker(name: "System", avatarPath: nil, kind: .system)
+    }
+
+    func speaker(for expert: ResponderExpert) -> TranscriptSpeaker {
+        TranscriptSpeaker(name: expert.name, avatarPath: expert.avatarPath, kind: .expert)
     }
 }

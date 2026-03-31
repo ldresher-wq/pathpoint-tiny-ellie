@@ -453,17 +453,25 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
     let textView = NSTextView()
     let headerLabel = NSTextField(labelWithString: "")
     let bubbleBackground = NSView()
+    let avatarContainer = NSView()
+    let actionRow = NSStackView()
+    private let copyButton = HoverButton(title: "", target: nil, action: nil)
+    private let followUpButton = HoverButton(title: "", target: nil, action: nil)
     private let isUser: Bool
     private let theme: PopoverTheme
     private var textWidthConstraint: NSLayoutConstraint?
     private var textHeightConstraint: NSLayoutConstraint?
+    private var onCopy: (() -> Void)?
+    private var onFollowUp: (() -> Void)?
 
-    init(text: NSAttributedString, isUser: Bool, speakerName: String, theme: PopoverTheme) {
+    init(text: NSAttributedString, isUser: Bool, speaker: TranscriptSpeaker, theme: PopoverTheme, onCopy: (() -> Void)? = nil, onFollowUp: (() -> Void)? = nil) {
         self.isUser = isUser
         self.theme = theme
+        self.onCopy = onCopy
+        self.onFollowUp = onFollowUp
         super.init(frame: .zero)
         setupViews()
-        populate(text: text, name: speakerName)
+        populate(text: text, speaker: speaker)
     }
 
     required init?(coder: NSCoder) { fatalError() }
@@ -472,14 +480,39 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         wantsLayer = true
         translatesAutoresizingMaskIntoConstraints = false
 
-        headerLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        let row = NSStackView()
+        row.orientation = .horizontal
+        row.alignment = .top
+        row.spacing = 10
+        row.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(row)
+
+        avatarContainer.wantsLayer = true
+        avatarContainer.layer?.cornerRadius = 14
+        avatarContainer.layer?.masksToBounds = true
+        avatarContainer.layer?.borderWidth = 1
+        avatarContainer.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.30).cgColor
+        avatarContainer.translatesAutoresizingMaskIntoConstraints = false
+        avatarContainer.widthAnchor.constraint(equalToConstant: isUser ? 0 : 28).isActive = true
+        avatarContainer.heightAnchor.constraint(equalToConstant: isUser ? 0 : 28).isActive = true
+        avatarContainer.isHidden = isUser
+        row.addArrangedSubview(avatarContainer)
+
+        let contentColumn = NSStackView()
+        contentColumn.orientation = .vertical
+        contentColumn.alignment = .leading
+        contentColumn.spacing = 5
+        contentColumn.translatesAutoresizingMaskIntoConstraints = false
+        row.addArrangedSubview(contentColumn)
+
+        headerLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
         headerLabel.textColor = isUser ? theme.textDim : theme.accentColor
         headerLabel.alignment = .left
         headerLabel.translatesAutoresizingMaskIntoConstraints = false
         headerLabel.isEditable = false
         headerLabel.isBordered = false
         headerLabel.drawsBackground = false
-        addSubview(headerLabel)
+        contentColumn.addArrangedSubview(headerLabel)
 
         bubbleBackground.wantsLayer = true
         bubbleBackground.layer?.cornerRadius = theme.bubbleCornerRadius
@@ -489,7 +522,7 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         bubbleBackground.layer?.borderWidth = isUser ? 0 : 0.75
         bubbleBackground.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.36).cgColor
         bubbleBackground.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(bubbleBackground)
+        contentColumn.addArrangedSubview(bubbleBackground)
 
         textView.backgroundColor = .clear
         textView.isEditable = false
@@ -508,37 +541,114 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         p.paragraphSpacing = 7
         p.alignment = .left
         textView.defaultParagraphStyle = p
-        
         bubbleBackground.addSubview(textView)
 
-        NSLayoutConstraint.activate([
-            headerLabel.topAnchor.constraint(equalTo: topAnchor),
-            headerLabel.leadingAnchor.constraint(equalTo: bubbleBackground.leadingAnchor, constant: 4),
-            headerLabel.trailingAnchor.constraint(equalTo: bubbleBackground.trailingAnchor, constant: -4),
+        actionRow.orientation = .horizontal
+        actionRow.alignment = .centerY
+        actionRow.spacing = 8
+        actionRow.translatesAutoresizingMaskIntoConstraints = false
+        contentColumn.addArrangedSubview(actionRow)
 
-            bubbleBackground.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 4),
-            bubbleBackground.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
+        NSLayoutConstraint.activate([
+            row.topAnchor.constraint(equalTo: topAnchor),
+            row.leadingAnchor.constraint(equalTo: leadingAnchor),
+            row.trailingAnchor.constraint(equalTo: trailingAnchor),
+            row.bottomAnchor.constraint(equalTo: bottomAnchor),
+
             textView.topAnchor.constraint(equalTo: bubbleBackground.topAnchor),
             textView.bottomAnchor.constraint(equalTo: bubbleBackground.bottomAnchor),
             textView.leadingAnchor.constraint(equalTo: bubbleBackground.leadingAnchor),
-            textView.trailingAnchor.constraint(equalTo: bubbleBackground.trailingAnchor)
-        ])
+            textView.trailingAnchor.constraint(equalTo: bubbleBackground.trailingAnchor),
 
-        if isUser {
-            bubbleBackground.trailingAnchor.constraint(equalTo: trailingAnchor).isActive = true
-            bubbleBackground.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 56).isActive = true
-        } else {
-            bubbleBackground.leadingAnchor.constraint(equalTo: leadingAnchor).isActive = true
-            bubbleBackground.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -56).isActive = true
-        }
+            bubbleBackground.trailingAnchor.constraint(lessThanOrEqualTo: row.trailingAnchor, constant: isUser ? 0 : -56),
+            bubbleBackground.leadingAnchor.constraint(equalTo: contentColumn.leadingAnchor),
+        ])
     }
 
-    private func populate(text: NSAttributedString, name: String) {
-        headerLabel.stringValue = name
+    private func configureAction(_ button: HoverButton, title: String, primary: Bool = false, action: Selector) {
+        button.isBordered = false
+        button.wantsLayer = true
+        let background = primary ? theme.accentColor.withAlphaComponent(0.10) : theme.inputBg
+        button.normalBg = background.cgColor
+        button.hoverBg = (primary ? theme.accentColor.withAlphaComponent(0.18) : theme.accentColor.withAlphaComponent(0.06)).cgColor
+        button.layer?.backgroundColor = button.normalBg
+        button.layer?.cornerRadius = 12
+        button.layer?.borderWidth = 1
+        button.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.34).cgColor
+        button.contentTintColor = primary ? theme.accentColor : theme.textPrimary
+        button.attributedTitle = NSAttributedString(string: title, attributes: [
+            .font: NSFont.systemFont(ofSize: 11.5, weight: .medium),
+            .foregroundColor: primary ? theme.accentColor : theme.textPrimary
+        ])
+        button.target = self
+        button.action = action
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        button.widthAnchor.constraint(greaterThanOrEqualToConstant: title == "Copy" ? 52 : 104).isActive = true
+    }
+
+    private func populate(text: NSAttributedString, speaker: TranscriptSpeaker) {
+        headerLabel.stringValue = speaker.name
+        populateAvatar(for: speaker)
         configureTextContainer()
         textView.textStorage?.setAttributedString(text)
+        configureActions(for: speaker)
         recalculateSize()
+    }
+
+    private func populateAvatar(for speaker: TranscriptSpeaker) {
+        avatarContainer.subviews.forEach { $0.removeFromSuperview() }
+        guard !isUser else { return }
+
+        if let avatarPath = speaker.avatarPath, let image = resolvedExpertAvatarImage(at: avatarPath) {
+            let avatarView = NSImageView()
+            avatarView.image = image
+            avatarView.imageScaling = .scaleAxesIndependently
+            avatarView.translatesAutoresizingMaskIntoConstraints = false
+            avatarContainer.addSubview(avatarView)
+            NSLayoutConstraint.activate([
+                avatarView.topAnchor.constraint(equalTo: avatarContainer.topAnchor),
+                avatarView.leadingAnchor.constraint(equalTo: avatarContainer.leadingAnchor),
+                avatarView.trailingAnchor.constraint(equalTo: avatarContainer.trailingAnchor),
+                avatarView.bottomAnchor.constraint(equalTo: avatarContainer.bottomAnchor)
+            ])
+            return
+        }
+
+        let icon = NSImageView()
+        let symbolName = speaker.kind == .lenny ? "sparkles" : "person.crop.circle.fill"
+        if let image = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) {
+            let config = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
+            icon.image = image.withSymbolConfiguration(config)
+        }
+        icon.contentTintColor = theme.accentColor
+        icon.translatesAutoresizingMaskIntoConstraints = false
+        avatarContainer.addSubview(icon)
+        NSLayoutConstraint.activate([
+            icon.centerXAnchor.constraint(equalTo: avatarContainer.centerXAnchor),
+            icon.centerYAnchor.constraint(equalTo: avatarContainer.centerYAnchor),
+            icon.widthAnchor.constraint(equalToConstant: 15),
+            icon.heightAnchor.constraint(equalToConstant: 15)
+        ])
+    }
+
+    private func configureActions(for speaker: TranscriptSpeaker) {
+        actionRow.arrangedSubviews.forEach {
+            actionRow.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        if !isUser, speaker.kind != .system {
+            configureAction(copyButton, title: "Copy", action: #selector(copyTapped))
+            actionRow.addArrangedSubview(copyButton)
+        }
+
+        if speaker.kind == .expert, onFollowUp != nil {
+            configureAction(followUpButton, title: "Ask follow-up", primary: true, action: #selector(followUpTapped))
+            actionRow.addArrangedSubview(followUpButton)
+        }
+
+        actionRow.isHidden = actionRow.arrangedSubviews.isEmpty
     }
 
     func setText(_ newText: NSAttributedString) {
@@ -553,6 +663,17 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         recalculateSize()
     }
 
+    @objc private func copyTapped() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(textView.string, forType: .string)
+        onCopy?()
+    }
+
+    @objc private func followUpTapped() {
+        WalkerCharacter.playSelectionSound()
+        onFollowUp?()
+    }
+
     private func configureTextContainer() {
         textView.textContainer?.widthTracksTextView = false
         textView.textContainer?.containerSize = NSSize(width: 1000, height: CGFloat.greatestFiniteMagnitude)
@@ -562,14 +683,12 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         guard let layoutManager = textView.layoutManager,
               let textContainer = textView.textContainer else { return }
 
-        // Start large
         textContainer.containerSize = NSSize(width: 1000, height: CGFloat.greatestFiniteMagnitude)
         layoutManager.ensureLayout(for: textContainer)
         let rect = layoutManager.usedRect(for: textContainer)
-        
-        let targetContentWidth = rect.width
-        let paddingWidth: CGFloat = 28 // left+right 14px
 
+        let targetContentWidth = rect.width
+        let paddingWidth: CGFloat = 28
         let maxWidth: CGFloat = 380
         let desiredWidth = targetContentWidth + paddingWidth
 
@@ -581,7 +700,7 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
             textView.removeConstraint(textHeightConstraint)
             self.textHeightConstraint = nil
         }
-        
+
         if desiredWidth >= maxWidth {
             textContainer.containerSize = NSSize(width: maxWidth - paddingWidth, height: CGFloat.greatestFiniteMagnitude)
             layoutManager.ensureLayout(for: textContainer)
@@ -674,7 +793,136 @@ class SourceBadgeView: NSView {
     required init?(coder: NSCoder) { fatalError() }
 }
 
+class TranscriptStatusView: NSView {
+    private let theme: PopoverTheme
+    private let avatarStack = NSStackView()
+    private let textLabel = NSTextField(labelWithString: "")
+
+    init(theme: PopoverTheme, text: String, experts: [ResponderExpert]) {
+        self.theme = theme
+        super.init(frame: .zero)
+        translatesAutoresizingMaskIntoConstraints = false
+        setupViews()
+        update(text: text, experts: experts)
+    }
+
+    required init?(coder: NSCoder) { fatalError() }
+
+    private func setupViews() {
+        let shell = NSView()
+        shell.wantsLayer = true
+        shell.layer?.backgroundColor = theme.bubbleBg.cgColor
+        shell.layer?.cornerRadius = 14
+        shell.layer?.borderWidth = 1
+        shell.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.28).cgColor
+        shell.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(shell)
+        let preferredWidth = shell.widthAnchor.constraint(equalTo: widthAnchor, constant: -56)
+        preferredWidth.priority = .defaultHigh
+
+        let titleLabel = NSTextField(labelWithString: "Lil-Lenny")
+        titleLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        titleLabel.textColor = theme.accentColor
+        titleLabel.lineBreakMode = .byTruncatingTail
+        titleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(titleLabel)
+
+        avatarStack.orientation = .horizontal
+        avatarStack.alignment = .centerY
+        avatarStack.spacing = 6
+        avatarStack.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        avatarStack.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(avatarStack)
+
+        textLabel.font = NSFont.systemFont(ofSize: 12.5, weight: .medium)
+        textLabel.textColor = theme.textPrimary
+        textLabel.lineBreakMode = .byWordWrapping
+        textLabel.maximumNumberOfLines = 4
+        textLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        textLabel.translatesAutoresizingMaskIntoConstraints = false
+        shell.addSubview(textLabel)
+
+        NSLayoutConstraint.activate([
+            shell.topAnchor.constraint(equalTo: topAnchor),
+            shell.leadingAnchor.constraint(equalTo: leadingAnchor),
+            shell.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -56),
+            shell.widthAnchor.constraint(lessThanOrEqualToConstant: 396),
+            preferredWidth,
+            shell.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            titleLabel.topAnchor.constraint(equalTo: shell.topAnchor, constant: 12),
+            titleLabel.leadingAnchor.constraint(equalTo: shell.leadingAnchor, constant: 14),
+            titleLabel.trailingAnchor.constraint(equalTo: shell.trailingAnchor, constant: -14),
+
+            avatarStack.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 8),
+            avatarStack.leadingAnchor.constraint(equalTo: shell.leadingAnchor, constant: 14),
+            avatarStack.trailingAnchor.constraint(lessThanOrEqualTo: shell.trailingAnchor, constant: -14),
+
+            textLabel.topAnchor.constraint(equalTo: avatarStack.bottomAnchor, constant: 8),
+            textLabel.leadingAnchor.constraint(equalTo: shell.leadingAnchor, constant: 14),
+            textLabel.trailingAnchor.constraint(equalTo: shell.trailingAnchor, constant: -14),
+            textLabel.bottomAnchor.constraint(equalTo: shell.bottomAnchor, constant: -12)
+        ])
+    }
+
+    func update(text: String, experts: [ResponderExpert]) {
+        textLabel.stringValue = text
+        avatarStack.arrangedSubviews.forEach {
+            avatarStack.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        for expert in Array(experts.prefix(3)) {
+            let avatar = NSView()
+            avatar.wantsLayer = true
+            avatar.layer?.cornerRadius = 12
+            avatar.layer?.masksToBounds = true
+            avatar.layer?.borderWidth = 1
+            avatar.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.28).cgColor
+            avatar.translatesAutoresizingMaskIntoConstraints = false
+            avatar.widthAnchor.constraint(equalToConstant: 24).isActive = true
+            avatar.heightAnchor.constraint(equalToConstant: 24).isActive = true
+            if let image = resolvedExpertAvatarImage(at: expert.avatarPath) {
+                let view = NSImageView()
+                view.image = image
+                view.imageScaling = .scaleAxesIndependently
+                view.translatesAutoresizingMaskIntoConstraints = false
+                avatar.addSubview(view)
+                NSLayoutConstraint.activate([
+                    view.topAnchor.constraint(equalTo: avatar.topAnchor),
+                    view.leadingAnchor.constraint(equalTo: avatar.leadingAnchor),
+                    view.trailingAnchor.constraint(equalTo: avatar.trailingAnchor),
+                    view.bottomAnchor.constraint(equalTo: avatar.bottomAnchor)
+                ])
+            }
+            avatar.toolTip = expert.name
+            avatarStack.addArrangedSubview(avatar)
+        }
+
+        avatarStack.isHidden = experts.isEmpty
+    }
+}
+
 extension TerminalView {
+    private func appendBubble(text: NSAttributedString, isUser: Bool, speaker: TranscriptSpeaker, followUpExpert: ResponderExpert? = nil) {
+        let bubble = ChatBubbleView(
+            text: text,
+            isUser: isUser,
+            speaker: speaker,
+            theme: theme,
+            onCopy: {
+                WalkerCharacter.playSelectionSound()
+            },
+            onFollowUp: { [weak self] in
+                guard let self, let followUpExpert else { return }
+                self.onSelectExpert?(followUpExpert)
+            }
+        )
+        transcriptStack.addArrangedSubview(bubble)
+        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+    }
+
     func expertSuggestionCardHeight(for expertCount: Int) -> CGFloat {
         let count = CGFloat(expertCount)
         return 30 + (count * 54) + max(0, count - 1) * 8
@@ -710,9 +958,7 @@ extension TerminalView {
             .font: t.font,
             .foregroundColor: t.textPrimary,
         ])
-        let bubble = ChatBubbleView(text: attrText, isUser: false, speakerName: "Lil-Lenny", theme: t)
-        transcriptStack.addArrangedSubview(bubble)
-        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        appendBubble(text: attrText, isUser: false, speaker: TranscriptSpeaker(name: "Lil-Lenny", avatarPath: nil, kind: .lenny))
 
         showWelcomeSuggestionsPanel()
         scrollToTop()
@@ -727,10 +973,8 @@ extension TerminalView {
             .font: theme.font,
             .foregroundColor: theme.textPrimary,
         ])
-        let bubble = ChatBubbleView(text: attrText, isUser: false, speakerName: expert.name, theme: theme)
         transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
-        transcriptStack.addArrangedSubview(bubble)
-        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        appendBubble(text: attrText, isUser: false, speaker: TranscriptSpeaker(name: expert.name, avatarPath: expert.avatarPath, kind: .expert))
         currentAssistantText = ""
         scrollToTop()
     }
@@ -751,9 +995,7 @@ extension TerminalView {
             ]))
         }
         
-        let bubble = ChatBubbleView(text: attrText, isUser: true, speakerName: "You", theme: t)
-        transcriptStack.addArrangedSubview(bubble)
-        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        appendBubble(text: attrText, isUser: true, speaker: TranscriptSpeaker(name: "You", avatarPath: nil, kind: .user))
         scrollToBottom()
     }
 
@@ -780,9 +1022,8 @@ extension TerminalView {
 
     func beginAssistantTurn(name: String?) {
         let labelName = name ?? theme.titleString
-        let bubble = ChatBubbleView(text: NSAttributedString(string: ""), isUser: false, speakerName: labelName, theme: theme)
-        transcriptStack.addArrangedSubview(bubble)
-        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        let speaker = TranscriptSpeaker(name: labelName, avatarPath: nil, kind: labelName.lowercased() == "lil-lenny" ? .lenny : .system)
+        appendBubble(text: NSAttributedString(string: ""), isUser: false, speaker: speaker)
         scrollToBottom()
     }
 
@@ -796,14 +1037,32 @@ extension TerminalView {
             .font: t.font,
             .foregroundColor: t.errorColor
         ])
-        let bubble = ChatBubbleView(text: errorText, isUser: false, speakerName: "System", theme: t)
-        transcriptStack.addArrangedSubview(bubble)
-        bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+        appendBubble(text: errorText, isUser: false, speaker: TranscriptSpeaker(name: "System", avatarPath: nil, kind: .system))
         scrollToBottom()
     }
 
     func appendStatus(_ text: String) {
         // Handled entirely by live status pill
+    }
+
+    func renderTranscriptLiveStatus(_ text: String, experts: [ResponderExpert] = []) {
+        if let statusView = transcriptLiveStatusView as? TranscriptStatusView {
+            statusView.update(text: text, experts: experts)
+        } else {
+            let statusView = TranscriptStatusView(theme: theme, text: text, experts: experts)
+            transcriptStack.addArrangedSubview(statusView)
+            statusView.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+            transcriptLiveStatusView = statusView
+        }
+        scrollToBottom()
+    }
+
+    func clearTranscriptLiveStatus() {
+        if let view = transcriptLiveStatusView {
+            transcriptStack.removeArrangedSubview(view)
+            view.removeFromSuperview()
+            transcriptLiveStatusView = nil
+        }
     }
 
     func appendExpertSuggestion(_ experts: [ResponderExpert]) {
@@ -812,20 +1071,20 @@ extension TerminalView {
         renderTranscriptSuggestions()
     }
 
-    func appendToolUse(toolName: String, summary: String) {
+    func appendToolUse(toolName: String, summary: String, experts: [ResponderExpert] = []) {
         endStreaming()
         let statusText = summary.isEmpty ? toolName : "\(toolName): \(summary)"
-        setLiveStatus(statusText, isBusy: true, isError: false)
+        setLiveStatus(statusText, isBusy: true, isError: false, experts: experts)
     }
 
-    func appendToolResult(summary: String, isError: Bool) {
+    func appendToolResult(summary: String, isError: Bool, experts: [ResponderExpert] = []) {
         if summary.hasPrefix("Source: ") {
             let badge = SourceBadgeView(text: summary, theme: theme)
             transcriptStack.addArrangedSubview(badge)
             badge.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
             scrollToBottom()
         }
-        setLiveStatus(summary, isBusy: !isError, isError: isError)
+        setLiveStatus(summary, isBusy: !isError, isError: isError, experts: experts)
     }
 
     func replayHistory(_ messages: [ClaudeSession.Message]) {
@@ -836,6 +1095,7 @@ extension TerminalView {
         let t = theme
         transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         transcriptSuggestionView = nil
+        transcriptLiveStatusView = nil
         hideWelcomeSuggestionsPanel()
         currentAssistantText = ""
         var lastRole: ClaudeSession.Message.Role?
@@ -846,13 +1106,9 @@ extension TerminalView {
             case .user:
                 appendUser(msg.text)
             case .assistant:
-                if lastRole != .assistant {
-                    beginAssistantTurn(name: t.titleString)
-                }
-                if let lastBubble = transcriptStack.arrangedSubviews.last as? ChatBubbleView {
-                    let formatted = TerminalMarkdownRenderer.render(msg.text + "\n", theme: t)
-                    lastBubble.appendText(formatted)
-                }
+                let speaker = msg.speaker ?? TranscriptSpeaker(name: t.titleString, avatarPath: nil, kind: .lenny)
+                let formatted = TerminalMarkdownRenderer.render(msg.text + "\n", theme: t)
+                appendBubble(text: formatted, isUser: false, speaker: speaker, followUpExpert: msg.followUpExpert)
             case .error:
                 appendError(msg.text)
             case .toolUse:

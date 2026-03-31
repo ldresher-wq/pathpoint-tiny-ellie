@@ -2,32 +2,21 @@ import Foundation
 
 extension ClaudeSession {
     func finishCLIResponse(_ outputText: String, conversationKey: String) {
-        let cleanedOutput = prepareAssistantOutput(outputText)
-        publishPendingExperts(fallbackText: cleanedOutput)
-        SessionDebugLogger.logMultiline("assistant", header: "finishCLIResponse()", body: cleanedOutput)
+        let response = prepareAssistantResponse(outputText)
+        publishPendingExperts(fallbackText: response.displayText)
+        SessionDebugLogger.logMultiline("assistant", header: "finishCLIResponse()", body: response.displayText)
         let composeSummary = "Composing the final answer"
         onToolUse?("Writing", ["summary": composeSummary])
         appendHistory(Message(role: .toolUse, text: "Writing: \(composeSummary)"), to: conversationKey)
-        appendHistory(Message(role: .assistant, text: cleanedOutput), to: conversationKey)
-        onText?(cleanedOutput)
+        response.messages.forEach { appendHistory($0, to: conversationKey) }
+        onText?(response.displayText)
         finishTurn()
     }
 
-    func prepareAssistantOutput(_ outputText: String) -> String {
-        if let payload = parseStructuredAssistantPayload(from: outputText) {
+    func prepareAssistantResponse(_ outputText: String) -> (messages: [Message], displayText: String) {
+        if let payload = parseStructuredAssistantResponse(from: outputText) {
             assistantExplicitlyRequestedExperts = payload.suggestExpertPrompt
-            pendingExperts = payload.suggestExpertPrompt
-                ? Array(payload.suggestedExperts.compactMap { name -> ResponderExpert? in
-                    guard let avatarPath = avatarPath(for: name) else { return nil }
-                    let context = "Explicitly suggested by the assistant in the latest answer."
-                    return ResponderExpert(
-                        name: name,
-                        avatarPath: avatarPath,
-                        archiveContext: context,
-                        responseScript: responseScript(for: name, context: context)
-                    )
-                }.prefix(3))
-                : []
+            pendingExperts = payload.suggestedExperts
 
             if payload.suggestExpertPrompt {
                 let names = pendingExperts.map(\.name).joined(separator: ", ")
@@ -36,7 +25,7 @@ extension ClaudeSession {
                 SessionDebugLogger.log("experts", "assistant explicitly declined expert suggestions")
             }
 
-            return payload.answerMarkdown.trimmingCharacters(in: .whitespacesAndNewlines)
+            return (assistantMessages(from: payload.segments), payload.segments.map(\.markdown).joined(separator: "\n\n").trimmingCharacters(in: .whitespacesAndNewlines))
         }
 
         let structuredNames = structuredExpertSuggestionNames(from: outputText)
@@ -58,30 +47,75 @@ extension ClaudeSession {
             SessionDebugLogger.log("experts", "parsed \(pendingExperts.count) structured expert candidate(s) from assistant output: \(names)")
         }
 
-        return cleanedAssistantText(outputText)
+        let cleaned = cleanedAssistantText(outputText)
+        let fallbackMessage = Message(role: .assistant, text: cleaned, speaker: lennySpeaker(), followUpExpert: nil)
+        return ([fallbackMessage], cleaned)
     }
 
-    func parseStructuredAssistantPayload(from outputText: String) -> (answerMarkdown: String, suggestedExperts: [String], suggestExpertPrompt: Bool)? {
-        if let json = decodeStructuredAssistantJSONObject(from: outputText),
-           let answerMarkdown = json["answer_markdown"] as? String {
-            let suggestedExperts = (json["suggested_experts"] as? [String] ?? [])
-                .compactMap { canonicalExpertName(for: $0) }
-            let suggestExpertPrompt = json["suggest_expert_prompt"] as? Bool ?? !suggestedExperts.isEmpty
-
-            SessionDebugLogger.log("assistant", "parsed structured JSON assistant payload. suggestedExperts=\(suggestedExperts.joined(separator: ", ")) prompt=\(suggestExpertPrompt)")
-            return (answerMarkdown, suggestedExperts, suggestExpertPrompt)
+    func parseStructuredAssistantResponse(from outputText: String) -> (segments: [AssistantSegment], suggestedExperts: [ResponderExpert], suggestExpertPrompt: Bool)? {
+        if let json = decodeStructuredAssistantJSONObject(from: outputText) {
+            if let payload = structuredResponse(from: json) {
+                let names = payload.suggestedExperts.map(\.name).joined(separator: ", ")
+                SessionDebugLogger.log("assistant", "parsed structured JSON assistant payload. suggestedExperts=\(names) prompt=\(payload.suggestExpertPrompt)")
+                return payload
+            }
         }
 
-        guard let answerMarkdown = extractStructuredJSONStringValue(forKey: "answer_markdown", from: outputText) else {
-            return nil
-        }
-
+        guard let answerMarkdown = extractStructuredJSONStringValue(forKey: "answer_markdown", from: outputText) else { return nil }
         let suggestedExperts = extractStructuredStringArray(forKey: "suggested_experts", from: outputText)
-            .compactMap { canonicalExpertName(for: $0) }
+            .compactMap { expertSuggestion(named: $0) }
         let suggestExpertPrompt = extractStructuredBoolean(forKey: "suggest_expert_prompt", from: outputText) ?? !suggestedExperts.isEmpty
+        let segments = [AssistantSegment(speaker: lennySpeaker(), markdown: answerMarkdown, followUpExpert: nil)]
+        return (segments, Array(suggestedExperts.prefix(3)), suggestExpertPrompt)
+    }
 
-        SessionDebugLogger.log("assistant", "parsed fallback structured assistant payload. suggestedExperts=\(suggestedExperts.joined(separator: ", ")) prompt=\(suggestExpertPrompt)")
-        return (answerMarkdown, suggestedExperts, suggestExpertPrompt)
+    private func structuredResponse(from json: [String: Any]) -> (segments: [AssistantSegment], suggestedExperts: [ResponderExpert], suggestExpertPrompt: Bool)? {
+        var segments: [AssistantSegment] = []
+
+        if let rawMessages = json["messages"] as? [[String: Any]] {
+            for raw in rawMessages {
+                guard let markdown = raw["markdown"] as? String,
+                      let speakerName = (raw["speaker"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines),
+                      !speakerName.isEmpty else { continue }
+                let kind = ((raw["kind"] as? String) ?? "").lowercased()
+                if kind == "expert", let expert = expertSuggestion(named: speakerName) {
+                    segments.append(AssistantSegment(speaker: speaker(for: expert), markdown: markdown, followUpExpert: expert))
+                } else {
+                    let speakerValue = normalize(speakerName) == normalize("Lil-Lenny")
+                        ? lennySpeaker()
+                        : TranscriptSpeaker(name: speakerName, avatarPath: nil, kind: .system)
+                    segments.append(AssistantSegment(speaker: speakerValue, markdown: markdown, followUpExpert: nil))
+                }
+            }
+        }
+
+        if segments.isEmpty, let answerMarkdown = json["answer_markdown"] as? String {
+            segments = [AssistantSegment(speaker: lennySpeaker(), markdown: answerMarkdown, followUpExpert: nil)]
+        }
+
+        guard !segments.isEmpty else { return nil }
+
+        let explicitExperts = (json["suggested_experts"] as? [String] ?? []).compactMap { expertSuggestion(named: $0) }
+        let impliedExperts = segments.compactMap(\.followUpExpert)
+        let uniqueExperts = (explicitExperts + impliedExperts).reduce(into: [ResponderExpert]()) { partial, expert in
+            if !partial.contains(where: { $0.name == expert.name }) {
+                partial.append(expert)
+            }
+        }
+        let suggestExpertPrompt = json["suggest_expert_prompt"] as? Bool ?? !uniqueExperts.isEmpty
+        return (segments, Array(uniqueExperts.prefix(3)), suggestExpertPrompt)
+    }
+
+    private func expertSuggestion(named rawName: String) -> ResponderExpert? {
+        guard let canonical = canonicalExpertName(for: rawName),
+              let avatarPath = avatarPath(for: canonical) else { return nil }
+        let context = "Explicitly suggested by the assistant in the latest answer."
+        return ResponderExpert(
+            name: canonical,
+            avatarPath: avatarPath,
+            archiveContext: context,
+            responseScript: responseScript(for: canonical, context: context)
+        )
     }
 
     func decodeStructuredAssistantJSONObject(from outputText: String) -> [String: Any]? {
@@ -105,7 +139,8 @@ extension ClaudeSession {
             return nil
         }
 
-        if let json = object as? [String: Any], json["answer_markdown"] is String {
+        if let json = object as? [String: Any],
+           json["answer_markdown"] is String || json["messages"] is [[String: Any]] {
             return json
         }
 
@@ -165,7 +200,7 @@ extension ClaudeSession {
                     depth -= 1
                     if depth == 0 {
                         let candidate = String(characters[startIndex...index])
-                        if candidate.contains("\"answer_markdown\"") {
+                        if candidate.contains("\"answer_markdown\"") || candidate.contains("\"messages\"") {
                             return candidate
                         }
                         break

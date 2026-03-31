@@ -62,10 +62,19 @@ extension ClaudeSession {
             return
         }
 
-        URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, _, error in
             DispatchQueue.main.async {
                 guard let self else { return }
+                self.currentDataTask = nil
+                if self.isCancellingTurn {
+                    self.isCancellingTurn = false
+                    self.pendingExperts.removeAll()
+                    return
+                }
                 if let error {
+                    if (error as NSError).code == NSURLErrorCancelled {
+                        return
+                    }
                     SessionDebugLogger.log("openai", "request failed: \(error.localizedDescription)")
                     self.failTurn("OpenAI request failed: \(error.localizedDescription)", conversationKey: conversationKey)
                     return
@@ -82,7 +91,9 @@ extension ClaudeSession {
                 }
                 self.handleOpenAIResponse(json, conversationKey: conversationKey)
             }
-        }.resume()
+        }
+        currentDataTask = task
+        task.resume()
     }
 
     func handleOpenAIResponse(_ json: [String: Any], conversationKey: String) {
@@ -117,13 +128,13 @@ extension ClaudeSession {
             case "mcp_call":
                 let name = item["name"] as? String ?? "mcp_call"
                 let arguments = item["arguments"] as? [String: Any] ?? [:]
+                let output = item["output"]
                 SessionDebugLogger.logMultiline("mcp", header: "mcp_call \(name)", body: "arguments=\(arguments)\noutput=\(String(describing: item["output"]))")
+                let extractedExperts = expertsFromMCPPayloads(arguments: arguments, output: output)
                 let processStep = processDisplay(for: name, arguments: arguments)
-                onToolUse?(processStep.title, ["summary": processStep.summary])
+                onToolUse?(processStep.title, ["summary": processStep.summary, "experts": extractedExperts])
                 appendHistory(Message(role: .toolUse, text: "\(processStep.title): \(processStep.summary)"), to: conversationKey)
 
-                let output = item["output"]
-                let extractedExperts = expertsFromMCPPayloads(arguments: arguments, output: output)
                 for expert in extractedExperts where !experts.contains(expert) {
                     experts.append(expert)
                 }
@@ -145,27 +156,27 @@ extension ClaudeSession {
 
         let outputText = (json["output_text"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines)
         if let outputText, !outputText.isEmpty {
-            let cleanedOutput = prepareAssistantOutput(outputText)
-            publishPendingExperts(fallbackText: cleanedOutput)
-            SessionDebugLogger.logMultiline("assistant", header: "final assistant response", body: cleanedOutput)
+            let response = prepareAssistantResponse(outputText)
+            publishPendingExperts(fallbackText: response.displayText)
+            SessionDebugLogger.logMultiline("assistant", header: "final assistant response", body: response.displayText)
             let composeSummary = "Composing the final answer"
             onToolUse?("Writing", ["summary": composeSummary])
             appendHistory(Message(role: .toolUse, text: "Writing: \(composeSummary)"), to: conversationKey)
-            appendHistory(Message(role: .assistant, text: cleanedOutput), to: conversationKey)
-            onText?(cleanedOutput)
+            response.messages.forEach { appendHistory($0, to: conversationKey) }
+            onText?(response.displayText)
             finishTurn()
             return
         }
 
         if let messageText = extractMessageText(from: outputItems), !messageText.isEmpty {
-            let cleanedMessage = prepareAssistantOutput(messageText)
-            publishPendingExperts(fallbackText: cleanedMessage)
-            SessionDebugLogger.logMultiline("assistant", header: "final assistant message response", body: cleanedMessage)
+            let response = prepareAssistantResponse(messageText)
+            publishPendingExperts(fallbackText: response.displayText)
+            SessionDebugLogger.logMultiline("assistant", header: "final assistant message response", body: response.displayText)
             let composeSummary = "Composing the final answer"
             onToolUse?("Writing", ["summary": composeSummary])
             appendHistory(Message(role: .toolUse, text: "Writing: \(composeSummary)"), to: conversationKey)
-            appendHistory(Message(role: .assistant, text: cleanedMessage), to: conversationKey)
-            onText?(cleanedMessage)
+            response.messages.forEach { appendHistory($0, to: conversationKey) }
+            onText?(response.displayText)
             finishTurn()
             return
         }

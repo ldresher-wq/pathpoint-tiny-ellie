@@ -19,8 +19,10 @@ class TerminalView: NSView {
     let expertSuggestionStack = NSStackView()
     let attachButton = HoverButton(title: "", target: nil, action: nil)
     let sendButton = HoverButton(title: "", target: nil, action: nil)
+    let composerStatusLabel = NSTextField(labelWithString: "Generating...")
     let returnButton = NSButton(title: "Back to Lil-Lenny", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
+    var onStopRequested: (() -> Void)?
     var onReturnToLenny: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?
     var onSelectExpertSuggestion: ((UUID, ResponderExpert) -> Void)?
@@ -40,11 +42,14 @@ class TerminalView: NSView {
     var currentExpertSuggestions: [ResponderExpert] = []
     var lastPickedExpert: ResponderExpert?
     var transcriptSuggestionView: NSView?
+    var transcriptLiveStatusView: NSView?
     var renderedConversationKey: String?
     var expertSuggestionsCollapsed = false
     var liveStatusAvatarTimer: Timer?
     var liveStatusAvatarPaths: [String] = []
     var liveStatusAvatarIndex = 0
+    var streamingPresentationInterrupted = false
+    var currentStreamingSpeakerName: String?
     var isPinnedOpen = false
     var isShowingDropTarget = false
 

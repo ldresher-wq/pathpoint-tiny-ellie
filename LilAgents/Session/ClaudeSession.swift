@@ -25,7 +25,11 @@ final class ClaudeSession {
     var selectedBackend: Backend?
     var selectedBackendPreferenceKey: String?
     var pendingExperts: [ResponderExpert] = []
+    var livePresenceExperts: [ResponderExpert] = []
     var assistantExplicitlyRequestedExperts = false
+    var currentProcess: Process?
+    var currentDataTask: URLSessionDataTask?
+    var isCancellingTurn = false
 
     var onText: ((String) -> Void)?
     var onError: ((String) -> Void)?

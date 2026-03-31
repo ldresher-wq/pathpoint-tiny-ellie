@@ -28,6 +28,7 @@ extension ClaudeSession {
     func send(message: String, attachments: [SessionAttachment] = []) {
         let activeExpert = focusedExpert
         let conversationKey = key(for: activeExpert)
+        isCancellingTurn = false
         pendingExperts.removeAll()
         assistantExplicitlyRequestedExperts = false
         appendHistory(Message(role: .user, text: historyText(message: message, attachments: attachments)), to: conversationKey)
@@ -67,7 +68,7 @@ extension ClaudeSession {
                     header: "starter pack search complete. summary=\(localResult.summary) result=\(localResult.resultSummary) experts=\(expertNames)",
                     body: localResult.promptContext
                 )
-                self.onToolUse?("Searching Starter Pack", ["summary": localResult.summary])
+                self.onToolUse?("Searching Starter Pack", ["summary": localResult.summary, "experts": localResult.experts])
                 self.appendHistory(Message(role: .toolUse, text: "Searching Starter Pack: \(localResult.summary)"), to: conversationKey)
                 self.onToolResult?(localResult.resultSummary, false)
                 self.appendHistory(Message(role: .toolResult, text: localResult.resultSummary), to: conversationKey)
@@ -168,9 +169,25 @@ extension ClaudeSession {
     }
 
     func terminate() {
+        currentProcess?.terminate()
+        currentProcess = nil
+        currentDataTask?.cancel()
+        currentDataTask = nil
         isRunning = false
         isBusy = false
+        livePresenceExperts.removeAll()
         onProcessExit?()
+    }
+
+    func cancelActiveTurn() {
+        isCancellingTurn = true
+        currentProcess?.terminate()
+        currentProcess = nil
+        currentDataTask?.cancel()
+        currentDataTask = nil
+        isBusy = false
+        pendingExperts.removeAll()
+        livePresenceExperts.removeAll()
     }
 
     func searchStarterArchive(message: String, expert: ResponderExpert?) -> (promptContext: String, experts: [ResponderExpert], summary: String, resultSummary: String) {

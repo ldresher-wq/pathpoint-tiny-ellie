@@ -75,20 +75,34 @@ extension ClaudeSession {
             workingDirectory: preferredWorkingDirectoryURL(),
             onLineReceived: { [weak self] line in
                 guard let self else { return }
+                SessionDebugLogger.traceMultiline(
+                    "claude-transport",
+                    header: "raw Claude transport line",
+                    body: line
+                )
                 if let data = line.data(using: .utf8),
                    let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                    let event = self.claudeCLIStreamEvent(from: json) {
-                    self.onToolUse?(event.title, ["summary": event.summary])
+                    let experts = self.expertsFromAssistantText(event.summary)
+                    self.onToolUse?(event.title, ["summary": event.summary, "experts": experts])
                 } else if !line.hasPrefix("{") && !line.hasPrefix("}") {
                     let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !trimmed.isEmpty else { return }
-                    self.onToolUse?("Calling Model", ["summary": String(trimmed.prefix(80))])
+                    let summary = String(trimmed.prefix(80))
+                    let experts = self.expertsFromAssistantText(summary)
+                    self.onToolUse?("Calling Model", ["summary": summary, "experts": experts])
                 }
             }
         ) { [weak self] status, stdout, stderr in
             guard let self else { return }
             if let configURL {
                 try? FileManager.default.removeItem(at: configURL)
+            }
+
+            if self.isCancellingTurn {
+                self.isCancellingTurn = false
+                self.pendingExperts.removeAll()
+                return
             }
 
             SessionDebugLogger.logMultiline(
@@ -166,6 +180,12 @@ extension ClaudeSession {
         ) { [weak self] status, stdout, stderr in
             guard let self else { return }
             defer { try? FileManager.default.removeItem(at: outputURL) }
+
+            if self.isCancellingTurn {
+                self.isCancellingTurn = false
+                self.pendingExperts.removeAll()
+                return
+            }
 
             SessionDebugLogger.logMultiline(
                 "codex-cli",

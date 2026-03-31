@@ -166,7 +166,7 @@ extension TerminalView {
         sendButton.contentTintColor = .white
         sendButton.toolTip = "Send"
         sendButton.target = self
-        sendButton.action = #selector(inputSubmitted)
+        sendButton.action = #selector(sendOrStopTapped)
         composerPanel.addSubview(sendButton)
 
         attachButton.frame = NSRect(x: attachX, y: attachY, width: controlButtonSize, height: controlButtonSize)
@@ -216,34 +216,16 @@ extension TerminalView {
         inputField.action = #selector(inputSubmitted)
         composerPanel.addSubview(inputField)
 
-        liveStatusSpinner.style = .spinning
-        liveStatusSpinner.controlSize = .small
-        liveStatusSpinner.frame = NSRect(x: 16, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
-        liveStatusSpinner.isDisplayedWhenStopped = false
-        liveStatusSpinner.isHidden = true
-        composerPanel.addSubview(liveStatusSpinner)
-
-        liveStatusAvatarView.frame = NSRect(x: 16, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)  // 16px left, vertically centered
-        liveStatusAvatarView.wantsLayer = true
-        liveStatusAvatarView.layer?.cornerRadius = 13
-        liveStatusAvatarView.layer?.masksToBounds = true
-        liveStatusAvatarView.layer?.borderWidth = 1
-        liveStatusAvatarView.layer?.borderColor = t.separatorColor.withAlphaComponent(0.35).cgColor
-        liveStatusAvatarView.imageAlignment = .alignCenter
-        liveStatusAvatarView.imageScaling = .scaleProportionallyUpOrDown
-        liveStatusAvatarView.isHidden = true
-        composerPanel.addSubview(liveStatusAvatarView)
-
-        liveStatusLabel.isEditable = false
-        liveStatusLabel.drawsBackground = false
-        liveStatusLabel.isBordered = false
-        liveStatusLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-        liveStatusLabel.textColor = t.accentColor
-        liveStatusLabel.lineBreakMode = .byTruncatingTail
-        liveStatusLabel.isHidden = true
-        liveStatusLabel.frame = NSRect(x: 52, y: (Layout.composerHeight - 18) / 2, width: composerPanel.frame.width - 52 - rightInset - controlButtonSize - 8, height: 18)
-        liveStatusLabel.autoresizingMask = [.width]
-        composerPanel.addSubview(liveStatusLabel)
+        composerStatusLabel.isEditable = false
+        composerStatusLabel.drawsBackground = false
+        composerStatusLabel.isBordered = false
+        composerStatusLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        composerStatusLabel.textColor = t.textDim
+        composerStatusLabel.lineBreakMode = .byTruncatingTail
+        composerStatusLabel.isHidden = true
+        composerStatusLabel.frame = NSRect(x: 16, y: (Layout.composerHeight - 18) / 2, width: composerPanel.frame.width - 16 - rightInset - controlButtonSize - 8, height: 18)
+        composerStatusLabel.autoresizingMask = [.width]
+        composerPanel.addSubview(composerStatusLabel)
 
         registerForDraggedTypes([.fileURL, .URL, .string, .tiff, .png])
         refreshComposerContentLayout()
@@ -253,7 +235,7 @@ extension TerminalView {
     func refreshComposerContentLayout(showingStatus: Bool? = nil) {
         guard let composerPanel = inputField.superview else { return }
 
-        let isShowingStatus = showingStatus ?? !liveStatusLabel.isHidden
+        let isShowingStatus = showingStatus ?? !composerStatusLabel.isHidden
         let controlButtonSize: CGFloat = 34
         let rightInset: CGFloat = 11
         let sideInset: CGFloat = 16
@@ -273,12 +255,9 @@ extension TerminalView {
             height: Layout.composerHeight - 16
         )
 
-        liveStatusSpinner.frame = NSRect(x: sideInset, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
-        liveStatusAvatarView.frame = NSRect(x: sideInset, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)
-
-        let statusLeading: CGFloat = liveStatusAvatarView.isHidden ? 16 : 52
+        let statusLeading: CGFloat = sideInset
         let statusTrailingInset: CGFloat = isShowingStatus ? 16 : (rightInset + controlButtonSize + 8)
-        liveStatusLabel.frame = NSRect(
+        composerStatusLabel.frame = NSRect(
             x: statusLeading,
             y: (Layout.composerHeight - 18) / 2,
             width: max(80, composerPanel.bounds.width - statusLeading - statusTrailingInset),
@@ -302,7 +281,16 @@ extension TerminalView {
         appendUser(text, attachments: attachments)
         isStreaming = true
         currentAssistantText = ""
+        setLiveStatus("Getting things moving…", isBusy: true, isError: false)
         onSendMessage?(text, attachments)
+    }
+
+    @objc func sendOrStopTapped() {
+        if composerStatusLabel.isHidden {
+            inputSubmitted()
+        } else {
+            onStopRequested?()
+        }
     }
 
     @objc func returnToLennyTapped() {

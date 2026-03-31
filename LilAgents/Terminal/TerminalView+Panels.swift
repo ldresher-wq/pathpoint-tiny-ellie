@@ -153,57 +153,47 @@ extension TerminalView {
         scrollToBottom()
     }
 
-    func setLiveStatus(_ text: String, isBusy: Bool, isError: Bool = false) {
-        let t = theme
+    func setLiveStatus(_ text: String, isBusy: Bool, isError: Bool = false, experts: [ResponderExpert] = []) {
         guard !text.isEmpty else {
             clearLiveStatus()
             return
         }
 
-        inputField.isHidden = true
-        sendButton.isHidden = true
-        attachButton.isHidden = true
-
-        let mainColor = isError ? t.errorColor : (isBusy ? t.accentColor : t.successColor)
-        let attrStr = NSMutableAttributedString(
-            string: text,
-            attributes: [
-                .font: NSFont.systemFont(ofSize: 13, weight: .medium),
-                .foregroundColor: mainColor
-            ]
-        )
-        if isBusy && !isError && text.count < 52 {
-            attrStr.append(NSAttributedString(
-                string: "  ·  Close anytime",
-                attributes: [
-                    .font: NSFont.systemFont(ofSize: 12, weight: .regular),
-                    .foregroundColor: t.textDim
-                ]
-            ))
+        inputField.isHidden = isBusy
+        attachButton.isHidden = isBusy
+        composerStatusLabel.isHidden = !isBusy
+        composerStatusLabel.stringValue = isBusy ? "Generating..." : ""
+        sendButton.isHidden = false
+        sendButton.toolTip = isBusy ? "Stop" : "Send"
+        if let img = NSImage(systemSymbolName: isBusy ? "stop.fill" : "arrow.up", accessibilityDescription: isBusy ? "Stop generation" : "Send message") {
+            let config = NSImage.SymbolConfiguration(pointSize: isBusy ? 10 : 11, weight: .bold)
+            sendButton.image = img.withSymbolConfiguration(config)
         }
-        liveStatusLabel.attributedStringValue = attrStr
+        sendButton.normalBg = isBusy ? theme.separatorColor.withAlphaComponent(0.16).cgColor : theme.accentColor.cgColor
+        sendButton.hoverBg = isBusy ? theme.separatorColor.withAlphaComponent(0.28).cgColor : theme.accentColor.withAlphaComponent(0.80).cgColor
+        sendButton.layer?.backgroundColor = sendButton.normalBg
+        sendButton.contentTintColor = isBusy ? theme.textPrimary : .white
 
-        liveStatusLabel.isHidden = false
-        liveStatusSpinner.stopAnimation(nil)
-        liveStatusSpinner.isHidden = true
-        if isBusy && !isError {
-            startLiveStatusAvatarShuffle()
-        } else {
-            stopLiveStatusAvatarShuffle()
-        }
+        renderTranscriptLiveStatus(text, experts: experts)
         refreshComposerContentLayout(showingStatus: true)
     }
 
     func clearLiveStatus() {
-        liveStatusLabel.attributedStringValue = NSAttributedString(string: "")
-        liveStatusSpinner.stopAnimation(nil)
-        stopLiveStatusAvatarShuffle()
-
-        liveStatusSpinner.isHidden = true
-        liveStatusLabel.isHidden = true
+        clearTranscriptLiveStatus()
+        composerStatusLabel.stringValue = "Generating..."
+        composerStatusLabel.isHidden = true
         inputField.isHidden = false
         sendButton.isHidden = false
         attachButton.isHidden = false
+        sendButton.toolTip = "Send"
+        if let img = NSImage(systemSymbolName: "arrow.up", accessibilityDescription: "Send message") {
+            let config = NSImage.SymbolConfiguration(pointSize: 11, weight: .bold)
+            sendButton.image = img.withSymbolConfiguration(config)
+        }
+        sendButton.normalBg = theme.accentColor.cgColor
+        sendButton.hoverBg = theme.accentColor.withAlphaComponent(0.80).cgColor
+        sendButton.layer?.backgroundColor = sendButton.normalBg
+        sendButton.contentTintColor = .white
         refreshComposerContentLayout(showingStatus: false)
     }
 

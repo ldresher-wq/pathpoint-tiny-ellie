@@ -4,14 +4,7 @@ extension WalkerCharacter {
     func wireSession(_ session: ClaudeSession) {
         session.onText = { [weak self] text in
             guard let self, let tv = self.terminalView else { return }
-            // Emit the speaker label before the very first chunk of a response
-            if !tv.isStreaming {
-                tv.isStreaming = true
-                tv.currentAssistantText = ""
-                let speakerName = self.focusedExpert?.name ?? tv.theme.titleString
-                tv.beginAssistantTurn(name: speakerName)
-            }
-            tv.appendStreamingText(text)
+            tv.currentAssistantText = text
         }
 
         session.onTurnComplete = { [weak self] in
@@ -19,7 +12,7 @@ extension WalkerCharacter {
             let stagedExperts = self.terminalView?.deferredExpertSuggestions ?? []
             SessionDebugLogger.log("ui", "onTurnComplete fired. focusedExpert=\(self.focusedExpert?.name ?? "none") stagedExperts=\(stagedExperts.map(\.name).joined(separator: ", "))")
             self.stopLiveStatusFallback()
-            self.currentActivityStatus = ""
+            self.setCurrentActivityStatus("")
             self.terminalView?.endStreaming()
             self.terminalView?.clearLiveStatus()
             self.playCompletionSound()
@@ -27,25 +20,28 @@ extension WalkerCharacter {
             self.updateExpertNameTag()
             if self.focusedExpert != nil {
                 self.terminalView?.hideExpertSuggestions(clearState: false)
-            } else {
-                if !stagedExperts.isEmpty {
+            } else if !stagedExperts.isEmpty,
+                      let session = self.claudeSession {
+                let alreadyRenderedExperts = session.history(for: nil).contains { $0.role == .assistant && $0.followUpExpert != nil }
+                if !alreadyRenderedExperts {
                     let names = stagedExperts.map(\.name).joined(separator: ", ")
-                    self.claudeSession?.appendExpertSuggestionEntry(stagedExperts, for: nil)
+                    session.appendExpertSuggestionEntry(stagedExperts, for: nil)
                     SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")
                 }
-                if let session = self.claudeSession {
-                    self.terminalView?.replayConversation(
-                        session.history(for: nil),
-                        expertSuggestions: session.expertSuggestionEntries(for: nil)
-                    )
-                }
+            }
+            if let session = self.claudeSession {
+                self.terminalView?.replayConversation(
+                    session.history(for: self.focusedExpert),
+                    expertSuggestions: session.expertSuggestionEntries(for: self.focusedExpert)
+                )
+                session.livePresenceExperts = []
             }
             self.terminalView?.deferredExpertSuggestions = []
         }
 
         session.onError = { [weak self] text in
             self?.stopLiveStatusFallback()
-            self?.currentActivityStatus = ""
+            self?.setCurrentActivityStatus("")
             self?.terminalView?.setLiveStatus(text, isBusy: false, isError: true)
             self?.terminalView?.appendError(text)
             self?.updateExpertNameTag()
@@ -54,10 +50,11 @@ extension WalkerCharacter {
         session.onToolUse = { [weak self] toolName, input in
             guard let self else { return }
             let summary = self.formatToolInput(input)
+            let experts = input["experts"] as? [ResponderExpert] ?? self.extractLiveExperts(from: summary)
             let liveStatus = self.formatLiveStatus(toolName: toolName, summary: summary)
             self.noteLiveStatusEvent()
-            self.currentActivityStatus = liveStatus
-            self.terminalView?.setLiveStatus(liveStatus, isBusy: true, isError: false)
+            self.setCurrentActivityStatus(liveStatus)
+            self.terminalView?.setLiveStatus(liveStatus, isBusy: true, isError: false, experts: experts)
             self.updateExpertNameTag()
 
             if toolName.lowercased().contains("planning") {
@@ -68,12 +65,13 @@ extension WalkerCharacter {
         session.onToolResult = { [weak self] summary, isError in
             if let self {
                 self.noteLiveStatusEvent()
-                self.currentActivityStatus = summary
+                self.setCurrentActivityStatus(summary)
                 if isError {
                     self.stopLiveStatusFallback()
                 }
             }
-            self?.terminalView?.appendToolResult(summary: summary, isError: isError)
+            let experts = self?.extractLiveExperts(from: summary) ?? []
+            self?.terminalView?.appendToolResult(summary: summary, isError: isError, experts: experts)
             self?.updateExpertNameTag()
         }
 
@@ -166,8 +164,29 @@ extension WalkerCharacter {
         return String(trimmed.prefix(32))
     }
 
+    func setCurrentActivityStatus(_ status: String) {
+        currentActivityStatus = status
+
+        let compact = compactLiveStatus(status)
+        if compact.isEmpty {
+            SessionDebugLogger.trace("avatar-status", "cleared")
+        } else {
+            SessionDebugLogger.trace("avatar-status", "showing \(compact) | raw=\(status)")
+        }
+    }
+
     func noteLiveStatusEvent() {
         lastLiveStatusEventAt = Date()
+    }
+
+    func extractLiveExperts(from text: String) -> [ResponderExpert] {
+        guard let session = claudeSession else { return [] }
+        let fromText = session.expertsFromAssistantText(text)
+        if !fromText.isEmpty {
+            session.livePresenceExperts = fromText
+            return fromText
+        }
+        return session.livePresenceExperts
     }
 
     func startLiveStatusFallback() {
@@ -209,7 +228,7 @@ extension WalkerCharacter {
         ])
         let normalizedCurrent = currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if !normalizedCurrent.isEmpty, !genericStatuses.contains(normalizedCurrent) {
-            terminalView?.setLiveStatus(currentActivityStatus, isBusy: true, isError: false)
+            terminalView?.setLiveStatus(currentActivityStatus, isBusy: true, isError: false, experts: claudeSession?.livePresenceExperts ?? [])
             updateExpertNameTag()
             lastLiveStatusEventAt = Date()
             return
@@ -224,8 +243,8 @@ extension WalkerCharacter {
 
         let index = min(liveStatusFallbackIndex, fallbackStatuses.count - 1)
         let nextStatus = fallbackStatuses[index]
-        currentActivityStatus = nextStatus
-        terminalView?.setLiveStatus(nextStatus, isBusy: true, isError: false)
+        setCurrentActivityStatus(nextStatus)
+        terminalView?.setLiveStatus(nextStatus, isBusy: true, isError: false, experts: claudeSession?.livePresenceExperts ?? [])
         updateExpertNameTag()
 
         if liveStatusFallbackIndex < fallbackStatuses.count - 1 {

@@ -179,6 +179,10 @@ extension WalkerCharacter {
             self?.claudeSession?.focusedExpert = self?.focusedExpert
             self?.claudeSession?.send(message: message, attachments: attachments)
         }
+        terminal.onStopRequested = { [weak self] in
+            self?.claudeSession?.cancelActiveTurn()
+            self?.terminalView?.clearLiveStatus()
+        }
         terminal.onReturnToLenny = { [weak self] in
             self?.controller?.returnToGenie()
         }

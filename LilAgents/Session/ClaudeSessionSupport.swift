@@ -12,6 +12,7 @@ extension ClaudeSession {
         completion: @escaping (Int32, String, String) -> Void
     ) {
         let process = Process()
+        currentProcess = process
         process.executableURL = URL(fileURLWithPath: executablePath)
         process.arguments = arguments
         process.environment = environment
@@ -61,6 +62,11 @@ extension ClaudeSession {
         stderr.fileHandleForReading.readabilityHandler = { handle in processStderr(handle.availableData) }
 
         process.terminationHandler = { process in
+            DispatchQueue.main.async { [weak self] in
+                if self?.currentProcess === process {
+                    self?.currentProcess = nil
+                }
+            }
             stdout.fileHandleForReading.readabilityHandler = nil
             stderr.fileHandleForReading.readabilityHandler = nil
             
@@ -81,6 +87,7 @@ extension ClaudeSession {
         do {
             try process.run()
         } catch {
+            currentProcess = nil
             DispatchQueue.main.async {
                 completion(-1, "", error.localizedDescription)
             }

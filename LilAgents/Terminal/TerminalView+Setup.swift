@@ -5,6 +5,7 @@ extension TerminalView {
         let t = theme
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
+        isExpertMode = false
 
         // Corner radius design system:
         //   Window: 18  ·  Composer shell: full pill  ·  Attachment strip: full pill  ·  Buttons: circle

@@ -179,7 +179,16 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         avatarContainer.subviews.forEach { $0.removeFromSuperview() }
         guard !isUser else { return }
 
-        if let avatarPath = speaker.avatarPath, let image = resolvedAvatarImage(at: avatarPath) {
+        let image: NSImage?
+        if let avatarPath = speaker.avatarPath {
+            image = resolvedAvatarImage(at: avatarPath)
+        } else if speaker.kind == .lenny {
+            image = resolvedLennyAvatarImage()
+        } else {
+            image = nil
+        }
+
+        if let image {
             let avatarView = NSImageView()
             avatarView.image = image
             avatarView.imageScaling = .scaleAxesIndependently

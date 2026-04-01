@@ -65,7 +65,10 @@ extension ClaudeSession {
         let suggestedExperts = extractStructuredStringArray(forKey: "suggested_experts", from: outputText)
             .compactMap { expertSuggestion(named: $0) }
         let suggestExpertPrompt = extractStructuredBoolean(forKey: "suggest_expert_prompt", from: outputText) ?? !suggestedExperts.isEmpty
-        let segments = [AssistantSegment(speaker: lennySpeaker(), markdown: answerMarkdown, followUpExpert: nil)]
+        let segments = sanitizedOrchestrationSegments(
+            [AssistantSegment(speaker: lennySpeaker(), markdown: answerMarkdown, followUpExpert: nil)],
+            suggestedExperts: Array(suggestedExperts.prefix(3))
+        )
         return (segments, Array(suggestedExperts.prefix(3)), suggestExpertPrompt)
     }
 }

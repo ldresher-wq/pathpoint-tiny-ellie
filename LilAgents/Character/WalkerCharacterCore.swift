@@ -167,6 +167,7 @@ extension WalkerCharacter {
     func restoreTranscriptState() {
         updateInputPlaceholder()
         terminalView?.setReturnToLennyVisible(focusedExpert != nil)
+        terminalView?.isExpertMode = focusedExpert != nil
 
         guard let session = claudeSession, let terminalView else { return }
         let activeHistory = session.history(for: focusedExpert)
@@ -184,6 +185,16 @@ extension WalkerCharacter {
                 terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: expert))
             }
             terminalView.renderedConversationKey = conversationKey
+            if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                terminalView.setLiveStatus(
+                    currentActivityStatus,
+                    isBusy: true,
+                    isError: false,
+                    experts: session.livePresenceExperts
+                )
+            } else {
+                terminalView.clearTranscriptLiveStatus()
+            }
             terminalView.hideExpertSuggestions(clearState: false)
             return
         }
@@ -196,6 +207,17 @@ extension WalkerCharacter {
             terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: nil))
         }
         terminalView.renderedConversationKey = conversationKey
+
+        if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            terminalView.setLiveStatus(
+                currentActivityStatus,
+                isBusy: true,
+                isError: false,
+                experts: session.livePresenceExperts
+            )
+        } else {
+            terminalView.clearTranscriptLiveStatus()
+        }
 
         let persistedEntries = session.expertSuggestionEntries(for: nil)
         guard persistedEntries.isEmpty else {

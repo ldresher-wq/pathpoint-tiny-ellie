@@ -19,6 +19,14 @@ extension TerminalView {
     }
 
     private func appendBubble(text: NSAttributedString, isUser: Bool, speaker: TranscriptSpeaker, followUpExpert: ResponderExpert? = nil) {
+        let followUpHandler: (() -> Void)? = {
+            guard let followUpExpert, !self.isExpertMode else { return nil }
+            return { [weak self] in
+                guard let self else { return }
+                self.onSelectExpert?(followUpExpert)
+            }
+        }()
+
         let bubble = ChatBubbleView(
             text: text,
             isUser: isUser,
@@ -27,10 +35,7 @@ extension TerminalView {
             onCopy: {
                 WalkerCharacter.playSelectionSound()
             },
-            onFollowUp: { [weak self] in
-                guard let self, let followUpExpert else { return }
-                self.onSelectExpert?(followUpExpert)
-            }
+            onFollowUp: followUpHandler
         )
         transcriptStack.addArrangedSubview(bubble)
         bubble.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
@@ -66,6 +71,7 @@ extension TerminalView {
     func showWelcomeGreeting() {
         clearTranscriptSuggestionView()
         hideWelcomeSuggestionsPanel()
+        isShowingInitialWelcomeState = true
         let t = theme
         let greeting = "I'm Lil-Lenny. Ask me anything about product, growth, leadership, pricing, startups, or AI.\n\nYour desktop shortcut to LennyData."
         let attrText = NSAttributedString(string: greeting, attributes: [
@@ -81,6 +87,7 @@ extension TerminalView {
     func showExpertGreeting(for expert: ResponderExpert) {
         clearTranscriptSuggestionView()
         hideWelcomeSuggestionsPanel()
+        isShowingInitialWelcomeState = false
 
         let greeting = "I'm \(expert.name). What would you like to dig into?"
         let attrText = NSAttributedString(string: greeting, attributes: [
@@ -94,6 +101,7 @@ extension TerminalView {
     }
 
     func appendUser(_ text: String, attachments: [SessionAttachment] = []) {
+        isShowingInitialWelcomeState = false
         let t = theme
         let visibleText = text.isEmpty ? "Sent with attachment" : text
         let attrText = NSMutableAttributedString(string: visibleText, attributes: [
@@ -196,6 +204,7 @@ extension TerminalView {
 
     func replayConversation(_ messages: [ClaudeSession.Message], expertSuggestions: [ExpertSuggestionEntry]) {
         let t = theme
+        isShowingInitialWelcomeState = false
         transcriptStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         transcriptSuggestionView = nil
         transcriptLiveStatusView = nil

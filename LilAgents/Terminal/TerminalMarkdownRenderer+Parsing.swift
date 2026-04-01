@@ -236,29 +236,35 @@ extension TerminalMarkdownRenderer {
 
         var end = contentStart
         var sawContent = false
-        var lastWasSpace = false
+        var tokenCount = 0
+        var currentTokenHasContent = false
+
+        func isLikelyNameStart(_ character: Character) -> Bool {
+            guard character.isLetter else { return false }
+            return String(character) == String(character).uppercased()
+        }
 
         while end < text.endIndex {
             let ch = text[end]
             if ch.isLetter || ch.isNumber || ch == "_" || ch == "-" || ch == "." || ch == "'" {
                 sawContent = true
-                lastWasSpace = false
+                currentTokenHasContent = true
                 end = text.index(after: end)
                 continue
             }
 
             if ch == " " {
-                guard sawContent, !lastWasSpace else { break }
-                lastWasSpace = true
+                guard currentTokenHasContent else { break }
+                let next = text.index(after: end)
+                guard next < text.endIndex, isLikelyNameStart(text[next]) else { break }
+                tokenCount += 1
+                guard tokenCount < 3 else { break }
+                currentTokenHasContent = false
                 end = text.index(after: end)
                 continue
             }
 
             break
-        }
-
-        while end > contentStart, text[text.index(before: end)] == " " {
-            end = text.index(before: end)
         }
 
         guard sawContent, end > contentStart else { return nil }

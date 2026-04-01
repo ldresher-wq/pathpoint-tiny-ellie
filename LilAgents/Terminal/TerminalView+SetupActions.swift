@@ -5,6 +5,17 @@ extension TerminalView {
         let text = inputField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty || !pendingAttachments.isEmpty else { return }
 
+        if isShowingInitialWelcomeState {
+            transcriptStack.arrangedSubviews.forEach { view in
+                transcriptStack.removeArrangedSubview(view)
+                view.removeFromSuperview()
+            }
+            transcriptSuggestionView = nil
+            transcriptLiveStatusView = nil
+            currentAssistantText = ""
+            isShowingInitialWelcomeState = false
+        }
+
         hideWelcomeSuggestionsPanel()
         clearTranscriptSuggestionView()
 

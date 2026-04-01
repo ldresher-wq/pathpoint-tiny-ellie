@@ -41,6 +41,7 @@ class TerminalView: NSView {
     var deferredExpertSuggestions: [ResponderExpert] = []
     var currentExpertSuggestions: [ResponderExpert] = []
     var lastPickedExpert: ResponderExpert?
+    var isShowingInitialWelcomeState = false
     var transcriptSuggestionView: NSView?
     var transcriptLiveStatusView: NSView?
     var renderedConversationKey: String?
@@ -52,6 +53,7 @@ class TerminalView: NSView {
     var currentStreamingSpeakerName: String?
     var isPinnedOpen = false
     var isShowingDropTarget = false
+    var isExpertMode = false
 
     override init(frame: NSRect) {
         super.init(frame: frame)

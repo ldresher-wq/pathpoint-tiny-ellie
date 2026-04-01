@@ -5,6 +5,15 @@ func resolvedAvatarImage(at path: String) -> NSImage? {
     return NSImage(contentsOfFile: resolvedPath)
 }
 
+func resolvedLennyAvatarImage() -> NSImage? {
+    guard let resourceURL = Bundle.main.resourceURL else { return nil }
+    let path = resourceURL
+        .appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory, isDirectory: true)
+        .appendingPathComponent("main-front.png")
+        .path
+    return NSImage(contentsOfFile: path)
+}
+
 func pngAvatarPath(for path: String) -> String? {
     guard path.lowercased().hasSuffix(".webp"),
           let image = NSImage(contentsOfFile: path),

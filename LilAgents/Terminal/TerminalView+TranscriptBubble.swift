@@ -13,6 +13,7 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
     let isUser: Bool
     private let showsSpeakerHeader: Bool
     private let theme: PopoverTheme
+    private let textInsets: NSSize
     var textWidthConstraint: NSLayoutConstraint?
     var textHeightConstraint: NSLayoutConstraint?
     var onCopy: (() -> Void)?
@@ -24,12 +25,14 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         speaker: TranscriptSpeaker,
         theme: PopoverTheme,
         showsSpeakerHeader: Bool = true,
+        textInsets: NSSize = NSSize(width: 14, height: 12),
         onCopy: (() -> Void)? = nil,
         onFollowUp: (() -> Void)? = nil
     ) {
         self.isUser = isUser
         self.showsSpeakerHeader = showsSpeakerHeader
         self.theme = theme
+        self.textInsets = textInsets
         self.onCopy = onCopy
         self.onFollowUp = onFollowUp
         super.init(frame: .zero)
@@ -91,7 +94,7 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         textView.isEditable = false
         textView.isSelectable = true
         textView.isRichText = true
-        textView.textContainerInset = NSSize(width: 14, height: 12)
+        textView.textContainerInset = textInsets
         textView.translatesAutoresizingMaskIntoConstraints = false
         textView.delegate = self
         textView.linkTextAttributes = [

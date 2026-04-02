@@ -152,6 +152,7 @@ extension TerminalView {
             text: attrText,
             isUser: false,
             speaker: TranscriptSpeaker(name: expert.name, avatarPath: expert.avatarPath, kind: .expert),
+            textInsets: NSSize(width: 0, height: 12),
             showsCopyAction: false
         )
         currentAssistantText = ""

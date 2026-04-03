@@ -152,26 +152,32 @@ extension WalkerCharacter {
 
         if isWalking {
             let elapsed = now - walkStartTime
-            let videoTime = min(elapsed, 10.0)
+            // Skip the front-loaded idle lead-in of the source walk cycle so movement
+            // starts as soon as we switch into the walking state.
+            let videoTime = min(elapsed + accelStart, walkStop)
             let travelDistance = currentTravelDistance
 
-            let walkNorm = elapsed >= 10.0 ? 1.0 : movementPosition(at: videoTime)
+            let walkNorm = videoTime >= walkStop ? 1.0 : movementPosition(at: videoTime)
             let currentPixel = walkStartPixel + (walkEndPixel - walkStartPixel) * walkNorm
 
             if travelDistance > 0 {
                 positionProgress = min(max(currentPixel / travelDistance, 0), 1)
             }
 
-            if elapsed >= 10.0 {
-                walkEndPos = positionProgress
-                enterPause()
-                return
-            }
-
             let x = horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset
             let bottomPadding = displayHeight * 0.15
             let y = dockTopY - bottomPadding + yOffset
             window.setFrameOrigin(NSPoint(x: x, y: y))
+
+            if videoTime >= walkStop {
+                positionProgress = walkEndPos
+                window.setFrameOrigin(NSPoint(
+                    x: horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset,
+                    y: y
+                ))
+                enterPause()
+                return
+            }
         }
 
         updateThinkingBubble()

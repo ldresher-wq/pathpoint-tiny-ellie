@@ -30,6 +30,7 @@ extension WalkerCharacter {
 
         let imageView = NSImageView(frame: hostView.bounds)
         imageView.imageScaling = .scaleProportionallyUpOrDown
+        imageView.animates = true
         imageView.autoresizingMask = [.width, .height]
         hostView.addSubview(imageView)
         self.imageView = imageView
@@ -257,17 +258,27 @@ extension WalkerCharacter {
 
     private func loadDirectionalImages() {
         directionalImages[.front] = loadImage(named: "main-front.png")
-        directionalImages[.left] = loadImage(named: "main-left.png")
-        directionalImages[.right] = loadImage(named: "main-right.png")
+        directionalImages[.left] = loadImage(named: "lenny-walk-left.gif", fallback: "main-left.png")
+        directionalImages[.right] = loadImage(named: "lenny-walk-right.gif", fallback: "main-right.png")
         directionalImages[.back] = loadImage(named: "main-back.png")
     }
 
-    private func loadImage(named name: String) -> NSImage {
+    private func loadImage(named name: String, fallback: String? = nil) -> NSImage {
         guard let resourceURL = Bundle.main.resourceURL else {
             return NSImage(size: NSSize(width: displayWidth, height: displayHeight))
         }
-        let path = resourceURL.appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory).appendingPathComponent(name).path
-        return NSImage(contentsOfFile: path) ?? NSImage(size: NSSize(width: displayWidth, height: displayHeight))
+        let baseURL = resourceURL.appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory)
+        let primaryPath = baseURL.appendingPathComponent(name).path
+        if let image = NSImage(contentsOfFile: primaryPath) {
+            return image
+        }
+        if let fallback {
+            let fallbackPath = baseURL.appendingPathComponent(fallback).path
+            if let image = NSImage(contentsOfFile: fallbackPath) {
+                return image
+            }
+        }
+        return NSImage(size: NSSize(width: displayWidth, height: displayHeight))
     }
 
     func setFacing(_ facing: WalkerFacing) {

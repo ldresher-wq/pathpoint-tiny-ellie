@@ -45,8 +45,11 @@ extension TerminalView {
         bottomCursor = welcomePanelY + welcomePanelHeight
 
         let scrollTop = frame.height - Layout.topInset
-        let scrollY = bottomCursor + Layout.interSectionSpacing
-        let scrollHeight = max(160, scrollTop - scrollY)
+        let sectionGap: CGFloat = expertSuggestionContainer.isHidden ? Layout.interSectionSpacing : 10
+        let rawScrollY = bottomCursor + sectionGap
+        let minScrollHeight: CGFloat = 120
+        let scrollHeight = max(minScrollHeight, scrollTop - rawScrollY)
+        let scrollY = scrollTop - scrollHeight
         scrollView.frame = NSRect(x: Layout.padding, y: scrollY, width: width, height: scrollHeight)
         
         transcriptContainer.frame.size.width = width

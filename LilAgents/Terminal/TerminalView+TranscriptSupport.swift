@@ -282,18 +282,15 @@ class StarterPackUpsellCardView: NSView {
             stack.addArrangedSubview(eyebrow)
         }
 
-        let title = NSTextField(wrappingLabelWithString: compact
-            ? "Connect the full archive for broader results."
-            : "Connect the full archive for broader results."
-        )
+        let title = NSTextField(wrappingLabelWithString: "Get the full Lenny archive")
         title.font = NSFont.systemFont(ofSize: compact ? 13 : 14, weight: .semibold)
         title.textColor = theme.textPrimary
         title.maximumNumberOfLines = 0
         stack.addArrangedSubview(title)
 
         let body = NSTextField(wrappingLabelWithString: compact
-            ? "Use the official Lenny MCP at lennydata.com."
-            : "The starter pack is bundled locally. Connect the official Lenny MCP at lennydata.com, or skip for now and explore what is already included."
+            ? "Connect LennyData for richer, broader answers."
+            : "Your starter pack covers the essentials. Connect the official Lenny MCP from lennydata.com to unlock the full archive."
         )
         body.font = NSFont.systemFont(ofSize: 12, weight: .regular)
         body.textColor = theme.textDim
@@ -410,51 +407,69 @@ class OfficialMCPConnectCardView: NSView {
         let stack = NSStackView()
         stack.orientation = .vertical
         stack.alignment = .leading
-        stack.spacing = 8
-        stack.edgeInsets = NSEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
+        stack.spacing = compact ? 5 : 8
         stack.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stack)
 
+        let horizontalInset: CGFloat = 14
+        let verticalInset: CGFloat = compact ? 8 : 14
         NSLayoutConstraint.activate([
-            stack.topAnchor.constraint(equalTo: topAnchor),
-            stack.leadingAnchor.constraint(equalTo: leadingAnchor),
-            stack.trailingAnchor.constraint(equalTo: trailingAnchor),
-            stack.bottomAnchor.constraint(equalTo: bottomAnchor)
+            stack.topAnchor.constraint(equalTo: topAnchor, constant: verticalInset),
+            stack.leadingAnchor.constraint(equalTo: leadingAnchor, constant: horizontalInset),
+            stack.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -horizontalInset),
+            stack.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -verticalInset)
         ])
 
-        let title = NSTextField(wrappingLabelWithString: "Connect LennyData locally on this Mac.")
+        let titleRow = NSStackView()
+        titleRow.orientation = .horizontal
+        titleRow.alignment = .firstBaseline
+        titleRow.spacing = 8
+        titleRow.translatesAutoresizingMaskIntoConstraints = false
+        stack.addArrangedSubview(titleRow)
+        titleRow.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+
+        let title = NSTextField(wrappingLabelWithString: compact ? "Connect LennyData" : "Connect LennyData locally on this Mac")
         title.font = NSFont.systemFont(ofSize: compact ? 13 : 14, weight: .semibold)
         title.textColor = theme.textPrimary
         title.maximumNumberOfLines = 1
-        stack.addArrangedSubview(title)
-        title.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        title.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        titleRow.addArrangedSubview(title)
 
-        let body = NSTextField(wrappingLabelWithString: "Open lennydata.com, copy your auth key, and paste it here.")
-        body.font = NSFont.systemFont(ofSize: 12, weight: .regular)
-        body.textColor = theme.textDim
-        body.maximumNumberOfLines = 2
-        stack.addArrangedSubview(body)
-        body.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        let titleSpacer = NSView()
+        titleSpacer.translatesAutoresizingMaskIntoConstraints = false
+        titleSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        titleRow.addArrangedSubview(titleSpacer)
 
-        let badge = makeInfoBadge(title: "Everything stays local on this Mac.")
-        stack.addArrangedSubview(badge)
+        let compactBadge = makeInfoBadge(title: compact ? "Stays local" : "Everything stays local on this Mac.")
+        titleRow.addArrangedSubview(compactBadge)
 
-        let actionRow = NSStackView()
-        actionRow.orientation = .horizontal
-        actionRow.alignment = .centerY
-        actionRow.spacing = 8
-        actionRow.translatesAutoresizingMaskIntoConstraints = false
-        stack.addArrangedSubview(actionRow)
-        actionRow.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        if compact {
+            let body = NSTextField(wrappingLabelWithString: "Get your auth key from lennydata.com, then paste it here.")
+            body.font = NSFont.systemFont(ofSize: 11, weight: .regular)
+            body.textColor = theme.textDim
+            body.maximumNumberOfLines = 1
+            stack.addArrangedSubview(body)
+            body.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
 
-        let openButton = makeSecondaryButton(title: "Open lennydata.com", action: #selector(openWebsiteTapped))
-        actionRow.addArrangedSubview(openButton)
+            let openButton = makeSecondaryButton(title: "Get auth key", action: #selector(openWebsiteTapped))
+            stack.addArrangedSubview(openButton)
+        } else {
+            let body = NSTextField(wrappingLabelWithString: "Open lennydata.com, copy your auth key, and paste it here to unlock the full archive.")
+            body.font = NSFont.systemFont(ofSize: 12, weight: .regular)
+            body.textColor = theme.textDim
+            body.maximumNumberOfLines = 2
+            stack.addArrangedSubview(body)
+            body.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
 
-        let inputLabel = NSTextField(labelWithString: "Paste your auth key")
-        inputLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
-        inputLabel.textColor = theme.textDim
-        stack.addArrangedSubview(inputLabel)
-        inputLabel.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+            let openButton = makeSecondaryButton(title: "Get auth key", action: #selector(openWebsiteTapped))
+            stack.addArrangedSubview(openButton)
+
+            let inputLabel = NSTextField(labelWithString: "Auth key")
+            inputLabel.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+            inputLabel.textColor = theme.textDim
+            stack.addArrangedSubview(inputLabel)
+            inputLabel.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
+        }
 
         let tokenRow = makeTokenFieldRow()
         stack.addArrangedSubview(tokenRow)
@@ -462,7 +477,7 @@ class OfficialMCPConnectCardView: NSView {
 
         detectionLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         detectionLabel.textColor = theme.textDim
-        detectionLabel.maximumNumberOfLines = 2
+        detectionLabel.maximumNumberOfLines = 1
         detectionLabel.stringValue = OfficialMCPInstaller.compactInstallTargetHint()
         stack.addArrangedSubview(detectionLabel)
         detectionLabel.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
@@ -474,7 +489,7 @@ class OfficialMCPConnectCardView: NSView {
         buttonRow.translatesAutoresizingMaskIntoConstraints = false
         stack.addArrangedSubview(buttonRow)
 
-        configurePrimaryButton(saveButton, title: "Save and connect", action: #selector(saveTapped))
+        configurePrimaryButton(saveButton, title: compact ? "Connect" : "Save and connect", action: #selector(saveTapped))
         buttonRow.addArrangedSubview(saveButton)
 
         if showsBackButton {
@@ -491,12 +506,12 @@ class OfficialMCPConnectCardView: NSView {
         row.translatesAutoresizingMaskIntoConstraints = false
         row.wantsLayer = true
         row.layer?.backgroundColor = theme.inputBg.cgColor
-        row.layer?.cornerRadius = 10
+        row.layer?.cornerRadius = compact ? 9 : 10
         row.layer?.borderWidth = 1
         row.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.4).cgColor
 
         tokenField.translatesAutoresizingMaskIntoConstraints = false
-        tokenField.placeholderString = "Paste your auth key"
+        tokenField.placeholderString = "Paste auth key"
         tokenField.focusRingType = .none
         tokenField.isBordered = false
         tokenField.drawsBackground = false
@@ -506,7 +521,7 @@ class OfficialMCPConnectCardView: NSView {
         row.addSubview(tokenField)
 
         NSLayoutConstraint.activate([
-            row.heightAnchor.constraint(equalToConstant: 38),
+            row.heightAnchor.constraint(equalToConstant: compact ? 34 : 38),
             tokenField.leadingAnchor.constraint(equalTo: row.leadingAnchor, constant: 10),
             tokenField.trailingAnchor.constraint(equalTo: row.trailingAnchor, constant: -10),
             tokenField.centerYAnchor.constraint(equalTo: row.centerYAnchor)
@@ -522,17 +537,36 @@ class OfficialMCPConnectCardView: NSView {
         badge.layer?.backgroundColor = theme.accentColor.withAlphaComponent(0.08).cgColor
         badge.layer?.cornerRadius = 9
 
+        let lockIcon = NSImageView()
+        if let img = NSImage(systemSymbolName: "lock.fill", accessibilityDescription: nil) {
+            let config = NSImage.SymbolConfiguration(pointSize: compact ? 8 : 9, weight: .semibold)
+            lockIcon.image = img.withSymbolConfiguration(config)
+        }
+        lockIcon.contentTintColor = theme.accentColor
+        lockIcon.imageScaling = .scaleProportionallyDown
+        lockIcon.translatesAutoresizingMaskIntoConstraints = false
+
         let label = NSTextField(labelWithString: title)
-        label.font = NSFont.systemFont(ofSize: 11, weight: .semibold)
+        label.font = NSFont.systemFont(ofSize: compact ? 10 : 11, weight: .semibold)
         label.textColor = theme.accentColor
         label.translatesAutoresizingMaskIntoConstraints = false
 
-        badge.addSubview(label)
+        let hStack = NSStackView()
+        hStack.orientation = .horizontal
+        hStack.alignment = .centerY
+        hStack.spacing = compact ? 4 : 5
+        hStack.translatesAutoresizingMaskIntoConstraints = false
+        hStack.addArrangedSubview(lockIcon)
+        hStack.addArrangedSubview(label)
+        badge.addSubview(hStack)
+
         NSLayoutConstraint.activate([
-            label.topAnchor.constraint(equalTo: badge.topAnchor, constant: 5),
-            label.leadingAnchor.constraint(equalTo: badge.leadingAnchor, constant: 9),
-            label.trailingAnchor.constraint(equalTo: badge.trailingAnchor, constant: -9),
-            label.bottomAnchor.constraint(equalTo: badge.bottomAnchor, constant: -5)
+            lockIcon.widthAnchor.constraint(equalToConstant: compact ? 9 : 10),
+            lockIcon.heightAnchor.constraint(equalToConstant: compact ? 10 : 12),
+            hStack.topAnchor.constraint(equalTo: badge.topAnchor, constant: compact ? 4 : 5),
+            hStack.leadingAnchor.constraint(equalTo: badge.leadingAnchor, constant: compact ? 8 : 9),
+            hStack.trailingAnchor.constraint(equalTo: badge.trailingAnchor, constant: -(compact ? 8 : 9)),
+            hStack.bottomAnchor.constraint(equalTo: badge.bottomAnchor, constant: -(compact ? 4 : 5))
         ])
 
         return badge
@@ -546,16 +580,16 @@ class OfficialMCPConnectCardView: NSView {
         button.normalBg = theme.accentColor.cgColor
         button.hoverBg = theme.accentColor.withAlphaComponent(0.82).cgColor
         button.layer?.backgroundColor = button.normalBg
-        button.layer?.cornerRadius = 12
-        button.horizontalContentPadding = 16
-        button.verticalContentPadding = 6
+        button.layer?.cornerRadius = compact ? 11 : 12
+        button.horizontalContentPadding = compact ? 14 : 16
+        button.verticalContentPadding = compact ? 5 : 6
         button.attributedTitle = NSAttributedString(string: title, attributes: [
-            .font: NSFont.systemFont(ofSize: 12, weight: .semibold),
+            .font: NSFont.systemFont(ofSize: compact ? 11 : 12, weight: .semibold),
             .foregroundColor: NSColor.white
         ])
         button.contentTintColor = .white
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        button.heightAnchor.constraint(equalToConstant: compact ? 30 : 34).isActive = true
     }
 
     private func makeSecondaryButton(title: String, action: Selector) -> HoverButton {
@@ -565,17 +599,17 @@ class OfficialMCPConnectCardView: NSView {
         button.normalBg = theme.bubbleBg.cgColor
         button.hoverBg = theme.accentColor.withAlphaComponent(0.08).cgColor
         button.layer?.backgroundColor = button.normalBg
-        button.layer?.cornerRadius = 12
+        button.layer?.cornerRadius = compact ? 11 : 12
         button.layer?.borderWidth = 1
         button.layer?.borderColor = theme.separatorColor.withAlphaComponent(0.42).cgColor
-        button.horizontalContentPadding = 14
-        button.verticalContentPadding = 6
+        button.horizontalContentPadding = compact ? 12 : 14
+        button.verticalContentPadding = compact ? 5 : 6
         button.attributedTitle = NSAttributedString(string: title, attributes: [
-            .font: NSFont.systemFont(ofSize: 12, weight: .medium),
+            .font: NSFont.systemFont(ofSize: compact ? 11 : 12, weight: .medium),
             .foregroundColor: theme.textPrimary
         ])
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.heightAnchor.constraint(equalToConstant: 34).isActive = true
+        button.heightAnchor.constraint(equalToConstant: compact ? 30 : 34).isActive = true
         return button
     }
 

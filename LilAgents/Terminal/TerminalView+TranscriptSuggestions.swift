@@ -185,7 +185,7 @@ class CompactSuggestionView: NSView {
         let preferredWidth = shell.widthAnchor.constraint(equalTo: widthAnchor, constant: -56)
         preferredWidth.priority = .defaultHigh
 
-        let summary = NSTextField(labelWithString: "Now chatting with \(entry.pickedExpert?.name ?? "your specialist")")
+        let summary = NSTextField(labelWithString: "Chatting with \(entry.pickedExpert?.name ?? "your specialist")")
         summary.font = NSFont.systemFont(ofSize: 12.5, weight: .medium)
         summary.textColor = theme.textDim
         summary.translatesAutoresizingMaskIntoConstraints = false

@@ -31,18 +31,24 @@ Current structure:
 
 - short title
 - one short explanatory sentence
-- local-only badge
-- `Open lennydata.com`
-- one auth-key label
+- local-only badge in the title row, top-right
+- `Get auth key`
 - one auth-key input row
 - one compact detected-target hint
-- `Save and connect`
+- `Connect`
 - `Back`
 
 Implementation notes:
 
 - the auth key field is rendered as a single custom inset row instead of a stack of nested wrappers
+- the compact card now uses explicit `14pt` leading/trailing constraints instead of stack `edgeInsets`, which fixed the left-padding drift on title, input, and detection text
 - the target-detection copy now uses a compact hint instead of the full long summary
+- compact controls were tightened further:
+  - smaller vertical insets
+  - smaller helper text
+  - smaller badge
+  - smaller buttons
+  - shorter placeholder and button labels
 - the goal is to keep the onboarding short enough to fit inside the existing transcript/popover shell without introducing a second full-screen-feeling flow
 
 Current product intent:

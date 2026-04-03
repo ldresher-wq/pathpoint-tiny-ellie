@@ -14,7 +14,7 @@ extension WalkerCharacter {
     func createPopoverWindow() {
         let t = resolvedTheme
         let popoverWidth: CGFloat = 468
-        let popoverHeight: CGFloat = 460
+        let popoverHeight: CGFloat = WalkerCharacter.defaultPopoverHeight
         let shellCornerRadius: CGFloat = 18
 
         let win = KeyableWindow(

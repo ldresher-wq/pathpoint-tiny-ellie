@@ -56,7 +56,7 @@ final class WalkerCharacter {
     var popoverCloseButton: HoverButton?
     var isPopoverExpanded = false
     var isPopoverPinned = false
-    static let defaultPopoverHeight: CGFloat = 460
+    static let defaultPopoverHeight: CGFloat = 560
 
     var isClaudeBusy: Bool { claudeSession?.isBusy ?? false }
 

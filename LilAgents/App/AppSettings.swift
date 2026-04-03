@@ -384,13 +384,13 @@ enum OfficialMCPInstaller {
         let hint: String
         switch (detectedTargets.count, configuredTargets.count) {
         case (0, _):
-            hint = "No Claude Code or Codex detected yet."
+            hint = "No Claude Code or Codex found yet."
         case (_, 2):
-            hint = "Detected Claude Code and Codex. Existing MCP setup will be kept."
+            hint = "Claude Code and Codex are ready. Existing setup stays in place."
         case (_, 1):
-            hint = "Detected \(naturalList(detectedTargets.map(\.label))). Existing MCP setup will be kept."
+            hint = "\(naturalList(detectedTargets.map(\.label))) detected. Existing setup stays in place."
         default:
-            hint = "Detected \(naturalList(detectedTargets.map(\.label))). Lil-Lenny will configure what is missing."
+            hint = "\(naturalList(detectedTargets.map(\.label))) detected. Lil-Lenny will configure what is missing."
         }
 
         SessionDebugLogger.log("mcp-install", "context=compact hint | hint=\(hint)")

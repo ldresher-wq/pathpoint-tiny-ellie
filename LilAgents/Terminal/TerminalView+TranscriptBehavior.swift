@@ -197,9 +197,9 @@ extension TerminalView {
         let t = theme
         let greeting: String
         if archiveMode == .starterPack {
-            greeting = "Hi, I'm Lil-Lenny. Ask me anything about product, growth, leadership, pricing, startups, or AI, and I'll help you think it through with LennyData."
+            greeting = "Hi, I'm Lil-Lenny. Ask me anything about product, growth, leadership, pricing, startups, or AI — I'll help you think it through."
         } else {
-            greeting = "Hi, I'm Lil-Lenny. Ask me anything about product, growth, leadership, pricing, startups, or AI, and I'll help you think it through with LennyData."
+            greeting = "Hi, I'm Lil-Lenny. Ask me anything about product, growth, leadership, pricing, startups, or AI — I'll draw on the full LennyData archive."
         }
         let attrText = NSAttributedString(string: greeting, attributes: [
             .font: t.font,

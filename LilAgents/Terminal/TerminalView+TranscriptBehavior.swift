@@ -442,6 +442,8 @@ extension TerminalView {
 
         if shouldStickToBottom {
             scrollToBottom()
+        } else if let lastUserBubble = transcriptStack.arrangedSubviews.last(where: { ($0 as? ChatBubbleView)?.isUser == true }) {
+            scrollTranscriptViewIntoView(lastUserBubble, topPadding: 12, bottomPadding: 0)
         } else if let docView = scrollView.documentView {
             let maxOffsetY = max(0, docView.bounds.height - scrollView.contentSize.height)
             let restoredOffsetY = min(previousOffsetY, maxOffsetY)

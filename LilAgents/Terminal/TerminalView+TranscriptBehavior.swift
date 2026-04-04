@@ -162,7 +162,7 @@ extension TerminalView {
         setupCard.onOpenWebsite = { [weak self] in
             self?.openOfficialMCPURL()
         }
-        setupCard.onSave = { [weak self] _ in
+        setupCard.onSave = { [weak self] in
             self?.starterPackWelcomeBannerDismissed = true
             self?.currentWelcomeArchiveMode = nil
         }

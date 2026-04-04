@@ -3,12 +3,37 @@ import Foundation
 
 extension ClaudeSession {
     func preferredWorkingDirectoryURL() -> URL {
-        if AppSettings.effectiveArchiveAccessMode == .starterPack {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("LilLennyStarterPackCLI", isDirectory: true)
-            try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-            return url
+        // Always use a temp dir — avoids macOS TCC prompts for home/Documents folder access.
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("LilLennyCLI", isDirectory: true)
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        return url
+    }
+
+    private static let githubArchiveRawBase = "https://raw.githubusercontent.com/LennysNewsletter/lennys-newsletterpodcastdata/main"
+
+    func githubArchiveContext(for backend: Backend, expert: ResponderExpert?) -> String {
+        let expertHint = expert.map { "\nFocus on content featuring \($0.name)." } ?? ""
+        switch backend {
+        case .claudeCodeCLI, .codexCLI:
+            return """
+            Use WebFetch to search Lenny's public archive on GitHub:\(expertHint)
+            1. Fetch the index to discover what's available:
+               \(Self.githubArchiveRawBase)/index.json
+               (JSON with "podcasts" and "newsletters" arrays; each entry has: title, filename, date, guest, description, word_count)
+            2. Fetch 1–3 of the most relevant files:
+               \(Self.githubArchiveRawBase)/{filename}
+               (e.g. "podcasts/ryan-hoover.md" or "newsletters/lenny-2024-01-15.md")
+            3. Ground your answer in what you retrieved.
+            Do not describe the fetching steps in your response.
+            """
+        case .openAIResponsesAPI:
+            return """
+            Lenny's public archive:\(expertHint)
+            Index: \(Self.githubArchiveRawBase)/index.json
+            Files: \(Self.githubArchiveRawBase)/{filename}
+            Answer using your knowledge of Lenny Rachitsky's content. Cite specific episodes or newsletters when relevant.
+            """
         }
-        return FileManager.default.homeDirectoryForCurrentUser
     }
 
     func start() {
@@ -61,25 +86,18 @@ extension ClaudeSession {
             self.appendHistory(Message(role: .toolResult, text: status), to: conversationKey)
 
             let sourceSummary = archiveMode == .starterPack
-                ? "Source: Starter pack"
+                ? "Source: Lenny's public archive (GitHub)"
                 : "Source: Official Lenny archive"
             self.onToolResult?(sourceSummary, false)
             self.appendHistory(Message(role: .toolResult, text: sourceSummary), to: conversationKey)
 
             if archiveMode == .starterPack {
-                let localResult = self.searchStarterArchive(message: message, expert: activeExpert)
-                let expertNames = localResult.experts.map(\.name).joined(separator: ", ")
-                SessionDebugLogger.logMultiline(
-                    "starter-pack",
-                    header: "starter pack search complete. summary=\(localResult.summary) result=\(localResult.resultSummary) experts=\(expertNames)",
-                    body: localResult.promptContext
-                )
-                self.onToolUse?("Searching Starter Pack", ["summary": localResult.summary, "experts": localResult.experts])
-                self.appendHistory(Message(role: .toolUse, text: "Searching Starter Pack: \(localResult.summary)"), to: conversationKey)
-                self.onToolResult?(localResult.resultSummary, false)
-                self.appendHistory(Message(role: .toolResult, text: localResult.resultSummary), to: conversationKey)
-                self.pendingExperts = localResult.experts
-                SessionDebugLogger.log("experts", "staged \(localResult.experts.count) starter-pack expert candidate(s) until response completion")
+                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                SessionDebugLogger.log("archive", "using GitHub archive context. backend=\(backend) expert=\(activeExpert?.name ?? "none")")
+                self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
 
                 switch backend {
                 case let .claudeCodeCLI(path):
@@ -90,7 +108,7 @@ extension ClaudeSession {
                         environment: environment,
                         expert: activeExpert,
                         conversationKey: conversationKey,
-                        archiveContext: localResult.promptContext,
+                        archiveContext: archiveContext,
                         officialMCPToken: nil,
                         useOfficialMCP: false
                     )
@@ -103,13 +121,13 @@ extension ClaudeSession {
                         environment: environment,
                         expert: activeExpert,
                         conversationKey: conversationKey,
-                        archiveContext: localResult.promptContext,
+                        archiveContext: archiveContext,
                         useOfficialMCP: false
                     )
 
                 case .openAIResponsesAPI:
                     guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
-                        SessionDebugLogger.log("turn", "starter pack mode selected openai fallback but OPENAI_API_KEY missing")
+                        SessionDebugLogger.log("turn", "starter pack openai fallback but OPENAI_API_KEY missing")
                         self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
                         return
                     }
@@ -120,7 +138,7 @@ extension ClaudeSession {
                         expert: activeExpert,
                         conversationKey: conversationKey,
                         mcpToken: nil,
-                        archiveContext: localResult.promptContext
+                        archiveContext: archiveContext
                     )
                 }
                 return

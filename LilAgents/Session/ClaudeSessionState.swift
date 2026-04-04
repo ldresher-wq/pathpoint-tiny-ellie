@@ -250,7 +250,11 @@ extension ClaudeSession {
             sections.append("Attachment context:\n\(attachmentContext)")
         }
 
-        sections.append(expectMCP ? "Use the Lenny archive MCP tools whenever they help. Start with `index.md` for fast routing, then narrow to the right person/source, then read deeper only as needed. In expert mode, route through `index.md` to that person first. Return only the JSON object described above." : "Answer using the archive context above. Be explicit when the provided archive context does not include enough evidence. Return only the JSON object described above.")
+        if expectMCP {
+            sections.append("Use the Lenny archive MCP tools whenever they help. Start with `index.md` for fast routing, then narrow to the right person/source, then read deeper only as needed. In expert mode, route through `index.md` to that person first. Return only the JSON object described above.")
+        } else {
+            sections.append("Follow the archive instructions above: use WebFetch to retrieve content from the GitHub URLs provided, then answer based on what you retrieved. Return only the JSON object described above.")
+        }
         return sections.joined(separator: "\n\n")
     }
 

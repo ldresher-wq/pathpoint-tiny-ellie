@@ -55,6 +55,8 @@ extension ClaudeSession {
             if let configURL {
                 args.append(contentsOf: ["--mcp-config", configURL.path, "--strict-mcp-config"])
             }
+        } else {
+            args.append(contentsOf: ["--allowedTools", "WebFetch"])
         }
 
         if environment["ANTHROPIC_API_KEY"] != nil {

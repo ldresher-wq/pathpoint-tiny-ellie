@@ -129,6 +129,16 @@ extension ClaudeSession {
         case "read":
             let path = readablePath(arguments["file_path"] as? String ?? arguments["path"] as? String)
             return ("Tool Result", "Loaded \(path)")
+        case "webfetch", "web_fetch":
+            if let url = arguments["url"] as? String,
+               url.contains("raw.githubusercontent.com/LennysNewsletter") {
+                if url.hasSuffix("index.json") {
+                    return ("Tool Result", "Got the archive index")
+                }
+                let name = readableSourceName(from: URL(string: url)?.lastPathComponent)
+                return ("Tool Result", "Loaded \(name) from the archive")
+            }
+            return nil
         default:
             return nil
         }
@@ -158,6 +168,24 @@ extension ClaudeSession {
             if let pattern = arguments["pattern"] as? String, !pattern.isEmpty {
                 return ("Glob", "Looking through files matching \(pattern)")
             }
+        case "webfetch", "web_fetch":
+            if let url = arguments["url"] as? String {
+                if url.contains("raw.githubusercontent.com/LennysNewsletter") {
+                    if url.hasSuffix("index.json") {
+                        return ("Browsing archive", "Checking what's available in Lenny's archive")
+                    }
+                    let name = readableSourceName(from: URL(string: url)?.lastPathComponent)
+                    return ("Reading archive", "Reading \(name) from Lenny's archive")
+                }
+                let host = URL(string: url)?.host ?? url
+                return ("Web Fetch", "Fetching from \(host)")
+            }
+            return ("Web Fetch", "Fetching from the web")
+        case "websearch", "web_search":
+            if let query = arguments["query"] as? String, !query.isEmpty {
+                return ("Web Search", "Searching for \(query)")
+            }
+            return ("Web Search", "Searching the web")
         case "bash":
             if let description = arguments["description"] as? String, !description.isEmpty {
                 return ("Bash", description)

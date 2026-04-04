@@ -194,17 +194,54 @@ extension ClaudeSession {
                 return
             }
 
-            self.dispatchResolvedBackend(
-                backend,
-                message: message,
-                attachments: attachments,
-                environment: environment,
-                expert: activeExpert,
-                conversationKey: conversationKey,
-                archiveContext: nil,
-                officialMCPToken: self.officialMCPToken(from: environment),
-                useOfficialMCP: self.backendSupportsOfficialMCP(backend, environment: environment)
-            )
+            // No explicit MCP token — fall back to GitHub archive rather than attempting
+            // MCP via the global config (which may time out or lack auth).
+            let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+            SessionDebugLogger.log("archive", "no MCP token, using GitHub archive fallback")
+            self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+            self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+            self.onToolResult?("Archive ready", false)
+            self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+
+            switch backend {
+            case let .claudeCodeCLI(path):
+                self.callClaudeCodeCLI(
+                    executablePath: path,
+                    message: message,
+                    attachments: attachments,
+                    environment: environment,
+                    expert: activeExpert,
+                    conversationKey: conversationKey,
+                    archiveContext: archiveContext,
+                    officialMCPToken: nil,
+                    useOfficialMCP: false
+                )
+            case let .codexCLI(path):
+                self.callCodexCLI(
+                    executablePath: path,
+                    message: message,
+                    attachments: attachments,
+                    environment: environment,
+                    expert: activeExpert,
+                    conversationKey: conversationKey,
+                    archiveContext: archiveContext,
+                    useOfficialMCP: false
+                )
+            case .openAIResponsesAPI:
+                guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
+                    self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                    return
+                }
+                self.callOpenAI(
+                    message: message,
+                    attachments: attachments,
+                    apiKey: key,
+                    expert: activeExpert,
+                    conversationKey: conversationKey,
+                    mcpToken: nil,
+                    archiveContext: archiveContext
+                )
+            }
         }
     }
 

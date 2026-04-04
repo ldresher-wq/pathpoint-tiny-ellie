@@ -73,6 +73,14 @@
 		E25DDE8424DF4E209F62E6B3 /* ClaudeSessionAttachmentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */; };
 		F6C51614C7964C2EA992F899 /* ClaudeSessionCLIParsing+Structured.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */; };
 		F7A0C2AA9D5941F1B950A8A1 /* GuestTitles.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A0C2A99D5941F1B950A8A1 /* GuestTitles.swift */; };
+		A10000010000000000000061 /* MCPConnectionCards.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000061 /* MCPConnectionCards.swift */; };
+		A10000010000000000000062 /* SettingsComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000062 /* SettingsComponents.swift */; };
+		A10000010000000000000063 /* SettingsView+SourcePane.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000063 /* SettingsView+SourcePane.swift */; };
+		A10000010000000000000064 /* SettingsView+ModelsPane.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000064 /* SettingsView+ModelsPane.swift */; };
+		A10000010000000000000065 /* ClaudeSessionCLIParsing+ToolDisplay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000065 /* ClaudeSessionCLIParsing+ToolDisplay.swift */; };
+		A10000010000000000000066 /* HoverButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000066 /* HoverButton.swift */; };
+		A10000010000000000000067 /* TerminalView+WelcomePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000067 /* TerminalView+WelcomePanel.swift */; };
+		A10000010000000000000068 /* TerminalView+LiveStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000068 /* TerminalView+LiveStatus.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -143,6 +151,14 @@
 		E6147B37CFB04148BFA41599 /* TerminalView+TranscriptSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptSupport.swift"; sourceTree = "<group>"; };
 		F17C00560192470995924D41 /* TerminalView+TranscriptAccessoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptAccessoryViews.swift"; sourceTree = "<group>"; };
 		F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+AttachmentsParsing.swift"; sourceTree = "<group>"; };
+		A10000020000000000000061 /* MCPConnectionCards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPConnectionCards.swift; sourceTree = "<group>"; };
+		A10000020000000000000062 /* SettingsComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsComponents.swift; sourceTree = "<group>"; };
+		A10000020000000000000063 /* SettingsView+SourcePane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+SourcePane.swift"; sourceTree = "<group>"; };
+		A10000020000000000000064 /* SettingsView+ModelsPane.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SettingsView+ModelsPane.swift"; sourceTree = "<group>"; };
+		A10000020000000000000065 /* ClaudeSessionCLIParsing+ToolDisplay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+ToolDisplay.swift"; sourceTree = "<group>"; };
+		A10000020000000000000066 /* HoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverButton.swift; sourceTree = "<group>"; };
+		A10000020000000000000067 /* TerminalView+WelcomePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+WelcomePanel.swift"; sourceTree = "<group>"; };
+		A10000020000000000000068 /* TerminalView+LiveStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+LiveStatus.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -205,6 +221,9 @@
 				A10000020000000000000025 /* LilAgentsController.swift */,
 				A10000020000000000000040 /* AppSettings.swift */,
 				A10000020000000000000041 /* SettingsView.swift */,
+				A10000020000000000000062 /* SettingsComponents.swift */,
+				A10000020000000000000063 /* SettingsView+SourcePane.swift */,
+				A10000020000000000000064 /* SettingsView+ModelsPane.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -221,6 +240,7 @@
 				A10000020000000000000046 /* ClaudeSessionCLI.swift */,
 				A10000020000000000000047 /* ClaudeSessionCLIParsing.swift */,
 				BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */,
+				A10000020000000000000065 /* ClaudeSessionCLIParsing+ToolDisplay.swift */,
 				C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */,
 				F7A0C2A99D5941F1B950A8A1 /* GuestTitles.swift */,
 				2AD260B3BA9C4BCF90E35E5E /* ClaudeSessionCLIParsing+ValueExtraction.swift */,
@@ -259,6 +279,8 @@
 				A10000020000000000000023 /* TerminalView.swift */,
 				A10000020000000000000027 /* TerminalView+Setup.swift */,
 				A10000020000000000000053 /* TerminalView+Panels.swift */,
+				A10000020000000000000067 /* TerminalView+WelcomePanel.swift */,
+				A10000020000000000000068 /* TerminalView+LiveStatus.swift */,
 				A10000020000000000000029 /* TerminalView+Attachments.swift */,
 				F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */,
 				0A58238166CD4823820011F5 /* TerminalView+SetupActions.swift */,
@@ -273,6 +295,8 @@
 				A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */,
 				6250668D17C04A23B71786AC /* TerminalMarkdownRenderer+Parsing.swift */,
 				A10000020000000000000026 /* PaddedTextFieldCell.swift */,
+				A10000020000000000000066 /* HoverButton.swift */,
+				A10000020000000000000061 /* MCPConnectionCards.swift */,
 			);
 			path = Terminal;
 			sourceTree = "<group>";
@@ -428,6 +452,14 @@
 				A10000010000000000000034 /* WalkerCharacterVisuals.swift in Sources */,
 				A10000010000000000000035 /* WalkerCharacterMovement.swift in Sources */,
 				A10000010000000000000025 /* LilAgentsController.swift in Sources */,
+				A10000010000000000000061 /* MCPConnectionCards.swift in Sources */,
+				A10000010000000000000062 /* SettingsComponents.swift in Sources */,
+				A10000010000000000000063 /* SettingsView+SourcePane.swift in Sources */,
+				A10000010000000000000064 /* SettingsView+ModelsPane.swift in Sources */,
+				A10000010000000000000065 /* ClaudeSessionCLIParsing+ToolDisplay.swift in Sources */,
+				A10000010000000000000066 /* HoverButton.swift in Sources */,
+				A10000010000000000000067 /* TerminalView+WelcomePanel.swift in Sources */,
+				A10000010000000000000068 /* TerminalView+LiveStatus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -52,8 +52,20 @@ LilAgents/
 - `LilAgents/App/AppSettings.swift`
   Persistent app settings for archive mode, preferred transport, model selection labels, official MCP token override, and debug logging.
 
+- `LilAgents/App/OfficialMCPInstaller.swift`
+  CLI installation logic for the official Lenny MCP: `install(token:)`, detected install targets, status summaries, config writing helpers, and executable path detection.
+
 - `LilAgents/App/SettingsView.swift`
-  Sidebar-based Settings UI with `Lenny source`, `Models`, `About`, and conditional `Developer` tabs, including official LennyData token setup, runtime/model selection, linked credits, and the short product-story section for this fork.
+  `SettingsPane` enum and the main `SettingsView` struct with `@AppStorage` properties, `body`, `visiblePanes`, and `currentPaneView`. Pane content is split into extension files.
+
+- `LilAgents/App/SettingsComponents.swift`
+  Reusable SwiftUI components for settings UI: `SettingsSidebarRow`, `SettingsHeader`, `SettingsSectionCard`, `SettingsInfoRow`, `SettingsStatusPill`, `LabeledModelPicker`, and `Text.settingsCaption()`.
+
+- `LilAgents/App/SettingsView+SourcePane.swift`
+  Extension on `SettingsView` providing the `sourcePane` view, `sourceRow` helper, and `detectedOfficialSourceLabel`.
+
+- `LilAgents/App/SettingsView+ModelsPane.swift`
+  Extension on `SettingsView` providing `modelsPane`, `aboutPane`, `developerPane`, and model/transport selection helpers.
 
 ### Main character system
 - `LilAgents/Character/WalkerCharacter.swift`
@@ -120,6 +132,9 @@ LilAgents/
 - `LilAgents/Session/ClaudeSessionCLIParsing+Stdout.swift`
   stdout/stderr stream parsing helpers and event extraction.
 
+- `LilAgents/Session/ClaudeSessionCLIParsing+ToolDisplay.swift`
+  Tool display and result status helpers: `codexCLIStreamEvent(fromItem:)`, `claudeCLIToolUseDisplay`, `claudeCLIToolResultDisplay`, `claudeCLIToolDisplay`, `processResultStatus`, and private tool-result decoding helpers.
+
 - `LilAgents/Session/ClaudeSessionCLIParsing+ValueExtraction.swift`
   Value extraction helpers used by the CLI parser.
 
@@ -165,7 +180,19 @@ LilAgents/
   Focused setup-time actions split from the main setup file.
 
 - `LilAgents/Terminal/TerminalView+Panels.swift`
-  Welcome suggestion panel population, live-status display, status clearing, transcript suggestion rendering, expert-button tap handling, and `NSTextViewDelegate` link-click routing.
+  Comment-only stub pointing to the three focused files that replaced it.
+
+- `LilAgents/Terminal/TerminalView+WelcomePanel.swift`
+  Welcome panel logic: suggestion pool selection, starter-pack upsell and skip flow, official MCP setup card, `showWelcomeSuggestionsPanel`, `hideWelcomeSuggestionsPanel`, and `refreshWelcomePreviewIfNeeded`.
+
+- `LilAgents/Terminal/TerminalView+LiveStatus.swift`
+  Expert suggestion rendering (`setExpertSuggestions`, `renderTranscriptSuggestions`, collapsed/expanded states) and live-status lifecycle (`setLiveStatus`, `clearLiveStatus`) and the avatar-shuffle animation timer.
+
+- `LilAgents/Terminal/HoverButton.swift`
+  `NSButton` subclass with hover-tracking, animated background transitions, `HoverTooltipController` integration, and pointing-hand cursor.
+
+- `LilAgents/Terminal/MCPConnectionCards.swift`
+  `StarterPackUpsellCardView` and `OfficialMCPConnectCardView` — the two card views shown in the welcome panel for MCP connection setup.
 
 - `LilAgents/Terminal/TerminalViewLayout.swift`
   Layout constants, `relayoutPanels()` frame calculations, panel styling helpers, and panel visibility toggling.
@@ -292,6 +319,7 @@ Start with:
 - `LilAgents/Session/ClaudeSessionCLIParsing.swift`
 - `LilAgents/Session/ClaudeSessionCLIParsing+Structured.swift`
 - `LilAgents/Session/ClaudeSessionCLIParsing+Stdout.swift`
+- `LilAgents/Session/ClaudeSessionCLIParsing+ToolDisplay.swift`
 - `LilAgents/Session/ClaudeSessionCLIParsing+ValueExtraction.swift`
 - `LilAgents/Session/ClaudeSessionOpenAI.swift`
 - `LilAgents/Session/ClaudeSessionState.swift`
@@ -318,7 +346,10 @@ Start with:
 Start with:
 - `LilAgents/Terminal/TerminalView+Setup.swift`
 - `LilAgents/Terminal/TerminalView+SetupActions.swift`
-- `LilAgents/Terminal/TerminalView+Panels.swift`
+- `LilAgents/Terminal/TerminalView+WelcomePanel.swift`
+- `LilAgents/Terminal/TerminalView+LiveStatus.swift`
+- `LilAgents/Terminal/HoverButton.swift`
+- `LilAgents/Terminal/MCPConnectionCards.swift`
 - `LilAgents/Terminal/TerminalView+TranscriptSupport.swift`
 - `LilAgents/Terminal/TerminalView+TranscriptBehavior.swift`
 - `LilAgents/Terminal/TerminalView+TranscriptSuggestions.swift`
@@ -338,7 +369,11 @@ Start with:
 ### If you want to change settings or archive-source behavior
 Start with:
 - `LilAgents/App/AppSettings.swift`
+- `LilAgents/App/OfficialMCPInstaller.swift`
 - `LilAgents/App/SettingsView.swift`
+- `LilAgents/App/SettingsComponents.swift`
+- `LilAgents/App/SettingsView+SourcePane.swift`
+- `LilAgents/App/SettingsView+ModelsPane.swift`
 - `LilAgents/Session/ClaudeSessionBackend.swift`
 - `LilAgents/Session/ClaudeSessionTransport.swift`
 - `LilAgents/Session/LocalArchive.swift`
@@ -355,8 +390,10 @@ After the refactor, responsibilities are well-split across focused files. The la
 - `LilAgents/Session/ClaudeSessionTransport.swift` — top-level send/start routing and starter-pack search
 - `LilAgents/Session/ClaudeSessionExpertResolution.swift` — expert extraction from MCP payloads
 - `LilAgents/Session/ClaudeSessionExpertCatalog.swift` — expert name catalog and avatar management
+- `LilAgents/App/OfficialMCPInstaller.swift` — CLI installation logic (split from AppSettings)
+- `LilAgents/App/SettingsView+ModelsPane.swift` — models/about/developer pane views
 - `LilAgents/Terminal/TerminalView+Setup.swift` — terminal view construction
-- `LilAgents/Terminal/TerminalView+Panels.swift` — live-status and panel behavior
+- `LilAgents/Terminal/MCPConnectionCards.swift` — MCP connection card views (split from TranscriptSupport)
 - `LilAgents/Terminal/TerminalMarkdownRenderer+Formatting.swift` — markdown block rendering
 - `LilAgents/Character/WalkerCharacterVisuals.swift` — visual effects
 - `LilAgents/Character/WalkerCharacterBubble.swift` — bubbles and sound
@@ -379,7 +416,11 @@ If you are new to the codebase, read in this order:
 2. `LilAgents/App/LilAgentsApp+MenuBar.swift`
 3. `LilAgents/App/LilAgentsController.swift`
 4. `LilAgents/App/AppSettings.swift`
-5. `LilAgents/App/SettingsView.swift`
+5. `LilAgents/App/OfficialMCPInstaller.swift`
+5a. `LilAgents/App/SettingsView.swift`
+5b. `LilAgents/App/SettingsComponents.swift`
+5c. `LilAgents/App/SettingsView+SourcePane.swift`
+5d. `LilAgents/App/SettingsView+ModelsPane.swift`
 6. `LilAgents/Character/WalkerCharacter.swift`
 7. `LilAgents/Character/WalkerCharacterCore.swift`
 8. `LilAgents/Character/WalkerCharacterPopover.swift`
@@ -396,6 +437,7 @@ If you are new to the codebase, read in this order:
 19. `LilAgents/Session/ClaudeSessionCLIParsing.swift`
 20. `LilAgents/Session/ClaudeSessionCLIParsing+Structured.swift`
 21. `LilAgents/Session/ClaudeSessionCLIParsing+Stdout.swift`
+21a. `LilAgents/Session/ClaudeSessionCLIParsing+ToolDisplay.swift`
 22. `LilAgents/Session/ClaudeSessionCLIParsing+ValueExtraction.swift`
 23. `LilAgents/Session/ClaudeSessionOpenAI.swift`
 24. `LilAgents/Session/ClaudeSessionExpertResolution.swift`
@@ -407,7 +449,10 @@ If you are new to the codebase, read in this order:
 30. `LilAgents/Terminal/TerminalView.swift`
 31. `LilAgents/Terminal/TerminalView+Setup.swift`
 32. `LilAgents/Terminal/TerminalView+SetupActions.swift`
-33. `LilAgents/Terminal/TerminalView+Panels.swift`
+33. `LilAgents/Terminal/TerminalView+WelcomePanel.swift`
+33a. `LilAgents/Terminal/TerminalView+LiveStatus.swift`
+33b. `LilAgents/Terminal/HoverButton.swift`
+33c. `LilAgents/Terminal/MCPConnectionCards.swift`
 34. `LilAgents/Terminal/TerminalViewLayout.swift`
 35. `LilAgents/Terminal/TerminalView+TranscriptSupport.swift`
 36. `LilAgents/Terminal/TerminalView+TranscriptBehavior.swift`

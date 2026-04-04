@@ -308,22 +308,11 @@ extension ClaudeSession {
     }
 
     func hasAnyOfficialMCPConfiguration(environment: [String: String]) -> Bool {
-        officialMCPToken(from: environment) != nil || AppSettings.hasDetectedOfficialMCPConfiguration
+        officialMCPToken(from: environment) != nil
     }
 
     func backendSupportsOfficialMCP(_ backend: Backend, environment: [String: String]) -> Bool {
-        if officialMCPToken(from: environment) != nil {
-            return true
-        }
-
-        switch backend {
-        case .claudeCodeCLI:
-            return AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
-        case .codexCLI:
-            return AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
-        case .openAIResponsesAPI:
-            return false
-        }
+        return officialMCPToken(from: environment) != nil
     }
 
     func backendStatusMessage(for backend: Backend, environment: [String: String]? = nil) -> String {

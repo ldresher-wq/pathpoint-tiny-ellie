@@ -33,6 +33,9 @@ class HoverButton: NSButton {
             ctx.duration = 0.12
             animator().layer?.backgroundColor = hoverBg
         }
+        if let toolTip, !toolTip.isEmpty {
+            HoverTooltipController.shared.show(toolTip, from: self)
+        }
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -40,10 +43,16 @@ class HoverButton: NSButton {
             ctx.duration = 0.12
             animator().layer?.backgroundColor = normalBg
         }
+        HoverTooltipController.shared.hide()
     }
 
     override func resetCursorRects() {
         addCursorRect(bounds, cursor: .pointingHand)
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        HoverTooltipController.shared.hide()
+        super.mouseDown(with: event)
     }
 }
 

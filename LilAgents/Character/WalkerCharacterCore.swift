@@ -25,6 +25,7 @@ extension WalkerCharacter {
 
         let hostView = CharacterContentView(frame: CGRect(x: 0, y: 0, width: displayWidth, height: displayHeight))
         hostView.character = self
+        hostView.toolTip = "Ask Lil-Lenny"
         hostView.wantsLayer = true
         hostView.layer?.backgroundColor = NSColor.clear.cgColor
 

@@ -5,11 +5,98 @@ class KeyableWindow: NSWindow {
     override var canBecomeMain: Bool { true }
 }
 
+final class HoverTooltipController {
+    static let shared = HoverTooltipController()
+
+    private let window: NSPanel
+    private let label: NSTextField
+    private let padding = NSEdgeInsets(top: 6, left: 10, bottom: 6, right: 10)
+
+    private init() {
+        window = NSPanel(
+            contentRect: .zero,
+            styleMask: .borderless,
+            backing: .buffered,
+            defer: false
+        )
+        window.isOpaque = false
+        window.backgroundColor = .clear
+        window.hasShadow = true
+        window.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 20)
+        window.collectionBehavior = [.canJoinAllSpaces, .stationary]
+        window.ignoresMouseEvents = true
+
+        let contentView = NSView(frame: .zero)
+        contentView.wantsLayer = true
+        contentView.layer?.backgroundColor = NSColor(calibratedWhite: 0.12, alpha: 0.96).cgColor
+        contentView.layer?.cornerRadius = 10
+        contentView.layer?.borderWidth = 1
+        contentView.layer?.borderColor = NSColor.white.withAlphaComponent(0.08).cgColor
+        window.contentView = contentView
+
+        label = NSTextField(labelWithString: "")
+        label.font = NSFont.systemFont(ofSize: 11, weight: .medium)
+        label.textColor = .white
+        label.backgroundColor = .clear
+        label.isBordered = false
+        label.lineBreakMode = .byTruncatingTail
+        contentView.addSubview(label)
+    }
+
+    func show(_ text: String, from view: NSView) {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let parentWindow = view.window else { return }
+
+        label.stringValue = trimmed
+        label.sizeToFit()
+
+        let width = label.frame.width + padding.left + padding.right
+        let height = label.frame.height + padding.top + padding.bottom
+        window.setContentSize(NSSize(width: width, height: height))
+        label.frame = NSRect(
+            x: padding.left,
+            y: padding.bottom,
+            width: width - padding.left - padding.right,
+            height: height - padding.top - padding.bottom
+        )
+
+        let viewRectInWindow = view.convert(view.bounds, to: nil)
+        let rectOnScreen = parentWindow.convertToScreen(viewRectInWindow)
+        var x = rectOnScreen.midX - width / 2
+        var y = rectOnScreen.maxY + 8
+
+        if let screen = parentWindow.screen ?? NSScreen.main {
+            x = max(screen.visibleFrame.minX + 8, min(x, screen.visibleFrame.maxX - width - 8))
+            if y + height > screen.visibleFrame.maxY - 8 {
+                y = rectOnScreen.minY - height - 8
+            }
+        }
+
+        window.setFrame(NSRect(x: x, y: y, width: width, height: height), display: true)
+        window.orderFrontRegardless()
+    }
+
+    func hide() {
+        window.orderOut(nil)
+    }
+}
+
 class CharacterContentView: NSView {
     weak var character: WalkerCharacter?
     private var mouseDownPoint: NSPoint?
     private var didDrag = false
     private let dragThreshold: CGFloat = 4
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        trackingAreas.forEach { removeTrackingArea($0) }
+        addTrackingArea(NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        ))
+    }
 
     override func menu(for event: NSEvent) -> NSMenu? {
         guard let character else { return nil }
@@ -80,9 +167,20 @@ class CharacterContentView: NSView {
         return hitRect.contains(localPoint) ? self : nil
     }
 
+    override func mouseEntered(with event: NSEvent) {
+        if let toolTip, !toolTip.isEmpty {
+            HoverTooltipController.shared.show(toolTip, from: self)
+        }
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        HoverTooltipController.shared.hide()
+    }
+
     override func mouseDown(with event: NSEvent) {
         mouseDownPoint = convert(event.locationInWindow, from: nil)
         didDrag = false
+        HoverTooltipController.shared.hide()
         character?.beginHorizontalDrag(at: event)
     }
 
@@ -111,6 +209,7 @@ class CharacterContentView: NSView {
     override func rightMouseDown(with event: NSEvent) {
         mouseDownPoint = nil
         didDrag = false
+        HoverTooltipController.shared.hide()
         if let menu = menu(for: event) {
             NSMenu.popUpContextMenu(menu, with: event, for: self)
         }

@@ -155,7 +155,7 @@
 		A10000120000000000000004 /* fall-smoke-dust.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "fall-smoke-dust.json"; sourceTree = "<group>"; };
 		A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalMarkdownRenderer+Formatting.swift"; sourceTree = "<group>"; };
 		AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionAttachmentModels.swift; sourceTree = "<group>"; };
-		B59791042F81521300882382 /* log-codex.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "log-codex.md"; sourceTree = "<group>"; };
+		B59791042F81521300882382 /* log-claude-starter.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "log-claude-starter.md"; sourceTree = "<group>"; };
 		B6E1D829BD5F45BE93DC108D /* TerminalView+TranscriptBubbleText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubbleText.swift"; sourceTree = "<group>"; };
 		B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarImageUtilities.swift; sourceTree = "<group>"; };
 		BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+Stdout.swift"; sourceTree = "<group>"; };
@@ -189,7 +189,7 @@
 		A10000050000000000000001 = {
 			isa = PBXGroup;
 			children = (
-				B59791042F81521300882382 /* log-codex.md */,
+				B59791042F81521300882382 /* log-claude-starter.md */,
 				A10000050000000000000002 /* LilAgents */,
 				922A33A32F812E09008BF92C /* Frameworks */,
 				A10000050000000000000003 /* Products */,

@@ -181,7 +181,6 @@ class CharacterContentView: NSView {
         mouseDownPoint = convert(event.locationInWindow, from: nil)
         didDrag = false
         HoverTooltipController.shared.hide()
-        character?.beginHorizontalDrag(at: event)
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -189,6 +188,7 @@ class CharacterContentView: NSView {
         let currentPoint = convert(event.locationInWindow, from: nil)
         if !didDrag, abs(currentPoint.x - mouseDownPoint.x) >= dragThreshold {
             didDrag = true
+            character?.beginHorizontalDrag(at: event)
         }
         if didDrag {
             character?.continueHorizontalDrag(with: event)
@@ -199,7 +199,6 @@ class CharacterContentView: NSView {
         if didDrag {
             character?.endHorizontalDrag()
         } else {
-            character?.cancelHorizontalDrag()
             character?.handleClick()
         }
         mouseDownPoint = nil

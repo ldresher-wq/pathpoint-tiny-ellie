@@ -34,6 +34,11 @@ extension TerminalView {
         if expertSuggestionContainer.isHidden {
             welcomePanelHeight = 0
         } else {
+            // Set a non-zero frame before layout to avoid constraint conflicts:
+            // expertSuggestionStack uses translatesAutoresizingMaskIntoConstraints=true,
+            // so a height=0 frame generates a required height==0 constraint that fights
+            // with HoverChipView's NSImageView.height==16 constraint.
+            expertSuggestionStack.frame = NSRect(x: 0, y: 0, width: max(width, 1), height: 500)
             expertSuggestionStack.layoutSubtreeIfNeeded()
             welcomePanelHeight = ceil(expertSuggestionStack.fittingSize.height)
         }

@@ -109,6 +109,21 @@ extension WalkerCharacter {
             updateExpertNameTag()
             return
         }
+        if focusedExpert != nil {
+            isWalking = false
+            isPaused = true
+            pauseEndTime = .greatestFiniteMagnitude
+            setFacing(.front)
+            let travelDistance = currentTravelDistance
+            let x = horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset
+            let bottomPadding = displayHeight * 0.15
+            let y = dockTopY - bottomPadding + yOffset
+            window.setFrameOrigin(NSPoint(x: x, y: y))
+            updatePopoverPosition()
+            updateThinkingBubble()
+            updateExpertNameTag()
+            return
+        }
         if isIdleForPopover {
             let travelDistance = currentTravelDistance
             let x = horizontalMetrics.minX + travelDistance * positionProgress + flipXOffset

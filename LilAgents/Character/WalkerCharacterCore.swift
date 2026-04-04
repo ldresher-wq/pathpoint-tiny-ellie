@@ -152,12 +152,22 @@ extension WalkerCharacter {
     }
 
     func focus(on expert: ResponderExpert?) {
+        let wasExpertMode = focusedExpert != nil
         focusedExpert = expert
         claudeSession?.focusedExpert = expert
         if let expert {
+            isWalking = false
+            isPaused = true
+            pauseEndTime = .greatestFiniteMagnitude
+            setFacing(.front)
             setPersona(.expert(expert))
         } else {
             setPersona(.lenny)
+            if wasExpertMode, !movementLocked, !isDraggingHorizontally, !isOnboarding {
+                isPaused = true
+                isWalking = false
+                pauseEndTime = CACurrentMediaTime() + Double.random(in: 0.6...1.4)
+            }
         }
         updateCharacterTooltip()
         updateExpertNameTag()

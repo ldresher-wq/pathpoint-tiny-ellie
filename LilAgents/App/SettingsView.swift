@@ -54,6 +54,7 @@ struct SettingsView: View {
     @State var resetErrorMessage: String?
     @State var sourcePaneStatusMessage: String?
     @State var sourcePaneErrorMessage: String?
+    @State var detectionRefreshID = UUID()
 
     let officialArchiveURL = URL(string: "https://www.lennysdata.com")!
 
@@ -83,14 +84,10 @@ struct SettingsView: View {
         .toolbar(removing: .sidebarToggle)
         .frame(minWidth: 840, idealWidth: 920, minHeight: 620, idealHeight: 700)
         .onAppear {
-            AppSettings.refreshDetectionState()
-            guard !AppSettings.hasStoredArchiveAccessModePreference else { return }
-            archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue
+            refreshDetectionStateAndDefaults()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            AppSettings.refreshDetectionState()
-            guard !AppSettings.hasStoredArchiveAccessModePreference else { return }
-            archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue
+            refreshDetectionStateAndDefaults()
         }
         .onChange(of: debugLoggingEnabled) { _, enabled in
             if !enabled && selectedPane == .developer {
@@ -101,6 +98,7 @@ struct SettingsView: View {
             Button("Reset All Data", role: .destructive) {
                 do {
                     try AppSettings.resetAllData()
+                    refreshDetectionStateAndDefaults()
                 } catch {
                     resetErrorMessage = error.localizedDescription
                 }
@@ -147,5 +145,12 @@ struct SettingsView: View {
         case .developer:
             developerPane
         }
+    }
+
+    func refreshDetectionStateAndDefaults() {
+        AppSettings.refreshDetectionState()
+        detectionRefreshID = UUID()
+        guard !AppSettings.hasStoredArchiveAccessModePreference else { return }
+        archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue
     }
 }

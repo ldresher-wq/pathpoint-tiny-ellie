@@ -3,7 +3,8 @@ import SwiftUI
 
 extension SettingsView {
     var modelsPane: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        let _ = detectionRefreshID
+        return VStack(alignment: .leading, spacing: 20) {
             SettingsHeader(
                 title: "Models",
                 subtitle: "Choose how Lil-Lenny should answer on this Mac."

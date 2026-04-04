@@ -3,7 +3,8 @@ import SwiftUI
 
 extension SettingsView {
     var sourcePane: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        let _ = detectionRefreshID
+        return VStack(alignment: .leading, spacing: 20) {
             SettingsHeader(
                 title: "Lenny source",
                 subtitle: "Choose whether Lil-Lenny answers from the bundled Starter Pack or the full LennyData archive."
@@ -158,7 +159,7 @@ extension SettingsView {
             }
 
             sourcePaneErrorMessage = nil
-            AppSettings.refreshDetectionState()
+            refreshDetectionStateAndDefaults()
         } catch {
             sourcePaneErrorMessage = error.localizedDescription
         }

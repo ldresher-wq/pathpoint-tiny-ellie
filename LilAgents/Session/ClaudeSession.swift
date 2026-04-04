@@ -37,11 +37,13 @@ final class ClaudeSession {
     var onToolUse: ((String, [String: Any]) -> Void)?
     var onToolResult: ((String, Bool) -> Void)?
     var onSessionReady: (() -> Void)?
+    var onSetupRequired: ((String) -> Void)?
     var onTurnComplete: (() -> Void)?
     var onProcessExit: (() -> Void)?
     var onExpertsUpdated: (([ResponderExpert]) -> Void)?
 
     static var shellEnvironment: [String: String]?
+    static var shellEnvironmentResolvedAt: Date?
     static var openAIKey: String?
 
     func selectedClaudeModel() -> String? {

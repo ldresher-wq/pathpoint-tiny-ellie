@@ -2,6 +2,32 @@ import AppKit
 
 extension WalkerCharacter {
     func wireSession(_ session: ClaudeSession) {
+        session.onSessionReady = { [weak self] in
+            guard let self, let terminalView = self.terminalView else { return }
+            terminalView.requiresInitialConnectionSetup = false
+            terminalView.endStreaming()
+            if terminalView.isShowingInitialWelcomeState, self.focusedExpert == nil {
+                terminalView.showWelcomeGreeting(forceRefresh: true)
+            }
+        }
+
+        session.onSetupRequired = { [weak self] _ in
+            self?.stopLiveStatusFallback()
+            self?.setCurrentActivityStatus("")
+            self?.claudeSession?.isBusy = false
+            self?.claudeSession?.pendingExperts.removeAll()
+            self?.claudeSession?.assistantExplicitlyRequestedExperts = false
+            if let terminalView = self?.terminalView {
+                terminalView.endStreaming()
+                terminalView.clearLiveStatus()
+                terminalView.requiresInitialConnectionSetup = true
+                if self?.focusedExpert == nil {
+                    terminalView.showWelcomeGreeting(forceRefresh: true)
+                }
+            }
+            self?.updateExpertNameTag()
+        }
+
         session.onText = { [weak self] text in
             guard let self, let tv = self.terminalView else { return }
             tv.currentAssistantText = text
@@ -42,7 +68,8 @@ extension WalkerCharacter {
         session.onError = { [weak self] text in
             self?.stopLiveStatusFallback()
             self?.setCurrentActivityStatus("")
-            self?.terminalView?.setLiveStatus(text, isBusy: false, isError: true)
+            self?.terminalView?.endStreaming()
+            self?.terminalView?.clearLiveStatus()
             self?.terminalView?.appendError(text)
             self?.updateExpertNameTag()
         }

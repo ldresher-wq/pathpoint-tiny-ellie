@@ -3,6 +3,7 @@ import AppKit
 class ChatBubbleView: NSView, NSTextViewDelegate {
     let textView = NSTextView()
     let headerLabel = NSTextField(labelWithString: "")
+    let headerTitleLabel = NSTextField(labelWithString: "")
     let bubbleBackground = NSView()
     let avatarContainer = NSView()
     let headerRow = NSStackView()
@@ -79,6 +80,18 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         headerLabel.isBordered = false
         headerLabel.drawsBackground = false
         headerRow.addArrangedSubview(headerLabel)
+
+        headerTitleLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
+        headerTitleLabel.textColor = theme.textDim
+        headerTitleLabel.alignment = .left
+        headerTitleLabel.lineBreakMode = .byTruncatingTail
+        headerTitleLabel.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        headerTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        headerTitleLabel.isEditable = false
+        headerTitleLabel.isBordered = false
+        headerTitleLabel.drawsBackground = false
+        headerTitleLabel.isHidden = true
+        headerRow.addArrangedSubview(headerTitleLabel)
 
         bubbleBackground.wantsLayer = true
         bubbleBackground.layer?.cornerRadius = theme.bubbleCornerRadius
@@ -188,6 +201,13 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
 
     private func populate(text: NSAttributedString, speaker: TranscriptSpeaker) {
         headerLabel.stringValue = speaker.name
+        if let title = speaker.title?.trimmingCharacters(in: .whitespacesAndNewlines), !title.isEmpty {
+            headerTitleLabel.stringValue = "(\(title))"
+            headerTitleLabel.isHidden = false
+        } else {
+            headerTitleLabel.stringValue = ""
+            headerTitleLabel.isHidden = true
+        }
         populateAvatar(for: speaker)
         configureHeaderVisibility()
         configureTextContainer()

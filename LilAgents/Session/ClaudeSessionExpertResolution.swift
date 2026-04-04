@@ -49,12 +49,7 @@ extension ClaudeSession {
             guard let avatarPath = avatarPath(for: name),
                   !experts.contains(where: { $0.name == name }) else { continue }
             let context = summarizedContext(for: name, lines: expertContexts[name] ?? [])
-            experts.append(ResponderExpert(
-                name: name,
-                avatarPath: avatarPath,
-                archiveContext: context,
-                responseScript: responseScript(for: name, context: context)
-            ))
+            experts.append(makeResponderExpert(name: name, avatarPath: avatarPath, archiveContext: context))
         }
         return Array(experts.prefix(3))
     }

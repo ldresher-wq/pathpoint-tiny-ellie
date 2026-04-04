@@ -7,7 +7,7 @@ extension WalkerCharacter {
 
     func refreshPopoverHeader() {
         popoverTitleLabel?.stringValue = focusedExpert?.name ?? resolvedTheme.titleString
-        popoverSubtitleLabel?.stringValue = focusedExpert == nil ? "Your desktop shortcut to LennyData." : "Specialist follow-up"
+        popoverSubtitleLabel?.stringValue = focusedExpert?.title ?? "Your desktop shortcut to LennyData."
         popoverReturnButton?.isHidden = focusedExpert == nil
     }
 
@@ -59,7 +59,7 @@ extension WalkerCharacter {
         titleBar.addSubview(titleLabel)
         popoverTitleLabel = titleLabel
 
-        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Your desktop shortcut to LennyData." : "Specialist follow-up")
+        let subtitle = NSTextField(labelWithString: focusedExpert?.title ?? "Your desktop shortcut to LennyData.")
         subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         subtitle.textColor = t.textDim.withAlphaComponent(0.75)
         subtitle.frame = NSRect(x: 20, y: 5, width: popoverWidth - 244, height: 14)

@@ -53,12 +53,7 @@ extension ClaudeSession {
             let structuredExperts = structuredNames.compactMap { name -> ResponderExpert? in
                 guard let avatarPath = avatarPath(for: name) else { return nil }
                 let context = "Explicitly suggested by the assistant in the latest answer."
-                return ResponderExpert(
-                    name: name,
-                    avatarPath: avatarPath,
-                    archiveContext: context,
-                    responseScript: responseScript(for: name, context: context)
-                )
+                return makeResponderExpert(name: name, avatarPath: avatarPath, archiveContext: context)
             }
 
             assistantExplicitlyRequestedExperts = !structuredExperts.isEmpty

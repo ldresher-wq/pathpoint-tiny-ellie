@@ -251,11 +251,10 @@ extension ClaudeSession {
         let experts = matches.compactMap { match -> ResponderExpert? in
             let name = match.entry.guest ?? speakerName(fromTitle: match.entry.title)
             guard let name, let avatarPath = avatarPath(for: name) else { return nil }
-            return ResponderExpert(
+            return makeResponderExpert(
                 name: name,
                 avatarPath: avatarPath,
-                archiveContext: "- \(match.entry.title) (\(match.entry.date)): \(match.excerpt)",
-                responseScript: responseScript(for: name, context: "- \(match.entry.title) (\(match.entry.date)): \(match.excerpt)")
+                archiveContext: "- \(match.entry.title) (\(match.entry.date)): \(match.excerpt)"
             )
         }
 

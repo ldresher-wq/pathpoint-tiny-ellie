@@ -7,34 +7,36 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		051051E134E04AD1868E7F4C /* TerminalView+TranscriptBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BFF3306DFF4EEC97D297BF /* TerminalView+TranscriptBehavior.swift */; };
+		1294D7519C2B4472B8CCE236 /* TerminalView+TranscriptBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CF291C594F4C8A9539291A /* TerminalView+TranscriptBubble.swift */; };
+		3B4B035D86A547AC8198ECD8 /* TerminalMarkdownRenderer+Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6250668D17C04A23B71786AC /* TerminalMarkdownRenderer+Parsing.swift */; };
+		528CDB77E7D14B45A53268FB /* TerminalView+TranscriptSuggestions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D199B93FB44171854B772E /* TerminalView+TranscriptSuggestions.swift */; };
+		57A72875AC1342AABD881B60 /* TerminalMarkdownRenderer+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */; };
 		7B1000010000000000000001 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 7B1000030000000000000001 /* Lottie */; };
+		7DBAF4A3C7864585A79E6EF2 /* ClaudeSessionCLIParsing+ValueExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD260B3BA9C4BCF90E35E5E /* ClaudeSessionCLIParsing+ValueExtraction.swift */; };
+		7DF970370B8446F3B824C07C /* TerminalView+SetupActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A58238166CD4823820011F5 /* TerminalView+SetupActions.swift */; };
 		929E60C42F748E3E003EA359 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = 929E60C32F748E3E003EA359 /* Sparkle */; };
+		9B5B7C6D4F4E4B11A1D2C3E4 /* WalkerCharacterSessionWiring+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */; };
 		A10000010000000000000001 /* LilAgentsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000001 /* LilAgentsApp.swift */; };
 		A10000010000000000000002 /* walk-bruce-01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000002 /* walk-bruce-01.mov */; };
 		A10000010000000000000003 /* walk-jazz-01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000005 /* walk-jazz-01.mov */; };
 		A10000010000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000007 /* Assets.xcassets */; };
 		A10000010000000000000010 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000010 /* Sounds */; };
-		A10000110000000000000001 /* CharacterSprites in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000001 /* CharacterSprites */; };
-		A10000110000000000000002 /* ExpertAvatars in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000002 /* ExpertAvatars */; };
-		A10000110000000000000003 /* fall-smoke-dust.lottie in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000003 /* fall-smoke-dust.lottie */; };
-		A10000110000000000000004 /* fall-smoke-dust.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000004 /* fall-smoke-dust.json */; };
 		A10000010000000000000020 /* PopoverTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000020 /* PopoverTheme.swift */; };
 		A10000010000000000000021 /* CharacterContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000021 /* CharacterContentView.swift */; };
-		D8A23CFBC5234439AA8244A7 /* AvatarImageUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */; };
-		BE61A7DFB8334AA396E94A7D /* LilAgentsApp+MenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE77FA6D7384588B124A5E7 /* LilAgentsApp+MenuBar.swift */; };
-			A10000010000000000000022 /* ClaudeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000022 /* ClaudeSession.swift */; };
-			A10000010000000000000023 /* TerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000023 /* TerminalView.swift */; };
-			A10000010000000000000024 /* WalkerCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000024 /* WalkerCharacter.swift */; };
-			A10000010000000000000031 /* WalkerCharacterTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000031 /* WalkerCharacterTypes.swift */; };
-			A10000010000000000000032 /* WalkerCharacterCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000032 /* WalkerCharacterCore.swift */; };
-			A10000010000000000000033 /* WalkerCharacterPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000033 /* WalkerCharacterPopover.swift */; };
-			A10000010000000000000034 /* WalkerCharacterVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000034 /* WalkerCharacterVisuals.swift */; };
-			A10000010000000000000035 /* WalkerCharacterMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000035 /* WalkerCharacterMovement.swift */; };
-			A10000010000000000000025 /* LilAgentsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000025 /* LilAgentsController.swift */; };
+		A10000010000000000000022 /* ClaudeSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000022 /* ClaudeSession.swift */; };
+		A10000010000000000000023 /* TerminalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000023 /* TerminalView.swift */; };
+		A10000010000000000000024 /* WalkerCharacter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000024 /* WalkerCharacter.swift */; };
+		A10000010000000000000025 /* LilAgentsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000025 /* LilAgentsController.swift */; };
 		A10000010000000000000026 /* PaddedTextFieldCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000026 /* PaddedTextFieldCell.swift */; };
-		A10000010000000000000027 /* TerminalViewSetup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000027 /* TerminalViewSetup.swift */; };
-		A10000010000000000000029 /* TerminalViewAttachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000029 /* TerminalViewAttachments.swift */; };
+		A10000010000000000000027 /* TerminalView+Setup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000027 /* TerminalView+Setup.swift */; };
+		A10000010000000000000029 /* TerminalView+Attachments.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000029 /* TerminalView+Attachments.swift */; };
 		A10000010000000000000030 /* TerminalMarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000030 /* TerminalMarkdownRenderer.swift */; };
+		A10000010000000000000031 /* WalkerCharacterTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000031 /* WalkerCharacterTypes.swift */; };
+		A10000010000000000000032 /* WalkerCharacterCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000032 /* WalkerCharacterCore.swift */; };
+		A10000010000000000000033 /* WalkerCharacterPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000033 /* WalkerCharacterPopover.swift */; };
+		A10000010000000000000034 /* WalkerCharacterVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000034 /* WalkerCharacterVisuals.swift */; };
+		A10000010000000000000035 /* WalkerCharacterMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000035 /* WalkerCharacterMovement.swift */; };
 		A10000010000000000000036 /* ClaudeSessionModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000036 /* ClaudeSessionModels.swift */; };
 		A10000010000000000000037 /* ClaudeSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000037 /* ClaudeSessionState.swift */; };
 		A10000010000000000000038 /* ClaudeSessionExpertResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */; };
@@ -42,14 +44,10 @@
 		A10000010000000000000040 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000040 /* AppSettings.swift */; };
 		A10000010000000000000041 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000041 /* SettingsView.swift */; };
 		A10000010000000000000042 /* LocalArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000042 /* LocalArchive.swift */; };
-		A10000010000000000000044 /* SessionDebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000044 /* SessionDebugLogger.swift */; };
 		A10000010000000000000043 /* StarterArchive in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000043 /* StarterArchive */; };
+		A10000010000000000000044 /* SessionDebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000044 /* SessionDebugLogger.swift */; };
 		A10000010000000000000045 /* ClaudeSessionBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000045 /* ClaudeSessionBackend.swift */; };
-		E25DDE8424DF4E209F62E6B3 /* ClaudeSessionAttachmentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */; };
 		A10000010000000000000046 /* ClaudeSessionCLI.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000046 /* ClaudeSessionCLI.swift */; };
-		B79886ADD52D409490EA159A /* ClaudeSessionCLIParsing+Stdout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */; };
-		F6C51614C7964C2EA992F899 /* ClaudeSessionCLIParsing+Structured.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */; };
-		7DBAF4A3C7864585A79E6EF2 /* ClaudeSessionCLIParsing+ValueExtraction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD260B3BA9C4BCF90E35E5E /* ClaudeSessionCLIParsing+ValueExtraction.swift */; };
 		A10000010000000000000047 /* ClaudeSessionCLIParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000047 /* ClaudeSessionCLIParsing.swift */; };
 		A10000010000000000000048 /* ClaudeSessionExpertCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000048 /* ClaudeSessionExpertCatalog.swift */; };
 		A10000010000000000000049 /* ClaudeSessionExpertTextResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000049 /* ClaudeSessionExpertTextResolution.swift */; };
@@ -61,75 +59,65 @@
 		A10000010000000000000056 /* WalkerCharacterExpertTag.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000056 /* WalkerCharacterExpertTag.swift */; };
 		A10000010000000000000057 /* WalkerCharacterPopoverWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000057 /* WalkerCharacterPopoverWindow.swift */; };
 		A10000010000000000000058 /* WalkerCharacterSessionWiring.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000058 /* WalkerCharacterSessionWiring.swift */; };
-		9B5B7C6D4F4E4B11A1D2C3E4 /* WalkerCharacterSessionWiring+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */; };
-		57A72875AC1342AABD881B60 /* TerminalMarkdownRenderer+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */; };
-		3B4B035D86A547AC8198ECD8 /* TerminalMarkdownRenderer+Parsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6250668D17C04A23B71786AC /* TerminalMarkdownRenderer+Parsing.swift */; };
-		DE03A9314A424E6E8BEC2B02 /* TerminalView+AttachmentsParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */; };
-		7DF970370B8446F3B824C07C /* TerminalView+SetupActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A58238166CD4823820011F5 /* TerminalView+SetupActions.swift */; };
-		D799D5C77D4A4FE6B64212AC /* TerminalView+TranscriptAccessoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17C00560192470995924D41 /* TerminalView+TranscriptAccessoryViews.swift */; };
-		051051E134E04AD1868E7F4C /* TerminalView+TranscriptBehavior.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31BFF3306DFF4EEC97D297BF /* TerminalView+TranscriptBehavior.swift */; };
-		1294D7519C2B4472B8CCE236 /* TerminalView+TranscriptBubble.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CF291C594F4C8A9539291A /* TerminalView+TranscriptBubble.swift */; };
-		DFBB600C64A445B09FA49BC4 /* TerminalView+TranscriptBubbleText.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E1D829BD5F45BE93DC108D /* TerminalView+TranscriptBubbleText.swift */; };
-		528CDB77E7D14B45A53268FB /* TerminalView+TranscriptSuggestions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60D199B93FB44171854B772E /* TerminalView+TranscriptSuggestions.swift */; };
+		A10000110000000000000001 /* CharacterSprites in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000001 /* CharacterSprites */; };
+		A10000110000000000000002 /* ExpertAvatars in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000002 /* ExpertAvatars */; };
+		A10000110000000000000003 /* fall-smoke-dust.lottie in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000003 /* fall-smoke-dust.lottie */; };
+		A10000110000000000000004 /* fall-smoke-dust.json in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000004 /* fall-smoke-dust.json */; };
 		B67657262565478489452A02 /* TerminalView+TranscriptSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6147B37CFB04148BFA41599 /* TerminalView+TranscriptSupport.swift */; };
+		B79886ADD52D409490EA159A /* ClaudeSessionCLIParsing+Stdout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */; };
+		BE61A7DFB8334AA396E94A7D /* LilAgentsApp+MenuBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1DE77FA6D7384588B124A5E7 /* LilAgentsApp+MenuBar.swift */; };
+		D799D5C77D4A4FE6B64212AC /* TerminalView+TranscriptAccessoryViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17C00560192470995924D41 /* TerminalView+TranscriptAccessoryViews.swift */; };
+		D8A23CFBC5234439AA8244A7 /* AvatarImageUtilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */; };
+		DE03A9314A424E6E8BEC2B02 /* TerminalView+AttachmentsParsing.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */; };
+		DFBB600C64A445B09FA49BC4 /* TerminalView+TranscriptBubbleText.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6E1D829BD5F45BE93DC108D /* TerminalView+TranscriptBubbleText.swift */; };
+		E25DDE8424DF4E209F62E6B3 /* ClaudeSessionAttachmentModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */; };
+		F6C51614C7964C2EA992F899 /* ClaudeSessionCLIParsing+Structured.swift in Sources */ = {isa = PBXBuildFile; fileRef = C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */; };
+		F7A0C2AA9D5941F1B950A8A1 /* GuestTitles.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7A0C2A99D5941F1B950A8A1 /* GuestTitles.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A10000020000000000000001 /* LilAgentsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LilAgentsApp.swift; sourceTree = "<group>"; };
+		0A58238166CD4823820011F5 /* TerminalView+SetupActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+SetupActions.swift"; sourceTree = "<group>"; };
 		1DE77FA6D7384588B124A5E7 /* LilAgentsApp+MenuBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LilAgentsApp+MenuBar.swift"; sourceTree = "<group>"; };
+		2AD260B3BA9C4BCF90E35E5E /* ClaudeSessionCLIParsing+ValueExtraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+ValueExtraction.swift"; sourceTree = "<group>"; };
+		31BFF3306DFF4EEC97D297BF /* TerminalView+TranscriptBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBehavior.swift"; sourceTree = "<group>"; };
+		60D199B93FB44171854B772E /* TerminalView+TranscriptSuggestions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptSuggestions.swift"; sourceTree = "<group>"; };
+		6250668D17C04A23B71786AC /* TerminalMarkdownRenderer+Parsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalMarkdownRenderer+Parsing.swift"; sourceTree = "<group>"; };
+		64CF291C594F4C8A9539291A /* TerminalView+TranscriptBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubble.swift"; sourceTree = "<group>"; };
+		9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalkerCharacterSessionWiring+Formatting.swift"; sourceTree = "<group>"; };
+		A10000020000000000000001 /* LilAgentsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LilAgentsApp.swift; sourceTree = "<group>"; };
 		A10000020000000000000002 /* walk-bruce-01.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "walk-bruce-01.mov"; sourceTree = "<group>"; };
 		A10000020000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000020000000000000004 /* LilAgents.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LilAgents.entitlements; sourceTree = "<group>"; };
 		A10000020000000000000005 /* walk-jazz-01.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "walk-jazz-01.mov"; sourceTree = "<group>"; };
 		A10000020000000000000007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10000020000000000000010 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
-		A10000120000000000000001 /* CharacterSprites */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CharacterSprites; sourceTree = "<group>"; };
-		A10000120000000000000002 /* ExpertAvatars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ExpertAvatars; sourceTree = "<group>"; };
-		A10000120000000000000003 /* fall-smoke-dust.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fall-smoke-dust.lottie"; sourceTree = "<group>"; };
-		A10000120000000000000004 /* fall-smoke-dust.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "fall-smoke-dust.json"; sourceTree = "<group>"; };
 		A10000020000000000000020 /* PopoverTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverTheme.swift; sourceTree = "<group>"; };
 		A10000020000000000000021 /* CharacterContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterContentView.swift; sourceTree = "<group>"; };
 		A10000020000000000000022 /* ClaudeSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSession.swift; sourceTree = "<group>"; };
 		A10000020000000000000023 /* TerminalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalView.swift; sourceTree = "<group>"; };
 		A10000020000000000000024 /* WalkerCharacter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacter.swift; sourceTree = "<group>"; };
+		A10000020000000000000025 /* LilAgentsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LilAgentsController.swift; sourceTree = "<group>"; };
+		A10000020000000000000026 /* PaddedTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextFieldCell.swift; sourceTree = "<group>"; };
+		A10000020000000000000027 /* TerminalView+Setup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+Setup.swift"; sourceTree = "<group>"; };
+		A10000020000000000000029 /* TerminalView+Attachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+Attachments.swift"; sourceTree = "<group>"; };
+		A10000020000000000000030 /* TerminalMarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalMarkdownRenderer.swift; sourceTree = "<group>"; };
 		A10000020000000000000031 /* WalkerCharacterTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterTypes.swift; sourceTree = "<group>"; };
 		A10000020000000000000032 /* WalkerCharacterCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterCore.swift; sourceTree = "<group>"; };
 		A10000020000000000000033 /* WalkerCharacterPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterPopover.swift; sourceTree = "<group>"; };
 		A10000020000000000000034 /* WalkerCharacterVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterVisuals.swift; sourceTree = "<group>"; };
 		A10000020000000000000035 /* WalkerCharacterMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterMovement.swift; sourceTree = "<group>"; };
-		A10000020000000000000025 /* LilAgentsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LilAgentsController.swift; sourceTree = "<group>"; };
-		A10000020000000000000026 /* PaddedTextFieldCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaddedTextFieldCell.swift; sourceTree = "<group>"; };
-		A10000020000000000000027 /* TerminalViewSetup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+Setup.swift"; sourceTree = "<group>"; };
-		A10000020000000000000029 /* TerminalViewAttachments.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+Attachments.swift"; sourceTree = "<group>"; };
-		A10000020000000000000030 /* TerminalMarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalMarkdownRenderer.swift; sourceTree = "<group>"; };
-		A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalMarkdownRenderer+Formatting.swift"; sourceTree = "<group>"; };
-		6250668D17C04A23B71786AC /* TerminalMarkdownRenderer+Parsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalMarkdownRenderer+Parsing.swift"; sourceTree = "<group>"; };
-		F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+AttachmentsParsing.swift"; sourceTree = "<group>"; };
-		0A58238166CD4823820011F5 /* TerminalView+SetupActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+SetupActions.swift"; sourceTree = "<group>"; };
-		F17C00560192470995924D41 /* TerminalView+TranscriptAccessoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptAccessoryViews.swift"; sourceTree = "<group>"; };
-		31BFF3306DFF4EEC97D297BF /* TerminalView+TranscriptBehavior.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBehavior.swift"; sourceTree = "<group>"; };
-		64CF291C594F4C8A9539291A /* TerminalView+TranscriptBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubble.swift"; sourceTree = "<group>"; };
-		B6E1D829BD5F45BE93DC108D /* TerminalView+TranscriptBubbleText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubbleText.swift"; sourceTree = "<group>"; };
-		60D199B93FB44171854B772E /* TerminalView+TranscriptSuggestions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptSuggestions.swift"; sourceTree = "<group>"; };
-		E6147B37CFB04148BFA41599 /* TerminalView+TranscriptSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptSupport.swift"; sourceTree = "<group>"; };
-		B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarImageUtilities.swift; sourceTree = "<group>"; };
 		A10000020000000000000036 /* ClaudeSessionModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionModels.swift; sourceTree = "<group>"; };
-		AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionAttachmentModels.swift; sourceTree = "<group>"; };
 		A10000020000000000000037 /* ClaudeSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionState.swift; sourceTree = "<group>"; };
 		A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionExpertResolution.swift; sourceTree = "<group>"; };
 		A10000020000000000000039 /* ClaudeSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionTransport.swift; sourceTree = "<group>"; };
 		A10000020000000000000040 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A10000020000000000000041 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A10000020000000000000042 /* LocalArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalArchive.swift; sourceTree = "<group>"; };
-		A10000020000000000000044 /* SessionDebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDebugLogger.swift; sourceTree = "<group>"; };
 		A10000020000000000000043 /* StarterArchive */ = {isa = PBXFileReference; lastKnownFileType = folder; path = StarterArchive; sourceTree = "<group>"; };
-		A10000030000000000000001 /* Lenny.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Lenny.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000020000000000000044 /* SessionDebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDebugLogger.swift; sourceTree = "<group>"; };
 		A10000020000000000000045 /* ClaudeSessionBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionBackend.swift; sourceTree = "<group>"; };
 		A10000020000000000000046 /* ClaudeSessionCLI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionCLI.swift; sourceTree = "<group>"; };
 		A10000020000000000000047 /* ClaudeSessionCLIParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionCLIParsing.swift; sourceTree = "<group>"; };
-		BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+Stdout.swift"; sourceTree = "<group>"; };
-		C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+Structured.swift"; sourceTree = "<group>"; };
-		2AD260B3BA9C4BCF90E35E5E /* ClaudeSessionCLIParsing+ValueExtraction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+ValueExtraction.swift"; sourceTree = "<group>"; };
 		A10000020000000000000048 /* ClaudeSessionExpertCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionExpertCatalog.swift; sourceTree = "<group>"; };
 		A10000020000000000000049 /* ClaudeSessionExpertTextResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionExpertTextResolution.swift; sourceTree = "<group>"; };
 		A10000020000000000000050 /* ClaudeSessionOpenAI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionOpenAI.swift; sourceTree = "<group>"; };
@@ -140,7 +128,21 @@
 		A10000020000000000000056 /* WalkerCharacterExpertTag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterExpertTag.swift; sourceTree = "<group>"; };
 		A10000020000000000000057 /* WalkerCharacterPopoverWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterPopoverWindow.swift; sourceTree = "<group>"; };
 		A10000020000000000000058 /* WalkerCharacterSessionWiring.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterSessionWiring.swift; sourceTree = "<group>"; };
-		9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalkerCharacterSessionWiring+Formatting.swift"; sourceTree = "<group>"; };
+		A10000030000000000000001 /* Lenny.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Lenny.app; path = "Lil-Lenny.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000120000000000000001 /* CharacterSprites */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CharacterSprites; sourceTree = "<group>"; };
+		A10000120000000000000002 /* ExpertAvatars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ExpertAvatars; sourceTree = "<group>"; };
+		A10000120000000000000003 /* fall-smoke-dust.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fall-smoke-dust.lottie"; sourceTree = "<group>"; };
+		A10000120000000000000004 /* fall-smoke-dust.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "fall-smoke-dust.json"; sourceTree = "<group>"; };
+		A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalMarkdownRenderer+Formatting.swift"; sourceTree = "<group>"; };
+		AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionAttachmentModels.swift; sourceTree = "<group>"; };
+		B6E1D829BD5F45BE93DC108D /* TerminalView+TranscriptBubbleText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubbleText.swift"; sourceTree = "<group>"; };
+		B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarImageUtilities.swift; sourceTree = "<group>"; };
+		BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+Stdout.swift"; sourceTree = "<group>"; };
+		C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+Structured.swift"; sourceTree = "<group>"; };
+		F7A0C2A99D5941F1B950A8A1 /* GuestTitles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuestTitles.swift; sourceTree = "<group>"; };
+		E6147B37CFB04148BFA41599 /* TerminalView+TranscriptSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptSupport.swift"; sourceTree = "<group>"; };
+		F17C00560192470995924D41 /* TerminalView+TranscriptAccessoryViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptAccessoryViews.swift"; sourceTree = "<group>"; };
+		F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+AttachmentsParsing.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -187,6 +189,14 @@
 			path = LilAgents;
 			sourceTree = "<group>";
 		};
+		A10000050000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A10000030000000000000001 /* Lenny.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		A10000060000000000000010 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -196,7 +206,6 @@
 				A10000020000000000000040 /* AppSettings.swift */,
 				A10000020000000000000041 /* SettingsView.swift */,
 			);
-			name = App;
 			path = App;
 			sourceTree = "<group>";
 		};
@@ -213,6 +222,7 @@
 				A10000020000000000000047 /* ClaudeSessionCLIParsing.swift */,
 				BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */,
 				C98E81F03EBD48908267BBEF /* ClaudeSessionCLIParsing+Structured.swift */,
+				F7A0C2A99D5941F1B950A8A1 /* GuestTitles.swift */,
 				2AD260B3BA9C4BCF90E35E5E /* ClaudeSessionCLIParsing+ValueExtraction.swift */,
 				A10000020000000000000050 /* ClaudeSessionOpenAI.swift */,
 				A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */,
@@ -222,7 +232,6 @@
 				A10000020000000000000042 /* LocalArchive.swift */,
 				A10000020000000000000044 /* SessionDebugLogger.swift */,
 			);
-			name = Session;
 			path = Session;
 			sourceTree = "<group>";
 		};
@@ -241,7 +250,6 @@
 				A10000020000000000000058 /* WalkerCharacterSessionWiring.swift */,
 				9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */,
 			);
-			name = Character;
 			path = Character;
 			sourceTree = "<group>";
 		};
@@ -249,9 +257,9 @@
 			isa = PBXGroup;
 			children = (
 				A10000020000000000000023 /* TerminalView.swift */,
-				A10000020000000000000027 /* TerminalViewSetup.swift */,
+				A10000020000000000000027 /* TerminalView+Setup.swift */,
 				A10000020000000000000053 /* TerminalView+Panels.swift */,
-				A10000020000000000000029 /* TerminalViewAttachments.swift */,
+				A10000020000000000000029 /* TerminalView+Attachments.swift */,
 				F57B574712DA4013BC6E6D5E /* TerminalView+AttachmentsParsing.swift */,
 				0A58238166CD4823820011F5 /* TerminalView+SetupActions.swift */,
 				E6147B37CFB04148BFA41599 /* TerminalView+TranscriptSupport.swift */,
@@ -266,7 +274,6 @@
 				6250668D17C04A23B71786AC /* TerminalMarkdownRenderer+Parsing.swift */,
 				A10000020000000000000026 /* PaddedTextFieldCell.swift */,
 			);
-			name = Terminal;
 			path = Terminal;
 			sourceTree = "<group>";
 		};
@@ -277,16 +284,7 @@
 				B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */,
 				A10000020000000000000021 /* CharacterContentView.swift */,
 			);
-			name = Support;
 			path = Support;
-			sourceTree = "<group>";
-		};
-		A10000050000000000000003 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A10000030000000000000001 /* Lenny.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -340,6 +338,7 @@
 			packageReferences = (
 				7B1000020000000000000001 /* XCRemoteSwiftPackageReference "lottie-spm" */,
 				929E60C22F748E3E003EA359 /* XCRemoteSwiftPackageReference "Sparkle" */,
+				92AFCDB12F805B6D002E07B5 /* XCRemoteSwiftPackageReference "SettingsKit-macOS" */,
 			);
 			productRefGroup = A10000050000000000000003 /* Products */;
 			projectDirPath = "";
@@ -384,6 +383,7 @@
 				A10000010000000000000045 /* ClaudeSessionBackend.swift in Sources */,
 				A10000010000000000000046 /* ClaudeSessionCLI.swift in Sources */,
 				F6C51614C7964C2EA992F899 /* ClaudeSessionCLIParsing+Structured.swift in Sources */,
+				F7A0C2AA9D5941F1B950A8A1 /* GuestTitles.swift in Sources */,
 				B79886ADD52D409490EA159A /* ClaudeSessionCLIParsing+Stdout.swift in Sources */,
 				7DBAF4A3C7864585A79E6EF2 /* ClaudeSessionCLIParsing+ValueExtraction.swift in Sources */,
 				A10000010000000000000047 /* ClaudeSessionCLIParsing.swift in Sources */,
@@ -403,8 +403,8 @@
 				A10000010000000000000026 /* PaddedTextFieldCell.swift in Sources */,
 				A10000010000000000000054 /* TerminalViewLayout.swift in Sources */,
 				A10000010000000000000053 /* TerminalView+Panels.swift in Sources */,
-				A10000010000000000000027 /* TerminalViewSetup.swift in Sources */,
-				A10000010000000000000029 /* TerminalViewAttachments.swift in Sources */,
+				A10000010000000000000027 /* TerminalView+Setup.swift in Sources */,
+				A10000010000000000000029 /* TerminalView+Attachments.swift in Sources */,
 				DE03A9314A424E6E8BEC2B02 /* TerminalView+AttachmentsParsing.swift in Sources */,
 				7DF970370B8446F3B824C07C /* TerminalView+SetupActions.swift in Sources */,
 				B67657262565478489452A02 /* TerminalView+TranscriptSupport.swift in Sources */,
@@ -630,6 +630,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.9.0;
+			};
+		};
+		92AFCDB12F805B6D002E07B5 /* XCRemoteSwiftPackageReference "SettingsKit-macOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/david-swift/SettingsKit-macOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

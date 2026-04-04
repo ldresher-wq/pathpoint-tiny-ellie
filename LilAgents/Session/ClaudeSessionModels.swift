@@ -4,9 +4,18 @@ import PDFKit
 
 struct ResponderExpert: Equatable {
     let name: String
+    let title: String?
     let avatarPath: String
     let archiveContext: String
     let responseScript: String
+
+    init(name: String, title: String? = nil, avatarPath: String, archiveContext: String, responseScript: String) {
+        self.name = name
+        self.title = title
+        self.avatarPath = avatarPath
+        self.archiveContext = archiveContext
+        self.responseScript = responseScript
+    }
 }
 
 enum TranscriptSpeakerKind: String, Codable, Equatable {
@@ -169,8 +178,16 @@ struct TranscriptSpeaker: Equatable {
     }
 
     let name: String
+    let title: String?
     let avatarPath: String?
     let kind: Kind
+
+    init(name: String, title: String? = nil, avatarPath: String?, kind: Kind) {
+        self.name = name
+        self.title = title
+        self.avatarPath = avatarPath
+        self.kind = kind
+    }
 }
 
 struct AssistantSegment: Equatable {

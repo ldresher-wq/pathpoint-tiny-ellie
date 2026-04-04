@@ -100,12 +100,7 @@ extension ClaudeSession {
         guard let canonical = canonicalExpertName(for: rawName),
               let avatarPath = avatarPath(for: canonical) else { return nil }
         let context = "Explicitly suggested by the assistant in the latest answer."
-        return ResponderExpert(
-            name: canonical,
-            avatarPath: avatarPath,
-            archiveContext: context,
-            responseScript: responseScript(for: canonical, context: context)
-        )
+        return makeResponderExpert(name: canonical, avatarPath: avatarPath, archiveContext: context)
     }
 
     func decodeStructuredAssistantJSONObject(from outputText: String) -> [String: Any]? {

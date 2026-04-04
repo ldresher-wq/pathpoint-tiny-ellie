@@ -92,12 +92,7 @@ extension ClaudeSession {
             \(String(text.prefix(320)))
             """
 
-            experts.append(ResponderExpert(
-                name: name,
-                avatarPath: avatarPath,
-                archiveContext: context,
-                responseScript: responseScript(for: name, context: context)
-            ))
+            experts.append(makeResponderExpert(name: name, avatarPath: avatarPath, archiveContext: context))
         }
 
         return Array(experts.prefix(3))
@@ -129,12 +124,7 @@ extension ClaudeSession {
             \(textCandidates.joined(separator: "\n").prefix(320))
             """
 
-            experts.append(ResponderExpert(
-                name: name,
-                avatarPath: avatarPath,
-                archiveContext: context,
-                responseScript: responseScript(for: name, context: context)
-            ))
+            experts.append(makeResponderExpert(name: name, avatarPath: avatarPath, archiveContext: context))
         }
 
         return Array(experts.prefix(3))

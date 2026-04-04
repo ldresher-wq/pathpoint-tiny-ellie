@@ -300,6 +300,6 @@ extension ClaudeSession {
     }
 
     func speaker(for expert: ResponderExpert) -> TranscriptSpeaker {
-        TranscriptSpeaker(name: expert.name, avatarPath: expert.avatarPath, kind: .expert)
+        TranscriptSpeaker(name: expert.name, title: expert.title, avatarPath: expert.avatarPath, kind: .expert)
     }
 }

@@ -21,6 +21,20 @@ xcuserdata/
 *.dSYM.zip
 *.dSYM
 
+# Session logs and scratch notes (may contain sensitive info)
+firebase-debug.log
+*.log
+IMPLEMENTATION_LOG_*.md
+log.md
+log2.md
+newlog.md
+checkmcp.md
+index.md
+implementationplan.md
+nextstep.md
+new.md
+OFFICIAL_MCP_SETUP_NOTES.md
+
 # Sparkle
 *.dmg
 *.zip

@@ -9,7 +9,7 @@ extension ClaudeSession {
             "content": buildInputContent(prompt: prompt, attachments: attachments)
         ]]
 
-        let instructions = buildInstructions(for: expert)
+        let instructions = buildInstructions(for: expert, expectMCP: mcpToken != nil)
         var payload: [String: Any] = [
             "model": selectedOpenAIModel(),
             "instructions": instructions,

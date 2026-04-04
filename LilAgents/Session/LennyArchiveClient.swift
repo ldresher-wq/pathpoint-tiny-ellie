@@ -206,14 +206,25 @@ final class LennyArchiveClient {
         }
 
         if let content = result["content"] as? [[String: Any]] {
-            let texts = content.compactMap { $0["text"] as? String }.filter { !$0.isEmpty }
-            if let first = texts.first,
-               let data = first.data(using: .utf8),
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                return json
+            for item in content {
+                if let embedded = item["json"] as? [String: Any] {
+                    return embedded
+                }
+                if let embedded = item["structuredContent"] as? [String: Any] {
+                    return embedded
+                }
             }
-            if let first = texts.first {
-                return ["content": first]
+
+            let texts = content.compactMap { $0["text"] as? String }.filter { !$0.isEmpty }
+            for text in texts {
+                if let data = text.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    return json
+                }
+            }
+
+            if !texts.isEmpty {
+                return ["content": texts.joined(separator: "\n\n")]
             }
         }
 

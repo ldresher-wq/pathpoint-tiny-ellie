@@ -1,216 +1,320 @@
-# Granola-Inspired Multi-Expert Transcript Plan
+# Codex-Owned MCP Implementation Plan
 
 ## Goal
 
-Shift Lil-Lenny from a single-answer transcript with optional expert handoff into a conversation that visibly shows:
+Make Lil-Lenny support Codex-owned MCP calls reliably, so Codex itself can call `lennysdata` during an in-app conversation.
 
-- work happening before the final answer is ready
-- multiple perspectives as separate messages
-- a clearer distinction between Lil-Lenny orchestration and specialist responses
-- a more agentic feel earlier in the turn
+This plan is specifically about runtime transport for Codex. It should not break:
 
-## Current State
+- MCP token save/install logic
+- `~/.codex/config.toml` writing
+- Claude Code config writing
+- Claude Code runtime path
+- starter-pack/local archive behavior
 
-- The transcript is primarily a linear history of `user`, `assistant`, `error`, `toolUse`, and `toolResult` messages.
-- The final answer is parsed as one `answer_markdown` string plus optional `suggested_experts`.
-- Expert suggestions are rendered as a separate prompt after the answer, not as first-class messages from those experts.
-- Live status currently appears in the composer area and not in the transcript itself.
-- Streaming output is rendered into a single assistant bubble, usually under the Lil-Lenny title.
+## Problem Summary
 
-## Confirmed UX Direction
+Current behavior confirms:
 
-### 1. Transcript-first status
+- MCP configuration and bearer token wiring are working
+- standalone interactive `codex` can use `lennysdata`
+- `codex exec` inside Lil-Lenny starts MCP tool calls, then cancels them with:
+  - `user cancelled MCP tool call`
 
-- Move generation/status feedback out of the input area and into the transcript/output region.
-- Show a live status block under the Lil-Lenny header while work is happening.
-- Keep the input area focused on generation state only:
-  - label like `Generating...`
-  - stop button on the far right
+This matches upstream issue `openai/codex#16685`: `codex exec` is not a reliable transport for MCP tool execution.
 
-### 2. Group-chat style replies
+## Non-Goals
 
-- Responses should appear as multiple message blocks from different speakers.
-- Every non-trivial answer should start with a Lil-Lenny orchestration message.
-- Example opening:
-  - `@Elena, I think you have some thoughts on this.`
-  - `@Elena, @Varun, what are your thoughts?`
-- After that, each expert appears in a separate message block with:
-  - avatar
-  - name
-  - markdown response
-- Each expert block should support a follow-up affordance directly beneath the message.
+This work should not:
 
-### 3. Transcript-native live status with expert presence
+- redesign the Claude Code path
+- remove existing MCP installer/config behavior
+- replace Codex with app-owned archive fetch as the default for the official Codex path
+- change how standalone Codex or Claude are configured outside Lil-Lenny
 
-- Earlier expert presence should be rendered as part of the transcript-first live status area, not as a separate UI system.
-- While the system is still searching or composing, surface likely expert involvement as soon as possible inside the live transcript status stream.
-- Example:
-  - `Searching LennyData for pricing advice`
-  - `Elena Verna is joining the conversation`
-  - show avatar before the final expert message is fully rendered
-- These are temporary status hints only.
-- Once the final answer is rendered, the provisional join/status rows should disappear.
+## Architecture Decision
 
-### 4. Per-message actions
+### Keep configuration shared
 
-- Every expert message should include a CTA directly underneath it.
-- That CTA should switch the avatar and continue in the specialist chat.
-- Every response message should also have a copy affordance so users can copy the message directly.
+Preserve current install/config behavior:
 
-## Technical Direction
+- save token in Lil-Lenny settings
+- write Codex MCP config when Codex is detected
+- write Claude Code MCP config when Claude is detected
 
-## Phase 1: Transcript and Composer Restructure
+This remains useful for:
 
-- Add a transcript-native live activity row for the active turn.
-- Replace current composer status text with a simpler generation state plus stop affordance.
-- Keep status rendering separate from final assistant/expert messages.
-- Make transcript-native status capable of showing:
-  - generic generation/search steps
-  - transport/tool progress
-  - provisional expert-presence events with avatar and name
-- Add per-message utility actions, starting with `Copy`.
+- direct CLI usage
+- external debugging
+- future backend paths
 
-### Likely code areas
+### Split runtime transport by backend
 
-- `LilAgents/Terminal/TerminalView+Setup.swift`
-- `LilAgents/Terminal/TerminalView+Panels.swift`
-- `LilAgents/Terminal/TerminalView+Transcript.swift`
+Use different runtime strategies:
+
+- Claude Code:
+  - keep current path
+- Codex:
+  - replace one-shot `codex exec` runtime with a true interactive Codex session over a PTY
+
+The bug is specific to Codex exec-mode MCP behavior, so runtime should diverge there.
+
+## Recommended Runtime Strategy
+
+### Codex path
+
+Run plain interactive `codex`, not `codex exec`, inside a PTY.
+
+Why:
+
+- interactive Codex already proves MCP can work
+- approvals can be surfaced and answered in-app
+- avoids the `exec`-mode cancellation bug
+
+### Claude path
+
+Do not change it in this project.
+
+Why:
+
+- current issue is not about Claude
+- touching Claude increases regression risk for no benefit
+
+## Implementation Phases
+
+## Phase 1: Isolate Codex Runtime Strategy
+
+Create a Codex-specific runtime path that is separate from the existing `exec` implementation.
+
+### Requirements
+
+- keep `callClaudeCodeCLI(...)` unchanged
+- preserve `callCodexCLI(...)` as a fallback until the new path is ready
+- add a new Codex interactive entry point, for example:
+  - `callCodexInteractive(...)`
+
+### Expected code areas
+
+- `LilAgents/Session/ClaudeSessionCLI.swift`
+- `LilAgents/Session/ClaudeSessionTransport.swift`
+
+## Phase 2: Add PTY-Backed Process Support
+
+The current `runProcess(...)` is pipe-based and optimized for one-shot CLI runs.
+Interactive Codex needs a real TTY.
+
+### Requirements
+
+- add PTY process launching support
+- keep existing pipe-based process support for Claude/other paths
+- capture stdout/stderr-like output from the PTY stream
+- allow writing user input back into the running session
+- preserve cancellation and termination handling
+
+### Important constraint
+
+This should be implemented as a separate code path, not by overloading the current simple `Pipe` model until it becomes hard to reason about.
+
+### Expected code areas
+
+- `LilAgents/Session/ClaudeSessionSupport.swift`
+- possibly a new helper such as:
+  - `LilAgents/Session/CodexPTYSession.swift`
+
+## Phase 3: Define Interactive Codex Session Contract
+
+We need a stable way to use interactive Codex inside Lil-Lenny.
+
+### Session lifecycle
+
+- start a fresh Codex interactive session for a turn
+- send the user prompt
+- let Codex run MCP/tools
+- collect the assistant response
+- terminate the session after the response is complete
+
+### Why not persistent first
+
+Persistent multi-turn sessions are attractive but add complexity immediately:
+
+- prompt/input framing
+- session recovery
+- history drift
+- stuck state handling
+
+Start with per-turn interactive sessions. If stable, consider persistence later.
+
+## Phase 4: In-App Approval Handling
+
+Lil-Lenny already has approval UI primitives. They should be wired to the real interactive Codex transport.
+
+### Requirements
+
+- detect approval prompt text in the PTY stream
+- render the minimized approval card already built in the UI
+- support these actions:
+  - `Allow`
+  - `Allow for this session`
+  - `Always allow`
+  - `Cancel`
+- send the selected choice back to the PTY session
+
+### Success condition
+
+The user should be able to approve `lennysdata.search_content` from Lil-Lenny without switching to terminal.
+
+### Expected code areas
+
+- `LilAgents/Session/ClaudeSessionSupport.swift`
 - `LilAgents/Character/WalkerCharacterSessionWiring.swift`
+- `LilAgents/Terminal/TerminalView+TranscriptBehavior.swift`
+- `LilAgents/Terminal/TerminalView+TranscriptAccessoryViews.swift`
 
-## Phase 2: Richer Message Model
+## Phase 5: Interactive Output Parsing
 
-- Introduce a richer conversation message model that can represent:
-  - Lil-Lenny orchestration/status
-  - standard user messages
-  - specialist/expert messages
-  - live joining / routing events
-  - follow-up affordances attached to a message
-- Stop treating the final answer as only one assistant markdown blob.
+`codex exec --json` gave structured events. Interactive Codex may not.
 
-### Needed model changes
+We need a robust extraction strategy for:
 
-- Extend `ClaudeSession.Message.Role` or replace it with a richer enum/struct.
-- Add per-message speaker identity:
-  - name
-  - avatar
-  - source type (`lenny`, `expert`, `system`, `status`)
-- Add optional metadata for expert follow-up actions.
+- progress/status text
+- approval prompts
+- final assistant response
 
-### Likely code areas
+### First version
 
-- `LilAgents/Session/ClaudeSessionModels.swift`
-- `LilAgents/Session/ClaudeSessionState.swift`
-- `LilAgents/Terminal/TerminalView+Transcript.swift`
+- treat transport/status text as provisional live status only
+- extract the final assistant block conservatively
+- keep the current structured JSON response contract in the prompt
+- parse the final JSON object from the terminal stream if present
 
-## Phase 3: Structured Multi-Speaker Output
+### Fallback
 
-- Update the model prompt/response contract so the backend can return multiple speaker segments instead of only:
-  - `answer_markdown`
-  - `suggested_experts`
-  - `suggest_expert_prompt`
+If structured JSON parsing fails:
 
-### Candidate response shape
+- show a clear runtime error
+- do not silently invent an answer
 
-```json
-{
-  "messages": [
-    {
-      "speaker": "Lil-Lenny",
-      "kind": "orchestrator",
-      "markdown": "@Elena, I think you have some thoughts on this."
-    },
-    {
-      "speaker": "Elena Verna",
-      "kind": "expert",
-      "markdown": "From my perspective..."
-    }
-  ],
-  "follow_up_experts": ["Elena Verna"],
-  "suggest_expert_prompt": true
-}
-```
+## Phase 6: Route Only Official Codex MCP Through Interactive Path
 
-### Notes
+The new path should be narrowly scoped.
 
-- This is the highest-leverage change if the product goal is “show the power of spinning up many agents.”
-- Without a structured multi-message output contract, the UI will remain guessy and fragile.
-- This structured response format should be used for both:
-  - official MCP-backed runs
-  - starter-pack/local runs
+### Use interactive Codex only when all are true
 
-### Likely code areas
+- backend is Codex
+- archive mode is official MCP
+- a valid official token is available
 
-- `LilAgents/Session/ClaudeSessionState.swift`
-- `LilAgents/Session/ClaudeSessionCLIParsing.swift`
-- `LilAgents/Session/ClaudeSessionOpenAI.swift`
-- `LilAgents/Session/ClaudeSessionExpertCatalog.swift`
+### Keep existing behavior for everything else
 
-## Phase 4: Expert Detection from Transport and Tooling
+- starter pack + Codex: current path
+- official + Claude Code: current path
+- OpenAI fallback: current path
 
-- Detect likely expert names during tool-use / MCP phases and surface provisional participant rows inside the transcript-native live status stream before final output.
-- Candidate sources:
-  - Claude Code CLI stream events
-  - Codex CLI stream events
-  - MCP result metadata
-  - named references extracted from tool summaries
-  - explicit structured hints emitted by the model during tool use
+This keeps the blast radius small.
 
-### Safer first version
+## Phase 7: Logging and Diagnostics
 
-- Treat these as provisional presence rows:
-  - `Elena Verna is being consulted`
-  - avatar shown
-- Only upgrade to a real expert message when the final structured response includes that expert.
-- Remove these provisional rows when the final message set is committed to the transcript.
+This work will be hard to stabilize without strong logs.
 
-### Risk
+### Add explicit debug logs for
 
-- Name extraction from raw tool/status text can create false positives.
-- This should be implemented conservatively and preferably behind structured hints from the model.
-- The safest implementation path is:
-  - first parse names from reliable structured transport/tool events
-  - only then consider regex/name extraction from freeform status strings as a fallback
+- interactive Codex session start
+- PTY launch command
+- prompt sent
+- approval prompt detected
+- approval choice submitted
+- final response detected
+- termination reason
+- timeout/stuck session recovery
 
-## Phase 5: Message-Attached Follow-Up Actions
+### Why
 
-- Add follow-up UI directly beneath each expert message.
-- Clicking should:
-  - play a sound
-  - switch avatar/focus
-  - open or continue the expert-specific thread
-- Add a `Copy` action to every assistant/expert response block.
+We need to distinguish:
 
-### Likely code areas
+- Codex session launched but never responded
+- approval prompt appeared but UI did not render
+- approval response was sent but ignored
+- response arrived but parser missed it
 
-- `LilAgents/Terminal/TerminalView+Transcript.swift`
-- `LilAgents/Character/WalkerCharacterCore.swift`
-- `LilAgents/Character/WalkerCharacterPopoverWindow.swift`
+## Phase 8: Safety and Recovery
 
-## Recommended Implementation Order
+Interactive sessions can wedge. Add explicit safeguards.
 
-1. Move live generation state into transcript output and simplify the composer.
-2. Introduce a richer message model with speaker metadata.
-3. Change the response format to return multiple message segments.
-4. Render each segment as an individual message with avatar and follow-up action.
-5. Add provisional “joining” events during MCP/tool phases.
+### Requirements
 
-## Confirmed Decisions
+- timeout for no-output period
+- timeout for approval prompt waiting
+- explicit cancel/stop behavior
+- hard kill fallback if Codex ignores termination
+- clear error messaging in transcript
 
-1. Use `Lil-Lenny intro + specialist message` for single-specialist answers.
-2. For multi-specialist answers, Lil-Lenny should explicitly call on them first, then each expert gets a separate message block even if short.
-3. Provisional join/status rows are temporary background hints and should disappear once the final answer renders.
-4. The follow-up CTA should appear under every expert message.
-5. The new experience should work for both official MCP and starter-pack flows.
-6. Every response message should include a copy action.
-7. Provisional expert rows belong to the transcript-first status stream and should be sourced from Claude/Codex transport and MCP/tool events when possible.
+## Acceptance Criteria
 
-## Remaining Product Choice
+This project is successful when all of these are true:
 
-One decision is still open enough to defer until implementation:
+1. In official archive mode with Codex, Lil-Lenny no longer uses `codex exec`.
+2. Codex itself initiates `lennysdata` MCP tool calls from inside Lil-Lenny.
+3. If approval is required, the minimized approval card appears in Lil-Lenny.
+4. Choosing `Allow` or `Always allow` continues the same turn successfully.
+5. Claude Code behavior is unchanged.
+6. Token/config installation behavior is unchanged for Codex and Claude.
+7. Starter-pack behavior is unchanged.
 
-- Whether Lil-Lenny response blocks should also get the follow-up CTA, or only the copy action.
+## Risks
 
-My default assumption is:
+- interactive stream format may change across Codex versions
+- approval prompt wording may change
+- PTY integration is more complex than one-shot `exec`
+- structured JSON final output may be less reliable in interactive mode than in `exec --json`
 
-- Lil-Lenny messages get `Copy`
-- expert messages get `Copy` + specialist follow-up CTA
+## Mitigations
+
+- keep the implementation Codex-only
+- keep the old `exec` path behind a temporary fallback while stabilizing
+- add strong logging
+- use conservative parsing for final output
+
+## Effort Estimate
+
+### Prototype
+
+- 1 to 2 days
+
+Includes:
+
+- PTY session launch
+- prompt injection
+- approval card wiring
+- basic response extraction
+
+### Production-ready
+
+- 3 to 5 days
+
+Includes:
+
+- recovery behavior
+- better parsing
+- cancellation correctness
+- transcript stability
+- regression testing
+
+## Implementation Order
+
+1. Add a dedicated PTY-backed Codex session helper.
+2. Add a new interactive Codex runtime method.
+3. Route only official Codex MCP turns to that method.
+4. Wire approval prompts to the existing minimized approval card.
+5. Add final-response extraction and strict failure handling.
+6. Add logging and timeout recovery.
+7. Test against real `lennysdata` MCP flows.
+
+## Recommendation
+
+Proceed with the interactive Codex PTY path only for official Codex MCP turns.
+
+Do not:
+
+- change Claude Code runtime
+- remove existing MCP installer/config logic
+- rely on `codex exec` for MCP in Lil-Lenny going forward

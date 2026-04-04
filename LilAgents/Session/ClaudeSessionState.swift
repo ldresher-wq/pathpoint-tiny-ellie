@@ -81,7 +81,7 @@ extension ClaudeSession {
         onTurnComplete?()
     }
 
-    func buildInstructions(for expert: ResponderExpert?) -> String {
+    func buildInstructions(for expert: ResponderExpert?, expectMCP: Bool) -> String {
         let base = """
         You are answering inside a macOS companion app using Lenny's archive.
         Prefer retrieved archive evidence over generic knowledge.
@@ -120,20 +120,24 @@ extension ClaudeSession {
         If no specialist is warranted, return a single Lil-Lenny message.
         `suggested_experts` should include up to 3 relevant archive experts you explicitly relied on or cited.
         If there are no useful expert suggestions, return an empty array and set `suggest_expert_prompt` to false.
+        """
+
+        let mcpInstructions = expectMCP ? """
+
         When MCP tools are available, prefer a fast routing pass before deep reading:
         1. Check `index.md` first to identify the right person, topic, or source.
         2. If `index.md` points to a likely person or source, narrow to that person/source next.
         3. Only then do deeper `read_excerpt` or `read_content` calls.
         Prefer the minimum number of MCP calls needed for a grounded answer.
-        """
+        """ : ""
 
         if let expert {
-            return base + """
+            return base + mcpInstructions + """
 
             The user explicitly switched into \(expert.name)'s avatar.
             Answer in first person as \(expert.name).
             Return exactly one expert message spoken by \(expert.name), unless the user explicitly asks to compare with others.
-            If MCP tools are available, check `index.md` for \(expert.name) first, then stay in that person's context unless the user asks to pivot.
+            \(expectMCP ? "If MCP tools are available, check `index.md` for \(expert.name) first, then stay in that person's context unless the user asks to pivot." : "Use the provided archive context for \(expert.name) if available, and stay in that person's context unless the user asks to pivot.")
             Do not mention the archive, MCP, retrieval, references, or source-gathering process in the final answer unless the user explicitly asks about it.
             Speak as \(expert.name), not as an assistant describing \(expert.name).
             \(expert.responseScript)
@@ -141,7 +145,7 @@ extension ClaudeSession {
             """
         }
 
-        return base
+        return base + mcpInstructions
     }
 
     func buildUserPrompt(message: String, attachments: [SessionAttachment], expert: ResponderExpert?, archiveContext: String? = nil) -> String {
@@ -215,7 +219,7 @@ extension ClaudeSession {
     }
 
     func buildConversationPrompt(message: String, attachments: [SessionAttachment], expert: ResponderExpert?, conversationKey: String, archiveContext: String?, expectMCP: Bool) -> String {
-        let instructions = buildInstructions(for: expert)
+        let instructions = buildInstructions(for: expert, expectMCP: expectMCP)
         let priorMessages = promptHistory(for: conversationKey, expert: expert)
         let transcript = priorMessages.compactMap { message -> String? in
             switch message.role {

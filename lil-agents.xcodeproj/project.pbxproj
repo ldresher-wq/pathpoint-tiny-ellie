@@ -41,6 +41,8 @@
 		A10000010000000000000037 /* ClaudeSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000037 /* ClaudeSessionState.swift */; };
 		A10000010000000000000038 /* ClaudeSessionExpertResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */; };
 		A10000010000000000000039 /* ClaudeSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000039 /* ClaudeSessionTransport.swift */; };
+		A10000010000000000000069 /* ClaudeSessionOfficialArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */; };
+		A10000010000000000000070 /* LennyArchiveClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000070 /* LennyArchiveClient.swift */; };
 		A10000010000000000000040 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000040 /* AppSettings.swift */; };
 		A10000010000000000000041 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000041 /* SettingsView.swift */; };
 		A10000010000000000000042 /* LocalArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000042 /* LocalArchive.swift */; };
@@ -118,6 +120,8 @@
 		A10000020000000000000037 /* ClaudeSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionState.swift; sourceTree = "<group>"; };
 		A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionExpertResolution.swift; sourceTree = "<group>"; };
 		A10000020000000000000039 /* ClaudeSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionTransport.swift; sourceTree = "<group>"; };
+		A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionOfficialArchive.swift; sourceTree = "<group>"; };
+		A10000020000000000000070 /* LennyArchiveClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LennyArchiveClient.swift; sourceTree = "<group>"; };
 		A10000020000000000000040 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A10000020000000000000041 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A10000020000000000000042 /* LocalArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalArchive.swift; sourceTree = "<group>"; };
@@ -245,6 +249,7 @@
 				A10000020000000000000037 /* ClaudeSessionState.swift */,
 				A10000020000000000000045 /* ClaudeSessionBackend.swift */,
 				A10000020000000000000039 /* ClaudeSessionTransport.swift */,
+				A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */,
 				A10000020000000000000046 /* ClaudeSessionCLI.swift */,
 				A10000020000000000000047 /* ClaudeSessionCLIParsing.swift */,
 				BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */,
@@ -257,6 +262,7 @@
 				A10000020000000000000048 /* ClaudeSessionExpertCatalog.swift */,
 				A10000020000000000000049 /* ClaudeSessionExpertTextResolution.swift */,
 				A10000020000000000000052 /* ClaudeSessionSupport.swift */,
+				A10000020000000000000070 /* LennyArchiveClient.swift */,
 				A10000020000000000000042 /* LocalArchive.swift */,
 				A10000020000000000000044 /* SessionDebugLogger.swift */,
 			);
@@ -424,7 +430,9 @@
 				A10000010000000000000048 /* ClaudeSessionExpertCatalog.swift in Sources */,
 				A10000010000000000000038 /* ClaudeSessionExpertResolution.swift in Sources */,
 				A10000010000000000000049 /* ClaudeSessionExpertTextResolution.swift in Sources */,
+				A10000010000000000000069 /* ClaudeSessionOfficialArchive.swift in Sources */,
 				A10000010000000000000050 /* ClaudeSessionOpenAI.swift in Sources */,
+				A10000010000000000000070 /* LennyArchiveClient.swift in Sources */,
 				A10000010000000000000052 /* ClaudeSessionSupport.swift in Sources */,
 				A10000010000000000000039 /* ClaudeSessionTransport.swift in Sources */,
 				A10000010000000000000040 /* AppSettings.swift in Sources */,

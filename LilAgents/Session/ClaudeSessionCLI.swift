@@ -142,9 +142,10 @@ extension ClaudeSession {
             runtimeEnvironment[Constants.lennyMCPAuthEnvVar] = token
         }
 
+        let approvalPolicy = useOfficialMCP ? "on-request" : "never"
         var args = [
             "-a",
-            "never",
+            approvalPolicy,
             "exec",
             "--json",
             "--skip-git-repo-check",
@@ -194,6 +195,8 @@ extension ClaudeSession {
             arguments: args,
             environment: runtimeEnvironment,
             workingDirectory: preferredWorkingDirectoryURL(),
+            wantsInteractiveInput: useOfficialMCP,
+            allocatePseudoTerminal: useOfficialMCP,
             onLineReceived: { [weak self] line in
                 guard let self else { return }
                 SessionDebugLogger.trace("codex-transport", line)

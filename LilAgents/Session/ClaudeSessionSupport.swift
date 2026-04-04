@@ -9,14 +9,24 @@ extension ClaudeSession {
         environment: [String: String],
         workingDirectory: URL?,
         wantsInteractiveInput: Bool = false,
+        allocatePseudoTerminal: Bool = false,
         onLineReceived: ((String) -> Void)? = nil,
         completion: @escaping (Int32, String, String) -> Void
     ) {
         let process = Process()
         currentProcess = process
         currentProcessStdin = nil
-        process.executableURL = URL(fileURLWithPath: executablePath)
-        process.arguments = arguments
+        let wrappedExecutablePath: String
+        let wrappedArguments: [String]
+        if allocatePseudoTerminal {
+            wrappedExecutablePath = "/usr/bin/script"
+            wrappedArguments = ["-q", "/dev/null", executablePath] + arguments
+        } else {
+            wrappedExecutablePath = executablePath
+            wrappedArguments = arguments
+        }
+        process.executableURL = URL(fileURLWithPath: wrappedExecutablePath)
+        process.arguments = wrappedArguments
         process.environment = environment
         if let workingDirectory {
             process.currentDirectoryURL = workingDirectory
@@ -34,7 +44,7 @@ extension ClaudeSession {
 
         SessionDebugLogger.log(
             "process",
-            "launching process executable=\(executablePath) args=\(arguments) cwd=\(workingDirectory?.path ?? FileManager.default.currentDirectoryPath)"
+            "launching process executable=\(wrappedExecutablePath) args=\(wrappedArguments) cwd=\(workingDirectory?.path ?? FileManager.default.currentDirectoryPath)"
         )
 
         var finalStdout = ""

@@ -16,6 +16,7 @@ extension ClaudeSession {
         Task {
             do {
                 let client = try LennyArchiveClient(token: token)
+                SessionDebugLogger.log("official-archive", "starting official archive lookup. query=\(query)")
 
                 let searchArguments: [String: Any] = [
                     "query": query,
@@ -28,6 +29,11 @@ extension ClaudeSession {
                 }
 
                 let searchOutput = try await client.searchContent(query: query, limit: 6)
+                SessionDebugLogger.logMultiline(
+                    "official-archive",
+                    header: "search_content returned for query=\(query)",
+                    body: flattenedArchiveText(from: searchOutput) ?? String(describing: searchOutput)
+                )
                 let resultSummary = processResultDisplay(for: "search_content", arguments: searchArguments, output: searchOutput)
                 await MainActor.run {
                     onToolResult?(resultSummary, false)
@@ -36,6 +42,7 @@ extension ClaudeSession {
 
                 guard let searchEnvelope = decodeSearchEnvelope(from: searchOutput),
                       !searchEnvelope.results.isEmpty else {
+                    SessionDebugLogger.log("official-archive", "search_content decoded no usable results for query=\(query)")
                     await MainActor.run {
                         completion(.success((
                             promptContext: """
@@ -64,12 +71,18 @@ extension ClaudeSession {
                 let excerptOutput: [String: Any]
                 do {
                     excerptOutput = try await client.readExcerpt(filename: topMatch.filename, query: query, radius: 700)
+                    SessionDebugLogger.logMultiline(
+                        "official-archive",
+                        header: "read_excerpt returned for file=\(topMatch.filename)",
+                        body: flattenedArchiveText(from: excerptOutput) ?? String(describing: excerptOutput)
+                    )
                     let excerptSummary = processResultDisplay(for: "read_excerpt", arguments: excerptArguments, output: excerptOutput)
                     await MainActor.run {
                         onToolResult?(excerptSummary, false)
                         appendHistory(Message(role: .toolResult, text: excerptSummary), to: conversationKey)
                     }
                 } catch {
+                    SessionDebugLogger.log("official-archive", "read_excerpt failed for file=\(topMatch.filename): \(error.localizedDescription)")
                     excerptOutput = [:]
                 }
 
@@ -83,6 +96,7 @@ extension ClaudeSession {
                     )))
                 }
             } catch {
+                SessionDebugLogger.log("official-archive", "official archive lookup failed: \(error.localizedDescription)")
                 await MainActor.run {
                     completion(.failure(error))
                 }

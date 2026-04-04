@@ -127,6 +127,21 @@ extension ClaudeSession {
             }
 
             if let token = self.officialMCPToken(from: environment) {
+                if case .codexCLI = backend, self.backendSupportsOfficialMCP(backend, environment: environment) {
+                    self.dispatchResolvedBackend(
+                        backend,
+                        message: message,
+                        attachments: attachments,
+                        environment: environment,
+                        expert: activeExpert,
+                        conversationKey: conversationKey,
+                        archiveContext: nil,
+                        officialMCPToken: token,
+                        useOfficialMCP: true
+                    )
+                    return
+                }
+
                 self.fetchOfficialArchiveContext(
                     message: message,
                     expert: activeExpert,

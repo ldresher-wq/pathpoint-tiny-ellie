@@ -227,7 +227,7 @@ extension TerminalView {
         appendBubble(
             text: attrText,
             isUser: false,
-            speaker: speaker(for: expert),
+            speaker: TranscriptSpeaker(name: expert.name, title: expert.title, avatarPath: expert.avatarPath, kind: .expert),
             textInsets: NSSize(width: 20, height: 12),
             showsCopyAction: false
         )

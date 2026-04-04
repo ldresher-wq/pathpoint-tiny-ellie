@@ -41,8 +41,6 @@
 		A10000010000000000000037 /* ClaudeSessionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000037 /* ClaudeSessionState.swift */; };
 		A10000010000000000000038 /* ClaudeSessionExpertResolution.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */; };
 		A10000010000000000000039 /* ClaudeSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000039 /* ClaudeSessionTransport.swift */; };
-		A10000010000000000000069 /* ClaudeSessionOfficialArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */; };
-		A10000010000000000000070 /* LennyArchiveClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000070 /* LennyArchiveClient.swift */; };
 		A10000010000000000000040 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000040 /* AppSettings.swift */; };
 		A10000010000000000000041 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000041 /* SettingsView.swift */; };
 		A10000010000000000000042 /* LocalArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000042 /* LocalArchive.swift */; };
@@ -69,6 +67,8 @@
 		A10000010000000000000066 /* HoverButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000066 /* HoverButton.swift */; };
 		A10000010000000000000067 /* TerminalView+WelcomePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000067 /* TerminalView+WelcomePanel.swift */; };
 		A10000010000000000000068 /* TerminalView+LiveStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000068 /* TerminalView+LiveStatus.swift */; };
+		A10000010000000000000069 /* ClaudeSessionOfficialArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */; };
+		A10000010000000000000070 /* LennyArchiveClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000070 /* LennyArchiveClient.swift */; };
 		A10000110000000000000001 /* CharacterSprites in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000001 /* CharacterSprites */; };
 		A10000110000000000000002 /* ExpertAvatars in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000002 /* ExpertAvatars */; };
 		A10000110000000000000003 /* fall-smoke-dust.lottie in Resources */ = {isa = PBXBuildFile; fileRef = A10000120000000000000003 /* fall-smoke-dust.lottie */; };
@@ -120,8 +120,6 @@
 		A10000020000000000000037 /* ClaudeSessionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionState.swift; sourceTree = "<group>"; };
 		A10000020000000000000038 /* ClaudeSessionExpertResolution.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionExpertResolution.swift; sourceTree = "<group>"; };
 		A10000020000000000000039 /* ClaudeSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionTransport.swift; sourceTree = "<group>"; };
-		A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionOfficialArchive.swift; sourceTree = "<group>"; };
-		A10000020000000000000070 /* LennyArchiveClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LennyArchiveClient.swift; sourceTree = "<group>"; };
 		A10000020000000000000040 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A10000020000000000000041 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A10000020000000000000042 /* LocalArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalArchive.swift; sourceTree = "<group>"; };
@@ -148,6 +146,8 @@
 		A10000020000000000000066 /* HoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverButton.swift; sourceTree = "<group>"; };
 		A10000020000000000000067 /* TerminalView+WelcomePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+WelcomePanel.swift"; sourceTree = "<group>"; };
 		A10000020000000000000068 /* TerminalView+LiveStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+LiveStatus.swift"; sourceTree = "<group>"; };
+		A10000020000000000000069 /* ClaudeSessionOfficialArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionOfficialArchive.swift; sourceTree = "<group>"; };
+		A10000020000000000000070 /* LennyArchiveClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LennyArchiveClient.swift; sourceTree = "<group>"; };
 		A10000030000000000000001 /* Lenny.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Lenny.app; path = "Lil-Lenny.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000120000000000000001 /* CharacterSprites */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CharacterSprites; sourceTree = "<group>"; };
 		A10000120000000000000002 /* ExpertAvatars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ExpertAvatars; sourceTree = "<group>"; };
@@ -155,6 +155,7 @@
 		A10000120000000000000004 /* fall-smoke-dust.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "fall-smoke-dust.json"; sourceTree = "<group>"; };
 		A2004BEEE2C94167A8B29DB6 /* TerminalMarkdownRenderer+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalMarkdownRenderer+Formatting.swift"; sourceTree = "<group>"; };
 		AC0815D0269047FF9812F195 /* ClaudeSessionAttachmentModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionAttachmentModels.swift; sourceTree = "<group>"; };
+		B59791042F81521300882382 /* log-codex.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "log-codex.md"; sourceTree = "<group>"; };
 		B6E1D829BD5F45BE93DC108D /* TerminalView+TranscriptBubbleText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubbleText.swift"; sourceTree = "<group>"; };
 		B97C5AEED2944E54BCB1A99A /* AvatarImageUtilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvatarImageUtilities.swift; sourceTree = "<group>"; };
 		BAAA8DD4462743869A46526E /* ClaudeSessionCLIParsing+Stdout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionCLIParsing+Stdout.swift"; sourceTree = "<group>"; };
@@ -188,6 +189,7 @@
 		A10000050000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				B59791042F81521300882382 /* log-codex.md */,
 				A10000050000000000000002 /* LilAgents */,
 				922A33A32F812E09008BF92C /* Frameworks */,
 				A10000050000000000000003 /* Products */,

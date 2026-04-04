@@ -32,6 +32,12 @@ extension ClaudeSession {
                 return ("Tool Result", toolFailureStatus(for: normalizedTool, errorMessage: errorMessage))
             }
 
+            if status == "completed",
+               let result = item["result"],
+               let completionStatus = completedToolStatus(for: normalizedTool, arguments: arguments, result: result) {
+                return ("Tool Result", completionStatus)
+            }
+
             if Constants.lennyAllowedTools.contains(normalizedTool) {
                 return processDisplay(for: normalizedTool, arguments: arguments)
             }
@@ -137,6 +143,10 @@ extension ClaudeSession {
         }
 
         switch normalizedTool.lowercased() {
+        case "list_mcp_resources":
+            return ("Calling MCP Tool", "Checking the archive index")
+        case "list_mcp_resource_templates":
+            return ("Calling MCP Tool", "Checking archive lookup shortcuts")
         case "grep":
             if let pattern = arguments["pattern"] as? String, !pattern.isEmpty {
                 return ("Grep", "Looking for \(pattern)")
@@ -182,12 +192,12 @@ extension ClaudeSession {
             let total = (envelope["total_results"] as? NSNumber)?.intValue ?? 0
             let query = (envelope["query"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "the topic"
             if total == 0 {
-                return "No direct matches for \(query), trying a broader search"
+                return "No direct matches for \(query), broadening the search"
             }
             if total == 1 {
-                return "Found 1 relevant match for \(query)"
+                return "Found a relevant source for \(query)"
             }
-            return "Found \(total) relevant matches for \(query)"
+            return "Found \(total) relevant sources for \(query)"
         }
 
         if toolName == "read_excerpt" || toolName == "read_content",
@@ -228,6 +238,34 @@ extension ClaudeSession {
             return "\(toolName) access isn't available here, trying another route"
         }
         return "That route isn't available here, trying another approach"
+    }
+
+    private func completedToolStatus(for toolName: String, arguments: [String: Any], result: Any) -> String? {
+        if Constants.lennyAllowedTools.contains(toolName) {
+            let output = decodedToolResultPayload(from: result)
+            return processResultStatus(for: toolName, arguments: arguments, output: output)
+        }
+
+        let normalized = toolName.lowercased()
+        let payload = decodedToolResultPayload(from: result)
+
+        if normalized == "list_mcp_resources",
+           let dict = payload as? [String: Any] {
+            let resources = dict["resources"] as? [Any] ?? []
+            return resources.isEmpty
+                ? "No archive index is exposed here, searching directly instead"
+                : "Found \(resources.count) archive sources"
+        }
+
+        if normalized == "list_mcp_resource_templates",
+           let dict = payload as? [String: Any] {
+            let templates = dict["resourceTemplates"] as? [Any] ?? []
+            return templates.isEmpty
+                ? "No archive shortcuts are exposed here, searching directly instead"
+                : "Found \(templates.count) archive shortcuts"
+        }
+
+        return nil
     }
 
     private func decodedToolResultPayload(from content: Any?) -> Any? {

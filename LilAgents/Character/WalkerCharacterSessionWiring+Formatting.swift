@@ -33,7 +33,7 @@ extension WalkerCharacter {
             if let planningStatus = userFacingPlanningStatus(from: detail ?? summary) {
                 return planningStatus
             }
-            return detail ?? "Getting things ready"
+            return detail ?? "Planning the next step"
         }
         if lowered.contains("calling mcp tool") {
             if let detail, let rewritten = userFacingResearchStatus(from: detail) {
@@ -60,9 +60,9 @@ extension WalkerCharacter {
             return detail.map { "Using \($0)" } ?? "Using a research tool"
         }
         if lowered.contains("running") || lowered.contains("progress") || lowered.contains("thinking") {
-            return detail ?? "Working through the request"
+            return detail ?? "Working through it"
         }
-        return detail ?? "Working through the request"
+        return detail ?? "Working through it"
     }
 
     func compactLiveStatus(_ status: String) -> String {
@@ -245,7 +245,7 @@ extension WalkerCharacter {
             return "Connecting to the archive"
         }
         if lowered.contains("claude code") || lowered.contains("openai responses") || lowered.contains("codex") {
-            return "Starting the background work"
+            return "Getting organized"
         }
         return userFacingNarration(from: summary)
     }
@@ -261,10 +261,10 @@ extension WalkerCharacter {
             return "Connecting to the archive"
         }
         if lowered.contains("archive lookup was cancelled") {
-            return "The archive lookup was cancelled"
+            return "The archive search was cancelled"
         }
         if lowered.contains("archive connection failed to start") {
-            return "The archive connection failed to start"
+            return "Could not connect to the archive"
         }
         if lowered.contains("archive token was not available") {
             return "The archive token was not available"
@@ -297,7 +297,7 @@ extension WalkerCharacter {
 
         if lowered.contains("i have enough from the archive now")
             || lowered.contains("based on what i've gathered from") {
-            return "Pulling together the final answer"
+            return "Pulling the answer together"
         }
 
         if lowered.contains("permission to use bash has been denied") {
@@ -341,7 +341,7 @@ extension WalkerCharacter {
             if let topic = trailingTopic(in: trimmed) {
                 return "Looking into \(topic)"
             }
-            return "Looking into the right source"
+            return "Looking for the right source"
         }
 
         return nil

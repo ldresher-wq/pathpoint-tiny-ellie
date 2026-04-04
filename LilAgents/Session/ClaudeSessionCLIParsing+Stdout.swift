@@ -94,7 +94,7 @@ extension ClaudeSession {
 
         switch eventType {
         case "thread.started", "turn.started":
-            return ("Planning", "Starting the background work")
+            return ("Planning", "Getting organized")
         case "turn.completed":
             return ("Writing", "Writing the answer")
         case "error":

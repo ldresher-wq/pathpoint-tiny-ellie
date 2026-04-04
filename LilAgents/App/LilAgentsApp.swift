@@ -254,6 +254,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
                 defer: false
             )
             window.title = "Lil-Lenny Settings"
+            window.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 11)
+            window.collectionBehavior = [.canJoinAllSpaces]
             let hostingController = NSHostingController(rootView: SettingsView())
             window.contentViewController = hostingController
             window.setContentSize(NSSize(width: 600, height: 460))
@@ -263,6 +265,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         }
 
         settingsWindow?.makeKeyAndOrderFront(nil)
+        settingsWindow?.orderFrontRegardless()
     }
 
     @objc func installPendingUpdate() {

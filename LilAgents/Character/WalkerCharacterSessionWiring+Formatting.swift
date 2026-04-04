@@ -69,19 +69,30 @@ extension WalkerCharacter {
         let trimmed = status.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return trimmed }
 
+        func compactPreview(_ text: String, limit: Int = 3) -> String {
+            let normalized = text
+                .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !normalized.isEmpty else { return "" }
+
+            let words = normalized.split(separator: " ").map(String.init)
+            guard words.count > limit else { return normalized }
+            return words.prefix(limit).joined(separator: " ") + "…"
+        }
+
         if trimmed.hasPrefix("Calling MCP Tool:") {
             let toolPortion = trimmed.replacingOccurrences(of: "Calling MCP Tool: ", with: "")
             let toolName = toolPortion.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "MCP"
-            return "MCP: \(toolName)"
+            return compactPreview("MCP \(toolName)")
         }
 
         if trimmed.hasPrefix("Calling Model:") {
             let modelPortion = trimmed.replacingOccurrences(of: "Calling Model: ", with: "")
-            return String(modelPortion.prefix(32))
+            return compactPreview(String(modelPortion.prefix(32)))
         }
 
         if trimmed.hasPrefix("Calling "), let range = trimmed.range(of: " in ") {
-            return String(trimmed[..<range.lowerBound])
+            return compactPreview(String(trimmed[..<range.lowerBound]))
         }
 
         if trimmed.lowercased().hasPrefix("writing") {
@@ -92,7 +103,7 @@ extension WalkerCharacter {
             return "Loaded"
         }
 
-        return String(trimmed.prefix(32))
+        return compactPreview(String(trimmed.prefix(32)))
     }
 
     func formatLiveResultStatus(_ summary: String, isError: Bool) -> String {

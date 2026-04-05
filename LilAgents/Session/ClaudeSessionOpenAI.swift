@@ -68,6 +68,8 @@ extension ClaudeSession {
             do {
                 let (asyncBytes, _) = try await URLSession.shared.bytes(for: request)
                 var mcpExperts: [ResponderExpert] = []
+                var hasStartedWriting = false
+                var hasSignaledThinking = false
 
                 for try await line in asyncBytes.lines {
                     if Task.isCancelled { return }
@@ -77,6 +79,14 @@ extension ClaudeSession {
                           let data = jsonStr.data(using: .utf8),
                           let event = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                           let eventType = event["type"] as? String else { continue }
+
+                    // First event of any kind — connection is live, show thinking status
+                    if !hasSignaledThinking {
+                        hasSignaledThinking = true
+                        DispatchQueue.main.async { [weak self] in
+                            self?.onToolUse?("Thinking", ["summary": "Thinking through it…"])
+                        }
+                    }
 
                     switch eventType {
 
@@ -92,8 +102,11 @@ extension ClaudeSession {
                         }
 
                     case "response.output_text.delta":
-                        DispatchQueue.main.async { [weak self] in
-                            self?.onToolUse?("Writing", ["summary": "Composing the answer"])
+                        if !hasStartedWriting {
+                            hasStartedWriting = true
+                            DispatchQueue.main.async { [weak self] in
+                                self?.onToolUse?("Writing", ["summary": "Writing the answer…"])
+                            }
                         }
 
                     case "response.mcp_call.completed":

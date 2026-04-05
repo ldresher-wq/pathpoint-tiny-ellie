@@ -22,39 +22,47 @@ enum AppSettings {
     }
 
     enum OpenAIModel: String, CaseIterable {
+        case gpt54 = "gpt-5.4"
+        case gpt54Pro = "gpt-5.4-pro"
+        case gpt54Mini = "gpt-5.4-mini"
+        case gpt54Nano = "gpt-5.4-nano"
+        case gpt41 = "gpt-4.1"
         case gpt5 = "gpt-5"
         case gpt5Mini = "gpt-5-mini"
         case gpt5Nano = "gpt-5-nano"
-        case o3 = "o3"
-        case o3Mini = "o3-mini"
 
         var label: String {
             switch self {
+            case .gpt54: return "GPT-5.4"
+            case .gpt54Pro: return "GPT-5.4 Pro"
+            case .gpt54Mini: return "GPT-5.4 mini"
+            case .gpt54Nano: return "GPT-5.4 nano"
+            case .gpt41: return "GPT-4.1"
             case .gpt5: return "GPT-5"
             case .gpt5Mini: return "GPT-5 mini"
             case .gpt5Nano: return "GPT-5 nano"
-            case .o3: return "o3"
-            case .o3Mini: return "o3-mini"
             }
         }
     }
 
     enum CodexModel: String, CaseIterable {
         case `default`
+        case gpt54 = "gpt-5.4"
+        case gpt54Mini = "gpt-5.4-mini"
+        case gpt54Nano = "gpt-5.4-nano"
         case gpt5 = "gpt-5"
         case gpt5Mini = "gpt-5-mini"
         case gpt5Nano = "gpt-5-nano"
-        case o3 = "o3"
-        case o3Mini = "o3-mini"
 
         var label: String {
             switch self {
             case .default: return "Codex"
+            case .gpt54: return "GPT-5.4"
+            case .gpt54Mini: return "GPT-5.4 mini"
+            case .gpt54Nano: return "GPT-5.4 nano"
             case .gpt5: return "GPT-5"
             case .gpt5Mini: return "GPT-5 mini"
             case .gpt5Nano: return "GPT-5 nano"
-            case .o3: return "o3"
-            case .o3Mini: return "o3-mini"
             }
         }
     }
@@ -318,8 +326,8 @@ enum AppSettings {
 
     static var preferredOpenAIModel: OpenAIModel {
         get {
-            let rawValue = UserDefaults.standard.string(forKey: preferredOpenAIModelKey) ?? OpenAIModel.gpt5Nano.rawValue
-            return OpenAIModel(rawValue: rawValue) ?? .gpt5Nano
+            let rawValue = UserDefaults.standard.string(forKey: preferredOpenAIModelKey) ?? OpenAIModel.gpt54Mini.rawValue
+            return OpenAIModel(rawValue: rawValue) ?? .gpt54Mini
         }
         set {
             UserDefaults.standard.set(newValue.rawValue, forKey: preferredOpenAIModelKey)

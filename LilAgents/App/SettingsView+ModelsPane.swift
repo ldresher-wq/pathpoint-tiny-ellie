@@ -225,20 +225,21 @@ extension SettingsView {
 private struct RuntimeSegment {
     let label: String
     let tag: String
-    let isAvailable: Bool
+    /// nil = still detecting, true/false = result known
+    let available: Bool?
 }
 
 struct RuntimeSegmentedControl: View {
     @Binding var selection: String
-    @State private var claudeAvailable = false
-    @State private var codexAvailable = false
+    @State private var claudeAvailable: Bool? = nil
+    @State private var codexAvailable: Bool? = nil
 
     private var segments: [RuntimeSegment] {
         [
-            RuntimeSegment(label: "Automatic",   tag: AppSettings.PreferredTransport.automatic.rawValue,  isAvailable: true),
-            RuntimeSegment(label: "Claude Code", tag: AppSettings.PreferredTransport.claudeCode.rawValue, isAvailable: claudeAvailable),
-            RuntimeSegment(label: "Codex",       tag: AppSettings.PreferredTransport.codex.rawValue,      isAvailable: codexAvailable),
-            RuntimeSegment(label: "OpenAI API",  tag: AppSettings.PreferredTransport.openAIAPI.rawValue,  isAvailable: true),
+            RuntimeSegment(label: "Automatic",   tag: AppSettings.PreferredTransport.automatic.rawValue,  available: true),
+            RuntimeSegment(label: "Claude Code", tag: AppSettings.PreferredTransport.claudeCode.rawValue, available: claudeAvailable),
+            RuntimeSegment(label: "Codex",       tag: AppSettings.PreferredTransport.codex.rawValue,      available: codexAvailable),
+            RuntimeSegment(label: "OpenAI API",  tag: AppSettings.PreferredTransport.openAIAPI.rawValue,  available: true),
         ]
     }
 
@@ -246,22 +247,32 @@ struct RuntimeSegmentedControl: View {
         HStack(spacing: 0) {
             ForEach(segments, id: \.tag) { segment in
                 segmentButton(segment)
+                    .overlay(alignment: .trailing) {
+                        if segment.tag != AppSettings.PreferredTransport.openAIAPI.rawValue {
+                            Rectangle()
+                                .fill(Color(NSColor.separatorColor).opacity(0.6))
+                                .frame(width: 0.5)
+                        }
+                    }
             }
         }
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 7))
-        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(NSColor.separatorColor), lineWidth: 0.5))
+        .background(Color(NSColor.controlBackgroundColor).opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(NSColor.separatorColor), lineWidth: 0.5))
         .task {
-            let claude = await Task.detached(priority: .userInitiated) { AppSettings.hasDetectedClaudeLogin }.value
-            let codex  = await Task.detached(priority: .userInitiated) { AppSettings.hasDetectedCodexLogin  }.value
-            claudeAvailable = claude
-            codexAvailable  = codex
+            async let claude = Task.detached(priority: .userInitiated) { AppSettings.hasDetectedClaudeLogin }.value
+            async let codex  = Task.detached(priority: .userInitiated) { AppSettings.hasDetectedCodexLogin  }.value
+            let (c, d) = await (claude, codex)
+            claudeAvailable = c
+            codexAvailable  = d
         }
     }
 
     @ViewBuilder
     private func segmentButton(_ segment: RuntimeSegment) -> some View {
-        let isSelected = selection == segment.tag
+        let isSelected   = selection == segment.tag
+        let isDetecting  = segment.available == nil
+        let isAvailable  = segment.available == true
 
         Button {
             selection = segment.tag
@@ -269,31 +280,37 @@ struct RuntimeSegmentedControl: View {
             VStack(spacing: 2) {
                 Text(segment.label)
                     .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
-                    .foregroundColor(segmentTextColor(isSelected: isSelected, isAvailable: segment.isAvailable))
-                if !segment.isAvailable {
+                    .foregroundColor(labelColor(isSelected: isSelected, isAvailable: isAvailable, isDetecting: isDetecting))
+
+                if isDetecting {
+                    // Placeholder to keep row height stable while checking
+                    Text("Checking…")
+                        .font(.system(size: 9.5))
+                        .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                } else if !isAvailable {
                     Text("Not installed")
                         .font(.system(size: 9.5))
                         .foregroundColor(Color(NSColor.tertiaryLabelColor))
                 }
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, segment.isAvailable ? 6 : 5)
-            .background(isSelected && segment.isAvailable ? Color.accentColor.opacity(0.14) : Color.clear)
-        }
-        .buttonStyle(.plain)
-        .disabled(!segment.isAvailable)
-        .overlay(alignment: .trailing) {
-            if segment.tag != AppSettings.PreferredTransport.openAIAPI.rawValue {
-                Rectangle()
-                    .fill(Color(NSColor.separatorColor))
-                    .frame(width: 0.5)
+            .padding(.vertical, 6)
+            .background {
+                if isSelected && isAvailable {
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.accentColor.opacity(0.18))
+                        .padding(2)
+                }
             }
         }
+        .buttonStyle(.plain)
+        .disabled(!isAvailable && !isDetecting)
     }
 
-    private func segmentTextColor(isSelected: Bool, isAvailable: Bool) -> Color {
-        if !isAvailable { return Color(NSColor.tertiaryLabelColor) }
-        if isSelected { return Color.accentColor }
+    private func labelColor(isSelected: Bool, isAvailable: Bool, isDetecting: Bool) -> Color {
+        if isDetecting   { return Color(NSColor.secondaryLabelColor) }
+        if !isAvailable  { return Color(NSColor.tertiaryLabelColor) }
+        if isSelected    { return Color.accentColor }
         return Color(NSColor.labelColor)
     }
 }

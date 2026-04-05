@@ -92,15 +92,34 @@ extension ClaudeSession {
             self.appendHistory(Message(role: .toolResult, text: sourceSummary), to: conversationKey)
 
             if archiveMode == .starterPack {
-                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
-                SessionDebugLogger.log("archive", "using GitHub archive context. backend=\(backend) expert=\(activeExpert?.name ?? "none")")
-                self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
-                self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
-                self.onToolResult?("Archive ready", false)
-                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
-
                 switch backend {
+                case .openAIResponsesAPI:
+                    guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
+                        SessionDebugLogger.log("turn", "starter pack openai fallback but OPENAI_API_KEY missing")
+                        self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                        return
+                    }
+                    SessionDebugLogger.log("archive", "openai path: pre-fetching GitHub archive. expert=\(activeExpert?.name ?? "none")")
+                    self.prefetchGitHubArchiveContext(message: message, expert: activeExpert, conversationKey: conversationKey) { [weak self] context in
+                        guard let self else { return }
+                        self.callOpenAI(
+                            message: message,
+                            attachments: attachments,
+                            apiKey: key,
+                            expert: activeExpert,
+                            conversationKey: conversationKey,
+                            mcpToken: nil,
+                            archiveContext: context.isEmpty ? nil : context
+                        )
+                    }
+
                 case let .claudeCodeCLI(path):
+                    let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                    SessionDebugLogger.log("archive", "using GitHub archive context (CLI). backend=\(backend) expert=\(activeExpert?.name ?? "none")")
+                    self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                    self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                    self.onToolResult?("Archive ready", false)
+                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                     self.callClaudeCodeCLI(
                         executablePath: path,
                         message: message,
@@ -114,6 +133,12 @@ extension ClaudeSession {
                     )
 
                 case let .codexCLI(path):
+                    let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                    SessionDebugLogger.log("archive", "using GitHub archive context (Codex). backend=\(backend) expert=\(activeExpert?.name ?? "none")")
+                    self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                    self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                    self.onToolResult?("Archive ready", false)
+                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                     self.callCodexCLI(
                         executablePath: path,
                         message: message,
@@ -123,22 +148,6 @@ extension ClaudeSession {
                         conversationKey: conversationKey,
                         archiveContext: archiveContext,
                         useOfficialMCP: false
-                    )
-
-                case .openAIResponsesAPI:
-                    guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
-                        SessionDebugLogger.log("turn", "starter pack openai fallback but OPENAI_API_KEY missing")
-                        self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
-                        return
-                    }
-                    self.callOpenAI(
-                        message: message,
-                        attachments: attachments,
-                        apiKey: key,
-                        expert: activeExpert,
-                        conversationKey: conversationKey,
-                        mcpToken: nil,
-                        archiveContext: archiveContext
                     )
                 }
                 return
@@ -196,15 +205,34 @@ extension ClaudeSession {
 
             // No explicit MCP token — fall back to GitHub archive rather than attempting
             // MCP via the global config (which may time out or lack auth).
-            let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
             SessionDebugLogger.log("archive", "no MCP token, using GitHub archive fallback")
-            self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
-            self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
-            self.onToolResult?("Archive ready", false)
-            self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
 
             switch backend {
+            case .openAIResponsesAPI:
+                guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
+                    self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                    return
+                }
+                SessionDebugLogger.log("archive", "openai path: pre-fetching GitHub archive. expert=\(activeExpert?.name ?? "none")")
+                self.prefetchGitHubArchiveContext(message: message, expert: activeExpert, conversationKey: conversationKey) { [weak self] context in
+                    guard let self else { return }
+                    self.callOpenAI(
+                        message: message,
+                        attachments: attachments,
+                        apiKey: key,
+                        expert: activeExpert,
+                        conversationKey: conversationKey,
+                        mcpToken: nil,
+                        archiveContext: context.isEmpty ? nil : context
+                    )
+                }
+
             case let .claudeCodeCLI(path):
+                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                 self.callClaudeCodeCLI(
                     executablePath: path,
                     message: message,
@@ -217,6 +245,11 @@ extension ClaudeSession {
                     useOfficialMCP: false
                 )
             case let .codexCLI(path):
+                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                 self.callCodexCLI(
                     executablePath: path,
                     message: message,
@@ -226,20 +259,6 @@ extension ClaudeSession {
                     conversationKey: conversationKey,
                     archiveContext: archiveContext,
                     useOfficialMCP: false
-                )
-            case .openAIResponsesAPI:
-                guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
-                    self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
-                    return
-                }
-                self.callOpenAI(
-                    message: message,
-                    attachments: attachments,
-                    apiKey: key,
-                    expert: activeExpert,
-                    conversationKey: conversationKey,
-                    mcpToken: nil,
-                    archiveContext: archiveContext
                 )
             }
         }

@@ -85,6 +85,7 @@ extension TerminalView {
             guard let self else { return }
             AppSettings.mcpReconnectNeeded = false
             self.isShowingOfficialMCPSetupPanel = false
+            self.mcpSetupBannerDismissedThisSession = true  // suppress proactive banner this session
             self.showWelcomeSuggestionsPanel()
         }
         setupCard.onUseStarterPack = { [weak self] in
@@ -118,9 +119,17 @@ extension TerminalView {
             view.removeFromSuperview()
         }
 
-        // MCP reconnect takes highest priority: show whenever the flag is set,
-        // regardless of conversation state (persists across app restarts).
-        if AppSettings.mcpReconnectNeeded || isShowingOfficialMCPSetupPanel {
+        // MCP reconnect: persisted failure flag from a previous turn.
+        // Proactive: native MCP URL in CLI config but no auth token yet (first-run / unconfigured).
+        let hasNativeMCPConfig = AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
+            || AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
+        let hasWorkingToken = AppSettings.officialLennyMCPToken != nil
+            || AppSettings.shellEnvironmentOfficialMCPToken() != nil
+        let shouldPromptMCPSetup = AppSettings.mcpReconnectNeeded
+            || isShowingOfficialMCPSetupPanel
+            || (hasNativeMCPConfig && !hasWorkingToken && !mcpSetupBannerDismissedThisSession)
+
+        if shouldPromptMCPSetup {
             showOfficialMCPSetupPanel()
             return
         }

@@ -63,9 +63,10 @@ extension ClaudeSession {
             let fm = FileManager.default
 
             // ── Runtimes ─────────────────────────────────────────────────────
-            let env = AppSettings.resolveShellEnvironment()
-            let claudePath = self.executablePath(named: "claude", environment: env)
-            let codexPath  = self.executablePath(named: "codex",  environment: env)
+            // Use ProcessInfo for PATH-based executable lookup (AppSettings.resolveShellEnvironment is private).
+            let processEnv = ProcessInfo.processInfo.environment
+            let claudePath = self.executablePath(named: "claude", environment: processEnv)
+            let codexPath  = self.executablePath(named: "codex",  environment: processEnv)
 
             let claudeFound = claudePath != nil
             let codexFound  = codexPath  != nil
@@ -73,9 +74,9 @@ extension ClaudeSession {
             let claudeLoggedIn = AppSettings.hasDetectedClaudeLogin
             let codexLoggedIn  = AppSettings.hasDetectedCodexLogin
 
-            let anthropicKey = !(env["ANTHROPIC_API_KEY"] ?? "").isEmpty
-            let openaiKey    = !(env["OPENAI_API_KEY"]    ?? "").isEmpty
-            let mcpEnvToken  = !(env[ClaudeSession.Constants.lennyMCPAuthEnvVar] ?? "").isEmpty
+            let anthropicKey     = AppSettings.hasDetectedAnthropicAPIKey
+            let openaiKey        = AppSettings.hasDetectedOpenAIAPIKey
+            let mcpEnvToken      = !(processEnv[ClaudeSession.Constants.lennyMCPAuthEnvVar] ?? "").isEmpty
             let mcpSettingsToken = AppSettings.officialLennyMCPToken != nil
 
             // ── MCP in config files ──────────────────────────────────────────

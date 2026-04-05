@@ -59,6 +59,7 @@ final class ClaudeSession {
     var onExpertsUpdated: (([ResponderExpert]) -> Void)?
     var onApprovalRequested: ((ApprovalRequest) -> Void)?
     var onApprovalCleared: (() -> Void)?
+    var onMCPAuthFailure: (() -> Void)?
 
     static var shellEnvironment: [String: String]?
     static var shellEnvironmentResolvedAt: Date?

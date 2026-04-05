@@ -120,7 +120,26 @@ extension ClaudeSession {
 
             let outputText = self.extractClaudeCLIResult(from: stdout)
             if status == 0, let outputText, !outputText.isEmpty {
+                // Intercept responses where Claude itself reports the MCP is not
+                // connected / needs re-auth (exit 0 but content signals failure).
+                if useOfficialMCP, self.looksLikeMCPNotConnectedResponse(outputText) {
+                    SessionDebugLogger.log("claude-cli", "MCP not-connected detected in response text — firing onMCPAuthFailure")
+                    self.isBusy = false
+                    self.pendingExperts.removeAll()
+                    self.assistantExplicitlyRequestedExperts = false
+                    DispatchQueue.main.async { self.onMCPAuthFailure?() }
+                    return
+                }
                 self.finishCLIResponse(outputText, conversationKey: conversationKey)
+                return
+            }
+            // Non-zero exit: check for auth errors before treating as generic failure.
+            if useOfficialMCP, self.looksLikeMCPAuthFailure(stdout: stdout, stderr: stderr) {
+                SessionDebugLogger.log("claude-cli", "MCP auth failure detected — firing onMCPAuthFailure")
+                self.isBusy = false
+                self.pendingExperts.removeAll()
+                self.assistantExplicitlyRequestedExperts = false
+                DispatchQueue.main.async { self.onMCPAuthFailure?() }
                 return
             }
 
@@ -162,6 +181,8 @@ extension ClaudeSession {
         }
 
         if useOfficialMCP, let token = officialMCPToken(from: environment) {
+            // Inject MCP config only when we have a bearer token from Settings/env.
+            // When the native path is used (token == nil), Codex reads its own .codex/config.toml.
             args.append(contentsOf: [
                 "-c",
                 "mcp_servers.\(Constants.lennyMCPServerLabel).url=\"\(Constants.lennyMCPURL)\""
@@ -265,8 +286,51 @@ extension ClaudeSession {
                 return
             }
 
+            if useOfficialMCP, self.looksLikeMCPAuthFailure(stdout: stdout, stderr: stderr) {
+                SessionDebugLogger.log("codex-cli", "MCP auth failure detected — firing onMCPAuthFailure")
+                self.isBusy = false
+                self.pendingExperts.removeAll()
+                self.assistantExplicitlyRequestedExperts = false
+                DispatchQueue.main.async { self.onMCPAuthFailure?() }
+                return
+            }
+
             let errorText = self.normalizeCLIError(stdout: stdout, stderr: stderr, fallback: "Codex CLI could not complete the request.")
             self.failTurn(errorText, conversationKey: conversationKey)
         }
+    }
+
+    // MARK: - MCP auth-failure detection
+
+    /// Detects when Claude's response TEXT itself indicates the MCP server is not
+    /// connected or needs re-authentication (the CLI exits 0 but the content signals failure).
+    func looksLikeMCPNotConnectedResponse(_ text: String) -> Bool {
+        let lowered = text.lowercased()
+        let patterns = [
+            "not connected",
+            "isn't connected",
+            "is not connected",
+            "run /mcp",
+            "archive isn't connected",
+            "lenny archive",
+            "please authenticate"
+        ]
+        // Require at least two distinct signals to reduce false positives on
+        // answers that happen to contain one of these phrases.
+        let matches = patterns.filter { lowered.contains($0) }
+        return matches.count >= 2
+    }
+
+    func looksLikeMCPAuthFailure(stdout: String, stderr: String) -> Bool {
+        let combined = "\(stdout)\n\(stderr)".lowercased()
+        let patterns = [
+            "401", "403",
+            "unauthorized", "unauthenticated",
+            "token expired", "token has expired",
+            "authentication failed", "authentication error",
+            "invalid token", "access denied",
+            "forbidden"
+        ]
+        return patterns.contains(where: combined.contains)
     }
 }

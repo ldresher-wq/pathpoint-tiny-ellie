@@ -99,31 +99,50 @@ extension ClaudeSession {
                 return
             }
 
+            // ── Priority 1: Claude Code with native Lenny MCP in .claude.json ──────────
             self.resolveClaudeCodeBackend(environment: environment) { claudeBackend in
-                if let claudeBackend {
-                    if archiveMode == .officialMCP {
-                        if self.backendSupportsOfficialMCP(claudeBackend, environment: environment) {
-                            SessionDebugLogger.log("backend", "selected Claude backend with official MCP support")
+                if let claudeBackend, self.backendHasNativeMCPConfiguration(claudeBackend) {
+                    SessionDebugLogger.log("backend", "selected Claude backend — native MCP config detected")
+                    self.selectedBackend = claudeBackend
+                    self.selectedBackendPreferenceKey = preferenceKey
+                    completion(claudeBackend, environment, nil)
+                    return
+                }
+
+                // ── Priority 2: Codex with native Lenny MCP in .codex/config.toml ─────────
+                self.resolveCodexBackend(environment: environment) { codexBackend in
+                    if let codexBackend, self.backendHasNativeMCPConfiguration(codexBackend) {
+                        SessionDebugLogger.log("backend", "selected Codex backend — native MCP config detected")
+                        self.selectedBackend = codexBackend
+                        self.selectedBackendPreferenceKey = preferenceKey
+                        completion(codexBackend, environment, nil)
+                        return
+                    }
+
+                    // ── Priority 3+: token-based or starter-pack (original ordering) ────────
+                    if let claudeBackend {
+                        if archiveMode == .officialMCP {
+                            if self.backendSupportsOfficialMCP(claudeBackend, environment: environment) {
+                                SessionDebugLogger.log("backend", "selected Claude backend with token-based MCP support")
+                                self.selectedBackend = claudeBackend
+                                self.selectedBackendPreferenceKey = preferenceKey
+                                completion(claudeBackend, environment, nil)
+                                return
+                            }
+                            SessionDebugLogger.log("backend", "Claude backend available but lacks official MCP support")
+                        } else {
+                            SessionDebugLogger.log("backend", "selected Claude backend (starter pack)")
                             self.selectedBackend = claudeBackend
                             self.selectedBackendPreferenceKey = preferenceKey
                             completion(claudeBackend, environment, nil)
                             return
                         }
-                        SessionDebugLogger.log("backend", "Claude backend available but lacks official MCP support")
-                    } else {
-                        SessionDebugLogger.log("backend", "selected Claude backend")
-                        self.selectedBackend = claudeBackend
-                        self.selectedBackendPreferenceKey = preferenceKey
-                        completion(claudeBackend, environment, nil)
-                        return
                     }
-                }
 
-                self.resolveCodexBackend(environment: environment) { codexBackend in
                     if let codexBackend {
                         if archiveMode == .officialMCP {
                             if self.backendSupportsOfficialMCP(codexBackend, environment: environment) {
-                                SessionDebugLogger.log("backend", "selected Codex backend with official MCP support")
+                                SessionDebugLogger.log("backend", "selected Codex backend with token-based MCP support")
                                 self.selectedBackend = codexBackend
                                 self.selectedBackendPreferenceKey = preferenceKey
                                 completion(codexBackend, environment, nil)
@@ -131,7 +150,7 @@ extension ClaudeSession {
                             }
                             SessionDebugLogger.log("backend", "Codex backend available but lacks official MCP support")
                         } else {
-                            SessionDebugLogger.log("backend", "selected Codex backend")
+                            SessionDebugLogger.log("backend", "selected Codex backend (starter pack)")
                             self.selectedBackend = codexBackend
                             self.selectedBackendPreferenceKey = preferenceKey
                             completion(codexBackend, environment, nil)
@@ -324,6 +343,13 @@ extension ClaudeSession {
     }
 
     func effectiveArchiveAccessMode(environment: [String: String]) -> AppSettings.ArchiveAccessMode {
+        // Native CLI MCP configuration always activates official mode, even if the
+        // stored preference is starterPack (the user may have set that before configuring MCP).
+        let sources = AppSettings.detectedOfficialMCPSources
+        if sources.contains(.claudeGlobalConfig) || sources.contains(.codexGlobalConfig) {
+            return .officialMCP
+        }
+
         guard AppSettings.archiveAccessMode != .starterPack else {
             return .starterPack
         }
@@ -333,6 +359,19 @@ extension ClaudeSession {
 
     func hasAnyOfficialMCPConfiguration(environment: [String: String]) -> Bool {
         officialMCPToken(from: environment) != nil || AppSettings.hasDetectedOfficialMCPConfiguration
+    }
+
+    /// True when the backend can invoke the Lenny MCP server using its own locally
+    /// stored credentials (no separate bearer token required from the app).
+    func backendHasNativeMCPConfiguration(_ backend: Backend) -> Bool {
+        switch backend {
+        case .claudeCodeCLI:
+            return AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
+        case .codexCLI:
+            return AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
+        case .openAIResponsesAPI:
+            return false
+        }
     }
 
     func backendSupportsOfficialMCP(_ backend: Backend, environment: [String: String]) -> Bool {

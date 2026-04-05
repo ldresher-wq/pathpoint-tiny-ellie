@@ -173,8 +173,14 @@ enum AppSettings {
     }
 
     static var effectiveArchiveAccessMode: ArchiveAccessMode {
+        // Native CLI MCP config activates official mode even if the stored
+        // preference is starterPack (mirrors the instance method logic).
+        let sources = detectedOfficialMCPSources
+        if sources.contains(.claudeGlobalConfig) || sources.contains(.codexGlobalConfig) {
+            return .officialMCP
+        }
         guard archiveAccessMode != .starterPack else { return .starterPack }
-        return detectedOfficialMCPSources.isEmpty ? .starterPack : .officialMCP
+        return sources.isEmpty ? .starterPack : .officialMCP
     }
 
     static var defaultArchiveAccessMode: ArchiveAccessMode {

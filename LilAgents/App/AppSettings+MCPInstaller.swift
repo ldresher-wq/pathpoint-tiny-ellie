@@ -54,12 +54,10 @@ enum OfficialMCPInstaller {
         var preservedTargets: [InstallTarget] = []
 
         if availableTargets.contains(.claude) {
-            if AppSettings.claudeGlobalConfigURLs.contains(where: AppSettings.containsOfficialMCPConfiguration(at:)) {
-                preservedTargets.append(.claude)
-            } else {
-                try installClaudeConfig(token: trimmed)
-                updatedTargets.append(.claude)
-            }
+            // Always (re-)write the config so an expired token is replaced.
+            // installClaudeConfig only touches the lennysdata key; other entries are preserved.
+            try installClaudeConfig(token: trimmed)
+            updatedTargets.append(.claude)
         }
 
         if availableTargets.contains(.codex) {

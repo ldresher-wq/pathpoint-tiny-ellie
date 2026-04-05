@@ -130,6 +130,30 @@ extension ClaudeSession {
                 return
             }
 
+            // ── Native CLI MCP path ────────────────────────────────────────────────────
+            // The CLI already has Lenny MCP configured with its own credentials;
+            // invoke it directly without injecting a token or fetching context via HTTP.
+            if archiveMode == .officialMCP, self.backendHasNativeMCPConfiguration(backend) {
+                SessionDebugLogger.log("archive", "native MCP path: backend=\(backend) — dispatching with useOfficialMCP=true, no token injection")
+                self.onToolUse?("Connecting to archive", ["summary": "Connecting to the official Lenny archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Connecting to archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                self.dispatchResolvedBackend(
+                    backend,
+                    message: message,
+                    attachments: attachments,
+                    environment: environment,
+                    expert: activeExpert,
+                    conversationKey: conversationKey,
+                    archiveContext: nil,
+                    officialMCPToken: nil,
+                    useOfficialMCP: true
+                )
+                return
+            }
+
+            // ── Settings / env bearer-token MCP path ───────────────────────────────
             if let token = self.officialMCPToken(from: environment) {
                 if case .codexCLI = backend, self.backendSupportsOfficialMCP(backend, environment: environment) {
                     self.dispatchResolvedBackend(

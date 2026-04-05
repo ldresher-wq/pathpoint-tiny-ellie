@@ -140,6 +140,21 @@ extension WalkerCharacter {
         session.onApprovalCleared = { [weak self] in
             self?.terminalView?.clearApprovalRequest()
         }
+
+        session.onMCPAuthFailure = { [weak self] in
+            guard let self else { return }
+            self.stopLiveStatusFallback()
+            self.setCurrentActivityStatus("")
+            self.claudeSession?.isBusy = false
+            self.claudeSession?.pendingExperts.removeAll()
+            self.claudeSession?.assistantExplicitlyRequestedExperts = false
+            guard let terminalView = self.terminalView else { return }
+            terminalView.endStreaming()
+            terminalView.clearLiveStatus()
+            terminalView.appendError("Lenny MCP authentication failed. Your token may have expired — update it below to reconnect.")
+            terminalView.showOfficialMCPSetupPanel()
+            self.updateExpertNameTag()
+        }
     }
 
     func setCurrentActivityStatus(_ status: String) {

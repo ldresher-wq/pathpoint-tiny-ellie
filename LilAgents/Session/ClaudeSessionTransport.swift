@@ -37,6 +37,11 @@ extension ClaudeSession {
     }
 
     func start() {
+        guard !isRunning else {
+            SessionDebugLogger.log("session", "start() called but already running — ignoring")
+            return
+        }
+        isRunning = true
         SessionDebugLogger.log("session", "start() called")
         logStartupDiagnostics()
         resolvePreferredBackend { [weak self] backend, environment, message in
@@ -45,12 +50,12 @@ extension ClaudeSession {
             guard let backend else {
                 let msg = message ?? self.backendSetupMessage(environment: environment)
                 SessionDebugLogger.log("session", "start() failed: \(msg)")
+                self.isRunning = false
                 self.onSetupRequired?(msg)
                 return
             }
 
             self.selectedBackend = backend
-            self.isRunning = true
             SessionDebugLogger.log("session", "session ready. selectedBackend=\(self.backendStatusMessage(for: backend, environment: environment))")
             self.onSessionReady?()
         }
@@ -81,7 +86,6 @@ extension ClaudeSession {
 
             // ── MCP in config files ──────────────────────────────────────────
             let claudeConfigURLs = AppSettings.claudeGlobalConfigURLs
-            let claudeConfigMCP  = claudeConfigURLs.filter { AppSettings.containsOfficialMCPConfiguration(at: $0) }
             let codexConfigURL   = AppSettings.codexGlobalConfigURL
             let codexConfigMCP   = AppSettings.containsOfficialMCPConfiguration(at: codexConfigURL)
             let codexConfigMCPViaList = AppSettings.hasDetectedCodexOfficialMCPConfiguration
@@ -166,6 +170,7 @@ extension ClaudeSession {
             SessionDebugLogger.log("turn", "resolved backend=\(String(describing: backend)) environment=\(SessionDebugLogger.summarizeEnvironment(environment))")
             guard let backend else {
                 SessionDebugLogger.log("turn", "backend resolution failed: \(messageText ?? "unknown error")")
+                self.isBusy = false
                 self.onSetupRequired?(messageText ?? self.backendSetupMessage(environment: environment))
                 return
             }

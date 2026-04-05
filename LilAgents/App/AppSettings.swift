@@ -380,6 +380,14 @@ enum AppSettings {
     }
 
     static func containsOfficialMCPConfiguration(at url: URL) -> Bool {
+        if url.pathExtension.lowercased() == "json" {
+            guard let data = try? Data(contentsOf: url),
+                  let root = try? JSONSerialization.jsonObject(with: data) else {
+                return false
+            }
+            return containsOfficialClaudeMCPConfiguration(in: root)
+        }
+
         guard let contents = try? String(contentsOf: url, encoding: .utf8) else {
             return false
         }
@@ -405,17 +413,10 @@ enum AppSettings {
         guard FileManager.default.fileExists(atPath: url.path) else { return }
 
         let existingData = try Data(contentsOf: url)
-        var root = (try JSONSerialization.jsonObject(with: existingData) as? [String: Any]) ?? [:]
-        guard var mcpServers = root["mcpServers"] as? [String: Any] else { return }
+        guard let root = try JSONSerialization.jsonObject(with: existingData) as? [String: Any] else { return }
+        guard let cleanedRoot = removeOfficialClaudeMCPConfiguration(from: root) as? [String: Any] else { return }
 
-        mcpServers.removeValue(forKey: ClaudeSession.Constants.lennyMCPServerLabel)
-        if mcpServers.isEmpty {
-            root.removeValue(forKey: "mcpServers")
-        } else {
-            root["mcpServers"] = mcpServers
-        }
-
-        try writeJSONObject(root, to: url)
+        try writeJSONObject(cleanedRoot, to: url)
     }
 
     private static func removeCodexOfficialMCPConfiguration(at url: URL) throws {
@@ -433,23 +434,87 @@ enum AppSettings {
     }
 
     private static func writeJSONObject(_ object: [String: Any], to url: URL) throws {
-        if object.isEmpty {
-            try? FileManager.default.removeItem(at: url)
-            return
-        }
-
         let data = try JSONSerialization.data(withJSONObject: object, options: [.prettyPrinted, .sortedKeys])
         try data.write(to: url, options: [.atomic])
     }
 
     private static func writeTextConfig(_ contents: String, to url: URL) throws {
-        let trimmed = contents.trimmingCharacters(in: .whitespacesAndNewlines)
-        if trimmed.isEmpty {
-            try? FileManager.default.removeItem(at: url)
-            return
+        try contents.write(to: url, atomically: true, encoding: .utf8)
+    }
+
+    private static func containsOfficialClaudeMCPConfiguration(in value: Any) -> Bool {
+        if isOfficialClaudeMCPServerConfiguration(value) {
+            return true
         }
 
-        try contents.write(to: url, atomically: true, encoding: .utf8)
+        if let dictionary = value as? [String: Any] {
+            return dictionary.values.contains(where: containsOfficialClaudeMCPConfiguration(in:))
+        }
+
+        if let array = value as? [Any] {
+            return array.contains(where: containsOfficialClaudeMCPConfiguration(in:))
+        }
+
+        return false
+    }
+
+    private static func removeOfficialClaudeMCPConfiguration(from value: Any) -> Any? {
+        if let dictionary = value as? [String: Any] {
+            var cleaned: [String: Any] = [:]
+
+            for (key, childValue) in dictionary {
+                if isOfficialClaudeMCPEntry(key: key, value: childValue) {
+                    continue
+                }
+
+                guard let cleanedChild = removeOfficialClaudeMCPConfiguration(from: childValue) else {
+                    continue
+                }
+
+                if key == "mcpServers",
+                   let servers = cleanedChild as? [String: Any],
+                   servers.isEmpty {
+                    continue
+                }
+
+                cleaned[key] = cleanedChild
+            }
+
+            return cleaned
+        }
+
+        if let array = value as? [Any] {
+            return array.compactMap { element -> Any? in
+                if let string = element as? String, isOfficialClaudeMCPPermission(string) {
+                    return nil
+                }
+                return removeOfficialClaudeMCPConfiguration(from: element)
+            }
+        }
+
+        return value
+    }
+
+    private static func isOfficialClaudeMCPEntry(key: String, value: Any) -> Bool {
+        if isOfficialClaudeMCPServerConfiguration(value) {
+            return true
+        }
+
+        return key.caseInsensitiveCompare(ClaudeSession.Constants.lennyMCPServerLabel) == .orderedSame
+    }
+
+    private static func isOfficialClaudeMCPServerConfiguration(_ value: Any) -> Bool {
+        guard let dictionary = value as? [String: Any],
+              let url = dictionary["url"] as? String else {
+            return false
+        }
+
+        return url.trimmingCharacters(in: .whitespacesAndNewlines)
+            .caseInsensitiveCompare(ClaudeSession.Constants.lennyMCPURL) == .orderedSame
+    }
+
+    private static func isOfficialClaudeMCPPermission(_ value: String) -> Bool {
+        value.lowercased().hasPrefix("mcp__\(ClaudeSession.Constants.lennyMCPServerLabel.lowercased())__")
     }
 
     private static func resolveShellEnvironment() -> [String: String] {

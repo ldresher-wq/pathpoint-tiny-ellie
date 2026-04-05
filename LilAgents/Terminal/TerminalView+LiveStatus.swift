@@ -177,12 +177,11 @@ extension TerminalView {
         refreshComposerContentLayout(showingStatus: true)
 
         if liveStatusAvatarTimer == nil {
-            liveStatusAvatarTimer = Timer.scheduledTimer(withTimeInterval: 0.18, repeats: true) { [weak self] _ in
+            let timer = Timer(timeInterval: 0.18, repeats: true) { [weak self] _ in
                 self?.advanceLiveStatusAvatar()
             }
-            if let timer = liveStatusAvatarTimer {
-                RunLoop.main.add(timer, forMode: .common)
-            }
+            RunLoop.main.add(timer, forMode: .common)
+            liveStatusAvatarTimer = timer
         }
     }
 

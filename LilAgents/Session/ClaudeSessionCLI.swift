@@ -75,7 +75,7 @@ extension ClaudeSession {
             environment: environment,
             workingDirectory: preferredWorkingDirectoryURL(),
             onLineReceived: { [weak self] line in
-                guard let self else { return }
+                guard let self, !self.isCancellingTurn else { return }
                 SessionDebugLogger.trace("claude-transport", line)
                 if self.handleApprovalPromptLine(line) {
                     return
@@ -200,7 +200,7 @@ extension ClaudeSession {
             wantsInteractiveInput: useOfficialMCP,
             allocatePseudoTerminal: useOfficialMCP,
             onLineReceived: { [weak self] line in
-                guard let self else { return }
+                guard let self, !self.isCancellingTurn else { return }
                 SessionDebugLogger.trace("codex-transport", line)
                 if self.handleApprovalPromptLine(line) {
                     return

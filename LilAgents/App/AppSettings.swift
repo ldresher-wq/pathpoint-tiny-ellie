@@ -49,20 +49,14 @@ enum AppSettings {
         case `default`
         case gpt54 = "gpt-5.4"
         case gpt54Mini = "gpt-5.4-mini"
-        case gpt54Nano = "gpt-5.4-nano"
-        case gpt5 = "gpt-5"
-        case gpt5Mini = "gpt-5-mini"
-        case gpt5Nano = "gpt-5-nano"
+        case gpt53Codex = "gpt-5.3-codex"
 
         var label: String {
             switch self {
             case .default: return "Codex"
             case .gpt54: return "GPT-5.4"
             case .gpt54Mini: return "GPT-5.4 mini"
-            case .gpt54Nano: return "GPT-5.4 nano"
-            case .gpt5: return "GPT-5"
-            case .gpt5Mini: return "GPT-5 mini"
-            case .gpt5Nano: return "GPT-5 nano"
+            case .gpt53Codex: return "GPT-5.3 Codex"
             }
         }
     }

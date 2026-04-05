@@ -29,11 +29,20 @@ extension SettingsView {
                     )
                 }
 
-                if archiveAccessMode == AppSettings.ArchiveAccessMode.officialMCP.rawValue {
+                if AppSettings.effectiveArchiveAccessMode == .officialMCP || archiveAccessMode == AppSettings.ArchiveAccessMode.officialMCP.rawValue {
                     Divider()
                         .padding(.top, 4)
 
                     VStack(alignment: .leading, spacing: 14) {
+                        // Reconnect warning — shown when a previous auth failure was detected
+                        if mcpReconnectNeeded {
+                            SettingsInfoRow(
+                                icon: "exclamationmark.triangle.fill",
+                                iconColor: .orange,
+                                text: "The Lenny archive connection failed. Your auth token may have expired — enter a new one below to reconnect."
+                            )
+                        }
+
                         if AppSettings.officialLennyMCPToken != nil {
                             SettingsInfoRow(
                                 icon: "checkmark.circle.fill",
@@ -41,6 +50,16 @@ extension SettingsView {
                                 text: "Your auth key is saved on this Mac. Lil-Lenny will use it automatically when you send a message."
                             )
                         } else {
+                            // Show a hint when native CLI config is detected but no Settings token
+                            let nativeSources = AppSettings.detectedOfficialMCPSources
+                            if nativeSources.contains(.claudeGlobalConfig) || nativeSources.contains(.codexGlobalConfig) {
+                                SettingsInfoRow(
+                                    icon: "info.circle.fill",
+                                    iconColor: Color.secondary,
+                                    text: "Lenny MCP URL detected in your CLI config. Enter an auth key below to activate authentication."
+                                )
+                            }
+
                             HStack(alignment: .center, spacing: 12) {
                                 SecureField("Paste auth key", text: $officialToken)
                                     .textFieldStyle(.roundedBorder)
@@ -81,7 +100,10 @@ extension SettingsView {
         detail: String,
         isLast: Bool
     ) -> some View {
-        let selected = archiveAccessMode == mode.rawValue
+        // Use the effective mode for the selected indicator so native CLI
+        // detection is reflected, not just the stored preference.
+        let effectiveMode = AppSettings.effectiveArchiveAccessMode
+        let selected = effectiveMode.rawValue == mode.rawValue
 
         Button {
             archiveAccessMode = mode.rawValue

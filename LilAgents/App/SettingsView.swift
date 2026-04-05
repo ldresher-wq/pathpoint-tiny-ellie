@@ -48,6 +48,7 @@ struct SettingsView: View {
     @AppStorage(AppSettings.preferredCodexModelKey) var preferredCodexModel = AppSettings.CodexModel.default.rawValue
     @AppStorage(AppSettings.preferredOpenAIModelKey) var preferredOpenAIModel = AppSettings.OpenAIModel.gpt5Nano.rawValue
     @AppStorage(AppSettings.welcomePreviewModeKey) var welcomePreviewMode = AppSettings.WelcomePreviewMode.live.rawValue
+    @AppStorage(AppSettings.mcpReconnectNeededKey) var mcpReconnectNeeded = false
 
     @State var selectedPane: SettingsPane = .source
     @State var showResetConfirmation = false

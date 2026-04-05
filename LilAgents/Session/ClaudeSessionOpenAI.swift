@@ -84,7 +84,8 @@ extension ClaudeSession {
                     if !hasSignaledThinking {
                         hasSignaledThinking = true
                         DispatchQueue.main.async { [weak self] in
-                            self?.onToolUse?("Thinking", ["summary": "Thinking through it…"])
+                            guard let self, !self.isCancellingTurn else { return }
+                            self.onToolUse?("Thinking", ["summary": "Thinking through it…"])
                         }
                     }
 
@@ -97,7 +98,8 @@ extension ClaudeSession {
                            let name = item["name"] as? String {
                             let display = self.processDisplay(for: name, arguments: [:])
                             DispatchQueue.main.async { [weak self] in
-                                self?.onToolUse?(display.title, ["summary": display.summary])
+                                guard let self, !self.isCancellingTurn else { return }
+                                self.onToolUse?(display.title, ["summary": display.summary])
                             }
                         }
 
@@ -105,7 +107,8 @@ extension ClaudeSession {
                         if !hasStartedWriting {
                             hasStartedWriting = true
                             DispatchQueue.main.async { [weak self] in
-                                self?.onToolUse?("Writing", ["summary": "Writing the answer…"])
+                                guard let self, !self.isCancellingTurn else { return }
+                                self.onToolUse?("Writing", ["summary": "Writing the answer…"])
                             }
                         }
 
@@ -128,8 +131,9 @@ extension ClaudeSession {
                         let resultSummary = self.processResultDisplay(for: name, arguments: arguments, output: output)
                         let display = self.processDisplay(for: name, arguments: arguments)
                         DispatchQueue.main.async { [weak self] in
-                            self?.onToolUse?(display.title, ["summary": display.summary, "experts": experts])
-                            self?.onToolResult?(resultSummary, false)
+                            guard let self, !self.isCancellingTurn else { return }
+                            self.onToolUse?(display.title, ["summary": display.summary, "experts": experts])
+                            self.onToolResult?(resultSummary, false)
                         }
 
                     case "response.completed":

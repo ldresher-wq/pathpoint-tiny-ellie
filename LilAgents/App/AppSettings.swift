@@ -115,6 +115,7 @@ enum AppSettings {
     static let preferredCodexModelKey   = "preferredCodexModel"
     static let preferredOpenAIModelKey  = "preferredOpenAIModel"
     static let welcomePreviewModeKey    = "welcomePreviewMode"
+    static let mcpReconnectNeededKey    = "mcpReconnectNeeded"
 
     // MARK: - Preferences
 
@@ -221,6 +222,13 @@ enum AppSettings {
         set { UserDefaults.standard.set(newValue.rawValue, forKey: preferredOpenAIModelKey) }
     }
 
+    /// Persists across app restarts — set when MCP auth fails, cleared when
+    /// the user saves a token, dismisses the banner with X, or picks Starter Pack.
+    static var mcpReconnectNeeded: Bool {
+        get { UserDefaults.standard.bool(forKey: mcpReconnectNeededKey) }
+        set { UserDefaults.standard.set(newValue, forKey: mcpReconnectNeededKey) }
+    }
+
     static var welcomePreviewMode: WelcomePreviewMode {
         get {
             let rawValue = UserDefaults.standard.string(forKey: welcomePreviewModeKey) ?? WelcomePreviewMode.live.rawValue
@@ -243,7 +251,8 @@ enum AppSettings {
             preferredCodexModelKey,
             preferredOpenAIModelKey,
             welcomePreviewModeKey,
-            "hasCompletedOnboarding"
+            "hasCompletedOnboarding",
+            mcpReconnectNeededKey
         ]
 
         for key in managedKeys {

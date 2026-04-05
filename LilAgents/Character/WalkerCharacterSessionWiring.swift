@@ -142,9 +142,9 @@ extension WalkerCharacter {
         }
 
         session.onMCPAuthFailure = { [weak self] in
-            // failTurn was already called before this fires, so the error is in the
-            // transcript and onTurnComplete has already replayed the conversation.
-            // Just show the MCP reconnect panel below the transcript.
+            // failTurn was already called before this fires.
+            // Mark reconnect needed (persists across restarts) then show the panel.
+            AppSettings.mcpReconnectNeeded = true
             self?.terminalView?.showOfficialMCPSetupPanel()
         }
     }

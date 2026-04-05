@@ -6,6 +6,8 @@ class OfficialMCPConnectCardView: NSView {
     var onOpenWebsite: (() -> Void)?
     var onSave: (() -> Void)?
     var onBack: (() -> Void)?
+    var onDismiss: (() -> Void)?          // X button — clears mcpReconnectNeeded
+    var onUseStarterPack: (() -> Void)?   // fallback to starter pack
 
     private let theme: PopoverTheme
     private let compact: Bool
@@ -78,6 +80,17 @@ class OfficialMCPConnectCardView: NSView {
         titleSpacer.setContentHuggingPriority(.defaultLow, for: .horizontal)
         titleRow.addArrangedSubview(titleSpacer)
 
+        let xButton = NSButton(title: "", target: self, action: #selector(dismissTapped))
+        xButton.bezelStyle = .regularSquare
+        xButton.isBordered = false
+        xButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: "Dismiss")
+        xButton.contentTintColor = theme.textDim
+        xButton.imageScaling = .scaleProportionallyDown
+        xButton.translatesAutoresizingMaskIntoConstraints = false
+        xButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        xButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        titleRow.addArrangedSubview(xButton)
+
         if compact {
             addCompactLayout(to: stack)
         } else {
@@ -109,6 +122,9 @@ class OfficialMCPConnectCardView: NSView {
             let backButton = makeSecondaryButton(title: "Back", action: #selector(backTapped))
             buttonRow.addArrangedSubview(backButton)
         }
+
+        let starterPackButton = makeSecondaryButton(title: "Use Starter Pack instead", action: #selector(useStarterPackTapped))
+        buttonRow.addArrangedSubview(starterPackButton)
 
         setContentHuggingPriority(.required, for: .vertical)
         setContentCompressionResistancePriority(.required, for: .vertical)
@@ -294,6 +310,10 @@ class OfficialMCPConnectCardView: NSView {
 
     @objc private func backTapped() { onBack?() }
 
+    @objc private func dismissTapped() { onDismiss?() }
+
+    @objc private func useStarterPackTapped() { onUseStarterPack?() }
+
     @objc private func saveTapped() {
         let trimmed = tokenField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
@@ -311,6 +331,7 @@ class OfficialMCPConnectCardView: NSView {
             } else {
                 detectionLabel.stringValue = "Connected. The key is saved on this Mac and CLI access was configured."
             }
+            AppSettings.mcpReconnectNeeded = false
             onSave?()
         } catch {
             detectionLabel.textColor = theme.errorColor

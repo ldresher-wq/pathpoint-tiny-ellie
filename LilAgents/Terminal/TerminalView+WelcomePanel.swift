@@ -57,6 +57,7 @@ extension TerminalView {
     }
 
     func completeOfficialMCPSetupFlow() {
+        AppSettings.mcpReconnectNeeded = false
         isShowingOfficialMCPSetupPanel = false
         starterPackWelcomeBannerDismissed = true
         currentWelcomeArchiveMode = nil
@@ -71,13 +72,27 @@ extension TerminalView {
 
         isShowingOfficialMCPSetupPanel = true
 
-        let setupCard = OfficialMCPConnectCardView(theme: theme, compact: true, showsBackButton: true)
+        let setupCard = OfficialMCPConnectCardView(theme: theme, compact: true, showsBackButton: false)
         setupCard.onOpenWebsite = { [weak self] in
             self?.openOfficialMCPURL()
         }
         setupCard.onBack = { [weak self] in
             guard let self else { return }
             self.isShowingOfficialMCPSetupPanel = false
+            self.showWelcomeSuggestionsPanel()
+        }
+        setupCard.onDismiss = { [weak self] in
+            guard let self else { return }
+            AppSettings.mcpReconnectNeeded = false
+            self.isShowingOfficialMCPSetupPanel = false
+            self.showWelcomeSuggestionsPanel()
+        }
+        setupCard.onUseStarterPack = { [weak self] in
+            guard let self else { return }
+            AppSettings.mcpReconnectNeeded = false
+            AppSettings.archiveAccessMode = .starterPack
+            self.isShowingOfficialMCPSetupPanel = false
+            self.refreshFirstRunStateIfNeeded(forceRefresh: true)
             self.showWelcomeSuggestionsPanel()
         }
         setupCard.onSave = { [weak self] in
@@ -103,7 +118,9 @@ extension TerminalView {
             view.removeFromSuperview()
         }
 
-        if isShowingOfficialMCPSetupPanel {
+        // MCP reconnect takes highest priority: show whenever the flag is set,
+        // regardless of conversation state (persists across app restarts).
+        if AppSettings.mcpReconnectNeeded || isShowingOfficialMCPSetupPanel {
             showOfficialMCPSetupPanel()
             return
         }

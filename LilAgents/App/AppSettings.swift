@@ -3,20 +3,16 @@ import Foundation
 enum AppSettings {
     enum ClaudeModel: String, CaseIterable {
         case `default`
-        case sonnet
-        case opus
-        case haiku
-        case sonnet1M = "sonnet[1m]"
-        case opusPlan = "opusplan"
+        case opus46 = "claude-opus-4-6"
+        case sonnet46 = "claude-sonnet-4-6"
+        case haiku45 = "claude-haiku-4-5-20251001"
 
         var label: String {
             switch self {
             case .default: return "Claude"
-            case .sonnet: return "Claude Sonnet"
-            case .opus: return "Claude Opus"
-            case .haiku: return "Claude Haiku"
-            case .sonnet1M: return "Claude Sonnet 1M"
-            case .opusPlan: return "Claude Opus Plan"
+            case .opus46: return "Claude Opus 4.6"
+            case .sonnet46: return "Claude Sonnet 4.6"
+            case .haiku45: return "Claude Haiku 4.5"
             }
         }
     }

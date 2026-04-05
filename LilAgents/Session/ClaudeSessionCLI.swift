@@ -69,6 +69,11 @@ extension ClaudeSession {
             body: prompt
         )
 
+        // Tracks whether the Lenny MCP server actually registered tools in this session.
+        // Set from the init event so the completion handler can detect a missing server
+        // without relying on response-text pattern matching.
+        var lennyMCPFoundInInit = false
+
         runProcess(
             executablePath: executablePath,
             arguments: args,
@@ -80,6 +85,23 @@ extension ClaudeSession {
                 if self.handleApprovalPromptLine(line) {
                     return
                 }
+
+                // Detect the init event and check if the Lenny MCP server loaded.
+                if useOfficialMCP, !lennyMCPFoundInInit,
+                   let data = line.data(using: .utf8),
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                   (json["type"] as? String) == "system",
+                   (json["subtype"] as? String) == "init",
+                   let tools = json["tools"] as? [String] {
+                    lennyMCPFoundInInit = tools.contains { $0.hasPrefix("mcp__\(Constants.lennyMCPServerLabel)__") }
+                    SessionDebugLogger.log(
+                        "claude-cli",
+                        lennyMCPFoundInInit
+                            ? "init event: mcp__lennysdata__* tools present"
+                            : "init event: no mcp__lennysdata__* tools — MCP server not loaded"
+                    )
+                }
+
                 if let data = line.data(using: .utf8),
                    let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                    let event = self.claudeCLIStreamEvent(from: json) {
@@ -120,6 +142,20 @@ extension ClaudeSession {
 
             let outputText = self.extractClaudeCLIResult(from: stdout)
             if status == 0, let outputText, !outputText.isEmpty {
+                // If the init event showed no Lenny MCP tools, the server never
+                // loaded — treat the entire response as an MCP connection failure.
+                if useOfficialMCP, !lennyMCPFoundInInit {
+                    SessionDebugLogger.log("claude-cli", "MCP server absent from init — failing turn and firing onMCPAuthFailure")
+                    DispatchQueue.main.async {
+                        self.failTurn(
+                            "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                            conversationKey: conversationKey
+                        )
+                        self.onMCPAuthFailure?()
+                    }
+                    return
+                }
+
                 // Intercept responses where Claude itself reports the MCP is not
                 // connected / needs re-auth (exit 0 but content signals failure).
                 if useOfficialMCP, self.looksLikeMCPNotConnectedResponse(outputText) {
@@ -325,7 +361,14 @@ extension ClaudeSession {
             "not authenticated",
             "not yet authenticated",
             "connection isn't",
-            "archive isn't"
+            "archive isn't",
+            "tools aren't available",
+            "tools are not available",
+            "mcp tools aren't",
+            "archive tools aren't",
+            "not available in this session",
+            "weren't able to reach",
+            "wasn't able to reach"
         ]
 
         // Group B: signals that the user needs to take an auth action
@@ -334,7 +377,9 @@ extension ClaudeSession {
             "authenticate",
             "authorization",
             "authorization flow",
-            "connect the archive"
+            "connect the archive",
+            "archive server",   // "check that the archive server is connected"
+            "reconnect"
         ]
 
         // Require at least one signal from each group to fire the banner.

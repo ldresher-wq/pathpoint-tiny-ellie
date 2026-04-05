@@ -167,6 +167,10 @@ extension ClaudeSession {
 
         resolvePreferredBackend { [weak self] backend, environment, messageText in
             guard let self else { return }
+            guard !self.isCancellingTurn else {
+                self.isBusy = false
+                return
+            }
             SessionDebugLogger.log("turn", "resolved backend=\(String(describing: backend)) environment=\(SessionDebugLogger.summarizeEnvironment(environment))")
             guard let backend else {
                 SessionDebugLogger.log("turn", "backend resolution failed: \(messageText ?? "unknown error")")

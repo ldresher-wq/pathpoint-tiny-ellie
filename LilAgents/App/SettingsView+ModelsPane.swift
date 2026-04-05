@@ -12,17 +12,7 @@ extension SettingsView {
 
             SettingsSectionCard(title: "Runtime", subtitle: modelSectionSubtitle) {
                 VStack(alignment: .leading, spacing: 14) {
-                    Picker("Runtime", selection: $preferredTransport) {
-                        Text("Automatic")
-                            .tag(AppSettings.PreferredTransport.automatic.rawValue)
-                        Text("Claude Code")
-                            .tag(AppSettings.PreferredTransport.claudeCode.rawValue)
-                        Text("Codex")
-                            .tag(AppSettings.PreferredTransport.codex.rawValue)
-                        Text("OpenAI API")
-                            .tag(AppSettings.PreferredTransport.openAIAPI.rawValue)
-                    }
-                    .pickerStyle(.segmented)
+                    RuntimeSegmentedControl(selection: $preferredTransport)
 
                     SettingsInfoRow(
                         icon: isAutomaticSelected ? "arrow.triangle.branch" : selectedRuntimeIcon,
@@ -227,5 +217,83 @@ extension SettingsView {
         case .openAIAPI: return "network.badge.shield.half.filled"
         case .automatic: return "arrow.triangle.branch"
         }
+    }
+}
+
+// MARK: - Custom segmented runtime control
+
+private struct RuntimeSegment {
+    let label: String
+    let tag: String
+    let isAvailable: Bool
+}
+
+struct RuntimeSegmentedControl: View {
+    @Binding var selection: String
+    @State private var claudeAvailable = false
+    @State private var codexAvailable = false
+
+    private var segments: [RuntimeSegment] {
+        [
+            RuntimeSegment(label: "Automatic",   tag: AppSettings.PreferredTransport.automatic.rawValue,  isAvailable: true),
+            RuntimeSegment(label: "Claude Code", tag: AppSettings.PreferredTransport.claudeCode.rawValue, isAvailable: claudeAvailable),
+            RuntimeSegment(label: "Codex",       tag: AppSettings.PreferredTransport.codex.rawValue,      isAvailable: codexAvailable),
+            RuntimeSegment(label: "OpenAI API",  tag: AppSettings.PreferredTransport.openAIAPI.rawValue,  isAvailable: true),
+        ]
+    }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(segments, id: \.tag) { segment in
+                segmentButton(segment)
+            }
+        }
+        .background(.regularMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 7))
+        .overlay(RoundedRectangle(cornerRadius: 7).stroke(Color(NSColor.separatorColor), lineWidth: 0.5))
+        .task {
+            let claude = await Task.detached(priority: .userInitiated) { AppSettings.hasDetectedClaudeLogin }.value
+            let codex  = await Task.detached(priority: .userInitiated) { AppSettings.hasDetectedCodexLogin  }.value
+            claudeAvailable = claude
+            codexAvailable  = codex
+        }
+    }
+
+    @ViewBuilder
+    private func segmentButton(_ segment: RuntimeSegment) -> some View {
+        let isSelected = selection == segment.tag
+
+        Button {
+            selection = segment.tag
+        } label: {
+            VStack(spacing: 2) {
+                Text(segment.label)
+                    .font(.system(size: 12, weight: isSelected ? .semibold : .regular))
+                    .foregroundColor(segmentTextColor(isSelected: isSelected, isAvailable: segment.isAvailable))
+                if !segment.isAvailable {
+                    Text("Not installed")
+                        .font(.system(size: 9.5))
+                        .foregroundColor(Color(NSColor.tertiaryLabelColor))
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, segment.isAvailable ? 6 : 5)
+            .background(isSelected && segment.isAvailable ? Color.accentColor.opacity(0.14) : Color.clear)
+        }
+        .buttonStyle(.plain)
+        .disabled(!segment.isAvailable)
+        .overlay(alignment: .trailing) {
+            if segment.tag != AppSettings.PreferredTransport.openAIAPI.rawValue {
+                Rectangle()
+                    .fill(Color(NSColor.separatorColor))
+                    .frame(width: 0.5)
+            }
+        }
+    }
+
+    private func segmentTextColor(isSelected: Bool, isAvailable: Bool) -> Color {
+        if !isAvailable { return Color(NSColor.tertiaryLabelColor) }
+        if isSelected { return Color.accentColor }
+        return Color(NSColor.labelColor)
     }
 }

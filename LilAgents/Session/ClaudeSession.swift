@@ -44,6 +44,7 @@ final class ClaudeSession {
     var currentProcess: Process?
     var currentProcessStdin: FileHandle?
     var currentDataTask: URLSessionDataTask?
+    var currentStreamingTask: Task<Void, Never>?
     var isCancellingTurn = false
     var pendingApprovalRequest: ApprovalRequest?
 

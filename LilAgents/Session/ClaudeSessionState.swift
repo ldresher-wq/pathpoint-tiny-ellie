@@ -84,7 +84,9 @@ extension ClaudeSession {
     func buildInstructions(for expert: ResponderExpert?, expectMCP: Bool) -> String {
         let base = """
         You are answering inside a macOS companion app using Lenny's archive.
-        Prefer retrieved archive evidence over generic knowledge.
+        Ground every factual claim in content you explicitly retrieved from the archive.
+        Do NOT fabricate quotes, episode titles, newsletter headlines, or expert insights from training data.
+        Do NOT access any URLs, websites, or knowledge sources beyond what is explicitly provided in these instructions.
         Keep the answer concise and practical.
         Return only valid JSON, with no prose before or after it and no code fences.
         Use this exact shape:
@@ -251,9 +253,9 @@ extension ClaudeSession {
         }
 
         if expectMCP {
-            sections.append("Use the Lenny archive MCP tools whenever they help. Start with `index.md` for fast routing, then narrow to the right person/source, then read deeper only as needed. In expert mode, route through `index.md` to that person first. Return only the JSON object described above.")
+            sections.append("Retrieve information ONLY using the Lenny archive MCP tools. Do not use WebFetch, WebSearch, or any other tool. Do not draw on training data for archive-specific content. Start with `index.md` for fast routing, then narrow to the right person/source, then read deeper only as needed. In expert mode, route through `index.md` to that person first. Return only the JSON object described above.")
         } else {
-            sections.append("Follow the archive instructions above: use WebFetch to retrieve content from the GitHub URLs provided, then answer based on what you retrieved. Return only the JSON object described above.")
+            sections.append("Retrieve information ONLY from the GitHub URLs explicitly provided above (the index.json and the podcast/newsletter files). Do not use WebSearch. Do not fetch from any other website. Do not use training knowledge for archive-specific content. Answer based solely on what you retrieved. Return only the JSON object described above.")
         }
         return sections.joined(separator: "\n\n")
     }

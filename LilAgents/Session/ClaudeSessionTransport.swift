@@ -250,6 +250,8 @@ extension ClaudeSession {
         currentProcess = nil
         currentDataTask?.cancel()
         currentDataTask = nil
+        currentStreamingTask?.cancel()
+        currentStreamingTask = nil
         isRunning = false
         isBusy = false
         livePresenceExperts.removeAll()
@@ -275,6 +277,8 @@ extension ClaudeSession {
         currentProcess = nil
         currentDataTask?.cancel()
         currentDataTask = nil
+        currentStreamingTask?.cancel()
+        currentStreamingTask = nil
         isBusy = false
         pendingExperts.removeAll()
         assistantExplicitlyRequestedExperts = false

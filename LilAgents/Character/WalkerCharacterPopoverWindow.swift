@@ -183,10 +183,13 @@ extension WalkerCharacter {
             self?.claudeSession?.send(message: message, attachments: attachments)
         }
         terminal.onStopRequested = { [weak self] in
-            self?.claudeSession?.cancelActiveTurn()
-            self?.setCurrentActivityStatus("")
-            self?.terminalView?.endStreaming()
-            self?.terminalView?.clearLiveStatus()
+            guard let self else { return }
+            self.claudeSession?.cancelActiveTurn()
+            self.stopLiveStatusFallback()
+            self.setCurrentActivityStatus("")
+            self.terminalView?.endStreaming()
+            self.terminalView?.clearLiveStatus()
+            self.updateExpertNameTag()
         }
         terminal.onReturnToLenny = { [weak self] in
             self?.controller?.returnToGenie()

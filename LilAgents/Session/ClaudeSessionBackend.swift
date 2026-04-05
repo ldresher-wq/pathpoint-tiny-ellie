@@ -41,11 +41,10 @@ extension ClaudeSession {
                     }
                 }
 
-                if (environment["OPENAI_API_KEY"] ?? "").isEmpty,
-                   let storedKey = AppSettings.openAIAPIKey,
-                   !storedKey.isEmpty {
+                // Settings key always takes priority over the shell environment.
+                if let storedKey = AppSettings.openAIAPIKey, !storedKey.isEmpty {
                     environment["OPENAI_API_KEY"] = storedKey
-                    SessionDebugLogger.log("env", "using locally stored OPENAI_API_KEY from Settings")
+                    SessionDebugLogger.log("env", "using locally stored OPENAI_API_KEY from Settings (overrides shell env)")
                 }
 
                 if (environment[Constants.lennyMCPAuthEnvVar] ?? "").isEmpty,

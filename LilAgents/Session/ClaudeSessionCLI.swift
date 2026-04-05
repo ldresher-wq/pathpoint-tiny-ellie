@@ -123,11 +123,14 @@ extension ClaudeSession {
                 // Intercept responses where Claude itself reports the MCP is not
                 // connected / needs re-auth (exit 0 but content signals failure).
                 if useOfficialMCP, self.looksLikeMCPNotConnectedResponse(outputText) {
-                    SessionDebugLogger.log("claude-cli", "MCP not-connected detected in response text — firing onMCPAuthFailure")
-                    self.isBusy = false
-                    self.pendingExperts.removeAll()
-                    self.assistantExplicitlyRequestedExperts = false
-                    DispatchQueue.main.async { self.onMCPAuthFailure?() }
+                    SessionDebugLogger.log("claude-cli", "MCP not-connected detected in response text — failing turn and firing onMCPAuthFailure")
+                    DispatchQueue.main.async {
+                        self.failTurn(
+                            "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                            conversationKey: conversationKey
+                        )
+                        self.onMCPAuthFailure?()
+                    }
                     return
                 }
                 self.finishCLIResponse(outputText, conversationKey: conversationKey)
@@ -135,11 +138,14 @@ extension ClaudeSession {
             }
             // Non-zero exit: check for auth errors before treating as generic failure.
             if useOfficialMCP, self.looksLikeMCPAuthFailure(stdout: stdout, stderr: stderr) {
-                SessionDebugLogger.log("claude-cli", "MCP auth failure detected — firing onMCPAuthFailure")
-                self.isBusy = false
-                self.pendingExperts.removeAll()
-                self.assistantExplicitlyRequestedExperts = false
-                DispatchQueue.main.async { self.onMCPAuthFailure?() }
+                SessionDebugLogger.log("claude-cli", "MCP auth failure detected — failing turn and firing onMCPAuthFailure")
+                DispatchQueue.main.async {
+                    self.failTurn(
+                        "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                        conversationKey: conversationKey
+                    )
+                    self.onMCPAuthFailure?()
+                }
                 return
             }
 
@@ -287,11 +293,14 @@ extension ClaudeSession {
             }
 
             if useOfficialMCP, self.looksLikeMCPAuthFailure(stdout: stdout, stderr: stderr) {
-                SessionDebugLogger.log("codex-cli", "MCP auth failure detected — firing onMCPAuthFailure")
-                self.isBusy = false
-                self.pendingExperts.removeAll()
-                self.assistantExplicitlyRequestedExperts = false
-                DispatchQueue.main.async { self.onMCPAuthFailure?() }
+                SessionDebugLogger.log("codex-cli", "MCP auth failure detected — failing turn and firing onMCPAuthFailure")
+                DispatchQueue.main.async {
+                    self.failTurn(
+                        "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                        conversationKey: conversationKey
+                    )
+                    self.onMCPAuthFailure?()
+                }
                 return
             }
 
@@ -306,19 +315,32 @@ extension ClaudeSession {
     /// connected or needs re-authentication (the CLI exits 0 but the content signals failure).
     func looksLikeMCPNotConnectedResponse(_ text: String) -> Bool {
         let lowered = text.lowercased()
-        let patterns = [
+
+        // Group A: signals that the archive/connection is not ready
+        let stateSignals = [
             "not connected",
             "isn't connected",
             "is not connected",
-            "run /mcp",
-            "archive isn't connected",
-            "lenny archive",
-            "please authenticate"
+            "isn't authenticated",
+            "not authenticated",
+            "not yet authenticated",
+            "connection isn't",
+            "archive isn't"
         ]
-        // Require at least two distinct signals to reduce false positives on
-        // answers that happen to contain one of these phrases.
-        let matches = patterns.filter { lowered.contains($0) }
-        return matches.count >= 2
+
+        // Group B: signals that the user needs to take an auth action
+        let actionSignals = [
+            "/mcp",            // covers "run /mcp", "type `/mcp`", etc.
+            "authenticate",
+            "authorization",
+            "authorization flow",
+            "connect the archive"
+        ]
+
+        // Require at least one signal from each group to fire the banner.
+        let hasStateSignal  = stateSignals.contains  { lowered.contains($0) }
+        let hasActionSignal = actionSignals.contains { lowered.contains($0) }
+        return hasStateSignal && hasActionSignal
     }
 
     func looksLikeMCPAuthFailure(stdout: String, stderr: String) -> Bool {

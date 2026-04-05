@@ -142,18 +142,10 @@ extension WalkerCharacter {
         }
 
         session.onMCPAuthFailure = { [weak self] in
-            guard let self else { return }
-            self.stopLiveStatusFallback()
-            self.setCurrentActivityStatus("")
-            self.claudeSession?.isBusy = false
-            self.claudeSession?.pendingExperts.removeAll()
-            self.claudeSession?.assistantExplicitlyRequestedExperts = false
-            guard let terminalView = self.terminalView else { return }
-            terminalView.endStreaming()
-            terminalView.clearLiveStatus()
-            terminalView.appendError("Lenny MCP authentication failed. Your token may have expired — update it below to reconnect.")
-            terminalView.showOfficialMCPSetupPanel()
-            self.updateExpertNameTag()
+            // failTurn was already called before this fires, so the error is in the
+            // transcript and onTurnComplete has already replayed the conversation.
+            // Just show the MCP reconnect panel below the transcript.
+            self?.terminalView?.showOfficialMCPSetupPanel()
         }
     }
 

@@ -94,7 +94,7 @@ extension ClaudeSession {
     }
 
     private func scoreAndRankEntries(_ entries: [[String: Any]], query: String, limit: Int) -> [[String: Any]] {
-        let stopWords: Set<String> = ["the", "and", "for", "that", "with", "this", "are", "was", "were", "how", "what", "why", "when", "you", "your", "have", "does", "can", "about", "from"]
+        let stopWords: Set<String> = ["the", "and", "for", "that", "with", "this", "are", "was", "were", "how", "what", "why", "when", "you", "your", "have", "does", "can", "about", "from", "write", "more", "detail", "answer", "tell", "give", "please", "also", "just", "say", "call"]
         let queryWords = query.lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { $0.count > 2 && !stopWords.contains($0) }
@@ -102,21 +102,28 @@ extension ClaudeSession {
         guard !queryWords.isEmpty else { return [] }
 
         let scored: [(entry: [String: Any], score: Int)] = entries.compactMap { entry in
-            let fields = [
-                entry["title"] as? String,
-                entry["guest"] as? String,
-                entry["description"] as? String,
-                entry["subtitle"] as? String
-            ].compactMap { $0 }.joined(separator: " ").lowercased()
+            let guestText = (entry["guest"] as? String ?? "").lowercased()
+            let titleText = (entry["title"] as? String ?? "").lowercased()
+            let descText = [entry["description"] as? String, entry["subtitle"] as? String]
+                .compactMap { $0 }.joined(separator: " ").lowercased()
 
-            let score = queryWords.reduce(0) { acc, word in acc + (fields.contains(word) ? 1 : 0) }
+            let score = queryWords.reduce(0) { acc, word in
+                if guestText.contains(word) { return acc + 3 }  // exact guest name match
+                if titleText.contains(word) { return acc + 2 }  // title keyword match
+                if descText.contains(word) { return acc + 1 }   // description match
+                return acc
+            }
             guard score > 0 else { return nil }
             return (entry, score)
         }
 
-        return scored
-            .sorted { $0.score > $1.score }
-            .prefix(limit)
-            .map(\.entry)
+        let ranked = scored.sorted { $0.score > $1.score }
+
+        // Require a minimum relevance score of 3 — anything lower means the query
+        // is a generic follow-up (e.g. "write more detail") and the model should
+        // rely on previous_response_id cache instead of a fresh but irrelevant fetch.
+        guard let topScore = ranked.first?.score, topScore >= 3 else { return [] }
+
+        return ranked.prefix(limit).map(\.entry)
     }
 }

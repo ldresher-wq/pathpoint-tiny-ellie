@@ -87,7 +87,7 @@ extension ClaudeSession {
         Ground every factual claim in content you explicitly retrieved from the archive.
         Do NOT fabricate quotes, episode titles, newsletter headlines, or expert insights from training data.
         Do NOT access any URLs, websites, or knowledge sources beyond what is explicitly provided in these instructions.
-        Keep the answer concise and practical.
+        Write substantive, practical answers that draw fully on the provided archive content. Don't artificially truncate insights — let the depth of the source material guide the length of your answer.
         Return only valid JSON, with no prose before or after it and no code fences.
         Use this exact shape:
         {

@@ -383,14 +383,11 @@ extension ClaudeSession {
         if let process = currentProcess {
             let processID = process.processIdentifier
             if process.isRunning {
-                process.interrupt()
-                process.terminate()
-
-                DispatchQueue.global().asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                    guard let self, self.isCancellingTurn else { return }
-                    guard process.isRunning else { return }
-                    kill(processID, SIGKILL)
-                }
+                // SIGKILL the process and its entire process group immediately.
+                // claude (Node.js) and codex ignore SIGINT/SIGTERM, and codex
+                // runs wrapped in /usr/bin/script so we must kill the group.
+                kill(processID, SIGKILL)
+                kill(-processID, SIGKILL)
             }
         }
         currentProcess = nil

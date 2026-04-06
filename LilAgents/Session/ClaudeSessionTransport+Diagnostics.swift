@@ -11,18 +11,20 @@ extension ClaudeSession {
     func logStartupDiagnostics() {
         Task.detached(priority: .utility) {
             let fm = FileManager.default
+            let processEnv = ProcessInfo.processInfo.environment
 
             // ── Runtimes ─────────────────────────────────────────────────────
-            // Use ProcessInfo for PATH-based executable lookup (AppSettings.resolveShellEnvironment is private).
-            let processEnv = ProcessInfo.processInfo.environment
-            let claudePath = self.executablePath(named: "claude", environment: processEnv)
-            let codexPath  = self.executablePath(named: "codex",  environment: processEnv)
-
-            let claudeFound = claudePath != nil
-            let codexFound  = codexPath  != nil
-
+            // hasDetectedClaudeLogin / hasDetectedCodexLogin use the full path
+            // scan (nvm version scan, volta, fnm, etc.) — more accurate than
+            // checking ProcessInfo.processInfo.environment["PATH"] directly.
             let claudeLoggedIn = AppSettings.hasDetectedClaudeLogin
             let codexLoggedIn  = AppSettings.hasDetectedCodexLogin
+
+            // Quick PATH-based check for display; falls back to login state
+            let claudePathFast = self.executablePath(named: "claude", environment: processEnv)
+            let codexPathFast  = self.executablePath(named: "codex",  environment: processEnv)
+            let claudeFound = claudeLoggedIn || claudePathFast != nil
+            let codexFound  = codexLoggedIn  || codexPathFast  != nil
 
             let anthropicKey     = AppSettings.hasDetectedAnthropicAPIKey
             let openaiKey        = AppSettings.hasDetectedOpenAIAPIKey
@@ -30,15 +32,16 @@ extension ClaudeSession {
             let mcpSettingsToken = AppSettings.officialLennyMCPToken != nil
 
             // ── MCP in config files ──────────────────────────────────────────
-            let claudeConfigURLs = AppSettings.claudeGlobalConfigURLs
-            let codexConfigURL   = AppSettings.codexGlobalConfigURL
-            let codexConfigMCP   = AppSettings.containsOfficialMCPConfiguration(at: codexConfigURL)
+            let claudeConfigURLs      = AppSettings.claudeGlobalConfigURLs
+            let codexConfigURL        = AppSettings.codexGlobalConfigURL
+            let codexConfigMCP        = AppSettings.containsOfficialMCPConfiguration(at: codexConfigURL)
             let codexConfigMCPViaList = AppSettings.hasDetectedCodexOfficialMCPConfiguration
 
             // ── Archive mode ─────────────────────────────────────────────────
-            let mcpSources  = AppSettings.detectedOfficialMCPSources
-            let archiveMode = AppSettings.effectiveArchiveAccessMode
-            let preferredTransport = AppSettings.preferredTransport
+            let mcpSources          = AppSettings.detectedOfficialMCPSources
+            let archiveMode         = AppSettings.effectiveArchiveAccessMode
+            let preferredTransport  = AppSettings.preferredTransport
+            let explicitStarterPack = AppSettings.hasExplicitStarterPackChoice
 
             // ── Print ────────────────────────────────────────────────────────
             var lines: [String] = []
@@ -48,8 +51,8 @@ extension ClaudeSession {
 
             lines.append("")
             lines.append("── Runtimes ────────────────────────────────────────")
-            lines.append("  claude  executable : \(claudeFound  ? (claudePath ?? "?") : "NOT FOUND")")
-            lines.append("  codex   executable : \(codexFound   ? (codexPath  ?? "?") : "NOT FOUND")")
+            lines.append("  claude  executable : \(claudeFound ? (claudePathFast ?? "found (via full scan)") : "NOT FOUND")")
+            lines.append("  codex   executable : \(codexFound  ? (codexPathFast  ?? "found (via full scan)") : "NOT FOUND")")
             lines.append("  claude  logged in  : \(claudeLoggedIn ? "YES" : "NO")\(anthropicKey ? " (via ANTHROPIC_API_KEY)" : "")")
             lines.append("  codex   logged in  : \(codexLoggedIn  ? "YES" : "NO")\(openaiKey    ? " (via OPENAI_API_KEY)"    : "")")
 
@@ -82,11 +85,12 @@ extension ClaudeSession {
 
             lines.append("")
             lines.append("── Active configuration ─────────────────────────────")
-            lines.append("  Preferred transport : \(preferredTransport.rawValue)")
-            lines.append("  Archive mode        : \(archiveMode.rawValue)")
-            lines.append("  Claude model        : \(AppSettings.preferredClaudeModel.label)")
-            lines.append("  Codex model         : \(AppSettings.preferredCodexModel.label)")
-            lines.append("  OpenAI model        : \(AppSettings.preferredOpenAIModel.label)")
+            lines.append("  Preferred transport      : \(preferredTransport.rawValue)")
+            lines.append("  Archive mode             : \(archiveMode.rawValue)")
+            lines.append("  Explicit starter pack    : \(explicitStarterPack ? "YES (user chose Starter Pack)" : "no")")
+            lines.append("  Claude model             : \(AppSettings.preferredClaudeModel.label)")
+            lines.append("  Codex model              : \(AppSettings.preferredCodexModel.label)")
+            lines.append("  OpenAI model             : \(AppSettings.preferredOpenAIModel.label)")
 
             lines.append("────────────────────────────────────────────────────")
 

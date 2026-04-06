@@ -15,9 +15,9 @@ extension SettingsView {
                     RuntimeSegmentedControl(selection: $preferredTransport)
 
                     SettingsInfoRow(
-                        icon: isAutomaticSelected ? "arrow.triangle.branch" : selectedRuntimeIcon,
+                        icon: selectedRuntimeIcon,
                         iconColor: .accentColor,
-                        text: isAutomaticSelected ? automaticRuntimeDescription : selectedRuntimeDescription
+                        text: selectedRuntimeDescription
                     )
 
                     if effectiveModelTransport == .claudeCode {
@@ -148,74 +148,39 @@ extension SettingsView {
 
     // MARK: - Model/transport helpers
 
-    var isAutomaticSelected: Bool {
-        preferredTransport == AppSettings.PreferredTransport.automatic.rawValue
-    }
-
     var effectiveModelTransport: AppSettings.PreferredTransport {
         if let selected = AppSettings.PreferredTransport(rawValue: preferredTransport), selected != .automatic {
             return selected
         }
-        if AppSettings.hasDetectedClaudeLogin {
-            return .claudeCode
-        }
-        if AppSettings.hasDetectedCodexLogin {
-            return .codex
-        }
-        if AppSettings.hasDetectedOpenAIAPIKey {
-            return .openAIAPI
-        }
-        return .automatic
+        if AppSettings.hasDetectedClaudeLogin { return .claudeCode }
+        if AppSettings.hasDetectedCodexLogin  { return .codex }
+        return .openAIAPI
     }
 
     var modelSectionSubtitle: String {
-        if isAutomaticSelected {
-            return "Automatic checks Claude first, then Codex, then OpenAI."
-        }
-
         switch effectiveModelTransport {
         case .claudeCode: return "Lil-Lenny will answer through Claude Code."
-        case .codex: return "Lil-Lenny will answer through Codex."
-        case .openAIAPI: return "Lil-Lenny will answer through the OpenAI API."
-        case .automatic: return "Automatic chooses the best available runtime on this Mac."
-        }
-    }
-
-    var automaticRuntimeDescription: String {
-        switch effectiveModelTransport {
-        case .claudeCode:
-            return "Automatic currently prefers Claude Code on this Mac."
-        case .codex:
-            return "Automatic currently prefers Codex on this Mac."
-        case .openAIAPI:
-            return AppSettings.hasDetectedOfficialMCPConfiguration
-                ? "Automatic would use the OpenAI API with LennyData right now."
-                : "Automatic would fall back to the OpenAI API right now."
-        case .automatic:
-            if AppSettings.hasDetectedOfficialMCPConfiguration {
-                return "LennyData is configured, but no logged-in Claude Code or Codex runtime was detected. Open Settings to check the local sign-in."
-            }
-            return AppSettings.hasDetectedOpenAIAPIKey
-                ? "Automatic would fall back to the OpenAI API right now."
-                : "Nothing is configured yet. Open Settings to connect Claude, Codex, or add an OpenAI API key."
+        case .codex:      return "Lil-Lenny will answer through Codex."
+        case .openAIAPI:  return "Lil-Lenny will answer through the OpenAI API."
+        case .automatic:  return "Detecting available runtimes…"
         }
     }
 
     var selectedRuntimeDescription: String {
         switch effectiveModelTransport {
         case .claudeCode: return "Choose which Claude model Lil-Lenny should use."
-        case .codex: return "Choose which Codex model Lil-Lenny should use."
-        case .openAIAPI: return "Choose which OpenAI model Lil-Lenny should use and add an API key below."
-        case .automatic: return "Automatic chooses the best available runtime on this Mac."
+        case .codex:      return "Choose which Codex model Lil-Lenny should use."
+        case .openAIAPI:  return "Choose which OpenAI model Lil-Lenny should use and add an API key below."
+        case .automatic:  return "Detecting available runtimes…"
         }
     }
 
     var selectedRuntimeIcon: String {
         switch effectiveModelTransport {
         case .claudeCode: return "person.crop.square.fill"
-        case .codex: return "terminal.fill"
-        case .openAIAPI: return "network.badge.shield.half.filled"
-        case .automatic: return "arrow.triangle.branch"
+        case .codex:      return "terminal.fill"
+        case .openAIAPI:  return "network.badge.shield.half.filled"
+        case .automatic:  return "arrow.triangle.branch"
         }
     }
 }
@@ -236,7 +201,6 @@ struct RuntimeSegmentedControl: View {
 
     private var segments: [RuntimeSegment] {
         [
-            RuntimeSegment(label: "Automatic",   tag: AppSettings.PreferredTransport.automatic.rawValue,  available: true),
             RuntimeSegment(label: "Claude Code", tag: AppSettings.PreferredTransport.claudeCode.rawValue, available: claudeAvailable),
             RuntimeSegment(label: "Codex",       tag: AppSettings.PreferredTransport.codex.rawValue,      available: codexAvailable),
             RuntimeSegment(label: "OpenAI API",  tag: AppSettings.PreferredTransport.openAIAPI.rawValue,  available: true),
@@ -248,7 +212,7 @@ struct RuntimeSegmentedControl: View {
             ForEach(segments, id: \.tag) { segment in
                 segmentButton(segment)
                     .overlay(alignment: .trailing) {
-                        if segment.tag != AppSettings.PreferredTransport.openAIAPI.rawValue {
+                        if segment.tag != segments.last?.tag {
                             Rectangle()
                                 .fill(Color(NSColor.separatorColor).opacity(0.6))
                                 .frame(width: 0.5)
@@ -265,6 +229,17 @@ struct RuntimeSegmentedControl: View {
             let (c, d) = await (claude, codex)
             claudeAvailable = c
             codexAvailable  = d
+
+            // Auto-select the best runtime if the user has never explicitly chosen one
+            if selection == AppSettings.PreferredTransport.automatic.rawValue {
+                if c {
+                    selection = AppSettings.PreferredTransport.claudeCode.rawValue
+                } else if d {
+                    selection = AppSettings.PreferredTransport.codex.rawValue
+                } else {
+                    selection = AppSettings.PreferredTransport.openAIAPI.rawValue
+                }
+            }
         }
     }
 

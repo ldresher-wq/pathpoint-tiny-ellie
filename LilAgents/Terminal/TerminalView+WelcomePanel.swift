@@ -120,14 +120,19 @@ extension TerminalView {
         }
 
         // MCP reconnect: persisted failure flag from a previous turn.
-        // Proactive: native MCP URL in CLI config but no auth token yet (first-run / unconfigured).
+        // Proactive: token-based path selected but no token saved yet (first-run / unconfigured).
+        // Native MCP (codex mcp add / codex mcp login) is self-sufficient — no app token needed.
         let hasNativeMCPConfig = AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
             || AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
         let hasWorkingToken = AppSettings.officialLennyMCPToken != nil
             || AppSettings.shellEnvironmentOfficialMCPToken() != nil
+        let needsTokenSetup = !hasNativeMCPConfig
+            && AppSettings.effectiveArchiveAccessMode == .officialMCP
+            && !hasWorkingToken
+            && !mcpSetupBannerDismissedThisSession
         let shouldPromptMCPSetup = AppSettings.mcpReconnectNeeded
             || isShowingOfficialMCPSetupPanel
-            || (hasNativeMCPConfig && !hasWorkingToken && !mcpSetupBannerDismissedThisSession)
+            || needsTokenSetup
 
         if shouldPromptMCPSetup {
             showOfficialMCPSetupPanel()

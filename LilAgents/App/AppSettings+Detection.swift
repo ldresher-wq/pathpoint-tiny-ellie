@@ -4,6 +4,8 @@ extension AppSettings {
     // Shared with AppSettings+MCPConfig via resolveShellEnvironment()
     static let shellEnvironmentMCPTokenKey = "LENNYSDATA_MCP_AUTH_TOKEN"
     private static var cachedShellEnvironment: [String: String]?
+    private static var cachedClaudeLogin: Bool?
+    private static var cachedCodexLogin: Bool?
 
     static var detectedOfficialMCPSources: [OfficialMCPSource] {
         var sources: [OfficialMCPSource] = []
@@ -29,6 +31,13 @@ extension AppSettings {
     }
 
     static var hasDetectedCodexLogin: Bool {
+        if let cached = cachedCodexLogin { return cached }
+        let result = detectCodexLogin()
+        cachedCodexLogin = result
+        return result
+    }
+
+    private static func detectCodexLogin() -> Bool {
         guard executablePathForDetection(named: "codex") != nil else { return false }
         if hasDetectedOpenAIAPIKey { return true }
         if hasDetectedCodexAuthFile { return true }
@@ -61,10 +70,15 @@ extension AppSettings {
     }
 
     static var hasDetectedClaudeLogin: Bool {
+        if let cached = cachedClaudeLogin { return cached }
+        let result = detectClaudeLogin()
+        cachedClaudeLogin = result
+        return result
+    }
+
+    private static func detectClaudeLogin() -> Bool {
         guard let executable = executablePathForDetection(named: "claude") else { return false }
-        if hasDetectedAnthropicAPIKey {
-            return true
-        }
+        if hasDetectedAnthropicAPIKey { return true }
         let result = runCommand(executablePath: executable, arguments: ["auth", "status"])
         if let data = result.stdout.data(using: .utf8),
            let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -80,6 +94,30 @@ extension AppSettings {
 
     static func refreshDetectionState() {
         cachedShellEnvironment = nil
+        cachedClaudeLogin = nil
+        cachedCodexLogin = nil
+    }
+
+    /// Warms up all detection caches on a background thread so results are ready
+    /// before the user opens Settings or the welcome panel.
+    static func prefetchDetectionState() {
+        DispatchQueue.global(qos: .userInitiated).async {
+            // Shell env first — both login checks depend on it
+            _ = resolveShellEnvironment()
+            // Run both in parallel
+            let group = DispatchGroup()
+            group.enter()
+            DispatchQueue.global(qos: .userInitiated).async {
+                cachedClaudeLogin = detectClaudeLogin()
+                group.leave()
+            }
+            group.enter()
+            DispatchQueue.global(qos: .userInitiated).async {
+                cachedCodexLogin = detectCodexLogin()
+                group.leave()
+            }
+            group.wait()
+        }
     }
 
     static var hasDetectedOpenAIAPIKey: Bool {

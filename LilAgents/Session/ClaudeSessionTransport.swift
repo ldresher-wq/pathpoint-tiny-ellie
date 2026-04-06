@@ -133,7 +133,14 @@ extension ClaudeSession {
             // ── Native CLI MCP path ────────────────────────────────────────────────────
             // The CLI already has Lenny MCP configured with its own credentials;
             // invoke it directly without injecting a token or fetching context via HTTP.
-            if archiveMode == .officialMCP, self.backendHasNativeMCPConfiguration(backend) {
+            //
+            // Yield to token injection when the user has an explicit settings/env token.
+            // This covers the expired-token recovery case: after the banner install the
+            // native config file may still hold a stale token, while the settings token
+            // is fresh. Token injection writes a temp --mcp-config with --strict-mcp-config
+            // so only the fresh bearer-token server is loaded, bypassing stale entries.
+            let hasExplicitToken = self.officialMCPToken(from: environment) != nil
+            if archiveMode == .officialMCP, self.backendHasNativeMCPConfiguration(backend), !hasExplicitToken {
                 SessionDebugLogger.log("archive", "native MCP path: backend=\(backend) — dispatching with useOfficialMCP=true, no token injection")
                 self.onToolUse?("Connecting to archive", ["summary": "Connecting to the official Lenny archive"])
                 self.appendHistory(Message(role: .toolUse, text: "Connecting to archive"), to: conversationKey)
@@ -154,7 +161,34 @@ extension ClaudeSession {
             }
 
             // ── Settings / env bearer-token MCP path ───────────────────────────────
+            // Also reached when native config exists but user has a settings token
+            // (hasExplicitToken bypassed the native path above).
             if let token = self.officialMCPToken(from: environment) {
+                // For both CLI backends, inject the token directly via the CLI's own
+                // MCP config mechanism. This is strictly better than HTTP pre-fetch:
+                // Claude can call multiple MCP tools interactively rather than getting
+                // a single pre-fetched context blob. It also bypasses any stale OAuth
+                // entries in the native config (--strict-mcp-config loads only ours).
+                if case .claudeCodeCLI = backend {
+                    SessionDebugLogger.log("archive", "claude CLI settings token: injecting via --mcp-config --strict-mcp-config. token=\(String(token.prefix(8)))...")
+                    self.onToolUse?("Connecting to archive", ["summary": "Connecting to the official Lenny archive"])
+                    self.appendHistory(Message(role: .toolUse, text: "Connecting to archive"), to: conversationKey)
+                    self.onToolResult?("Archive ready", false)
+                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                    self.dispatchResolvedBackend(
+                        backend,
+                        message: message,
+                        attachments: attachments,
+                        environment: environment,
+                        expert: activeExpert,
+                        conversationKey: conversationKey,
+                        archiveContext: nil,
+                        officialMCPToken: token,
+                        useOfficialMCP: true
+                    )
+                    return
+                }
+
                 if case .codexCLI = backend, self.backendSupportsOfficialMCP(backend, environment: environment) {
                     self.dispatchResolvedBackend(
                         backend,
@@ -170,6 +204,7 @@ extension ClaudeSession {
                     return
                 }
 
+                // OpenAI backend: no CLI to inject into, so HTTP pre-fetch is the only option.
                 self.fetchOfficialArchiveContext(
                     message: message,
                     expert: activeExpert,

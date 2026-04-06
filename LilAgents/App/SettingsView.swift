@@ -60,7 +60,7 @@ struct SettingsView: View {
     @State var detectedClaudeAvailable: Bool? = nil
     @State var detectedCodexAvailable: Bool? = nil
 
-    let officialArchiveURL = URL(string: "https://www.lennysdata.com")!
+    let officialArchiveURL = URL(string: "https://www.lennysdata.com") ?? URL(fileURLWithPath: "/")
 
     var body: some View {
         NavigationSplitView {
@@ -152,13 +152,23 @@ struct SettingsView: View {
     }
 
     func refreshDetectionStateAndDefaults() {
-        AppSettings.refreshDetectionState()
+        // Reset local loading indicators immediately so the UI shows "checking".
         detectedClaudeAvailable = nil
         detectedCodexAvailable = nil
-        detectionRefreshID = UUID()
-        // Only skip re-evaluation if the user explicitly chose Starter Pack.
-        // Auto-written defaults don't count — native MCP detection should always upgrade.
-        guard !AppSettings.hasExplicitStarterPackChoice else { return }
-        archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue
+
+        // Repopulate all subprocess-backed caches on a background thread so the
+        // view body never reads slow properties (e.g. `claude mcp list`) with empty
+        // caches on the main thread — which was the source of AttributeGraph cycles.
+        DispatchQueue.global(qos: .userInitiated).async {
+            AppSettings.refreshAndPrefetchDetectionStateSync()
+            DispatchQueue.main.async {
+                detectionRefreshID = UUID()
+                // Only skip re-evaluation if the user explicitly chose Starter Pack.
+                // Auto-written defaults don't count — native MCP detection should always upgrade.
+                if !AppSettings.hasExplicitStarterPackChoice {
+                    archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue
+                }
+            }
+        }
     }
 }

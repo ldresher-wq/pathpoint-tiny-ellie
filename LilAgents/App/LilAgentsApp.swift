@@ -63,6 +63,13 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
             character.terminalView?.requiresInitialConnectionSetup = false
             if character.isIdleForPopover {
                 character.terminalView?.showWelcomeGreeting(forceRefresh: true)
+                // Immediately recreate the session so the user can send a message
+                // without hitting nil → perpetual spinner (isStreaming=true, send dropped).
+                let session = ClaudeSession()
+                session.focusedExpert = character.focusedExpert
+                character.claudeSession = session
+                character.wireSession(session)
+                session.start()
             }
         }
     }

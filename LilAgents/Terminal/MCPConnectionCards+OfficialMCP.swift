@@ -322,8 +322,10 @@ class OfficialMCPConnectCardView: NSView {
             detectionLabel.stringValue = "Paste the auth key from lennysdata.com first."
             return
         }
+        SessionDebugLogger.log("token-entry", "banner: user tapped Save and connect. tokenLength=\(trimmed.count) tokenPrefix=\(String(trimmed.prefix(8)))...")
         do {
             let result = try OfficialMCPInstaller.install(token: trimmed)
+            SessionDebugLogger.log("token-entry", "banner: install succeeded. storedTokenOnly=\(result.storedTokenOnly) updated=\(result.updatedTargets.map(\.label).joined(separator: ",")) preserved=\(result.preservedTargets.map(\.label).joined(separator: ","))")
             detectionLabel.textColor = theme.accentColor
             detectionLabel.isHidden = false
             if result.storedTokenOnly {
@@ -334,6 +336,7 @@ class OfficialMCPConnectCardView: NSView {
             AppSettings.mcpReconnectNeeded = false
             onSave?()
         } catch {
+            SessionDebugLogger.log("token-entry", "banner: install failed. error=\(error.localizedDescription)")
             detectionLabel.textColor = theme.errorColor
             detectionLabel.isHidden = false
             detectionLabel.stringValue = error.localizedDescription

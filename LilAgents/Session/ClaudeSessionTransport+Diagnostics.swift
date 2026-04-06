@@ -32,10 +32,11 @@ extension ClaudeSession {
             let mcpSettingsToken = AppSettings.officialLennyMCPToken != nil
 
             // ── MCP in config files ──────────────────────────────────────────
-            let claudeConfigURLs      = AppSettings.claudeGlobalConfigURLs
-            let codexConfigURL        = AppSettings.codexGlobalConfigURL
-            let codexConfigMCP        = AppSettings.containsOfficialMCPConfiguration(at: codexConfigURL)
-            let codexConfigMCPViaList = AppSettings.hasDetectedCodexOfficialMCPConfiguration
+            let claudeConfigURLs       = AppSettings.claudeGlobalConfigURLs
+            let codexConfigURL         = AppSettings.codexGlobalConfigURL
+            let claudeConfigMCPViaList = AppSettings.hasDetectedClaudeOfficialMCPConfiguration
+            let codexConfigMCP         = AppSettings.containsOfficialMCPConfiguration(at: codexConfigURL)
+            let codexConfigMCPViaList  = AppSettings.hasDetectedCodexOfficialMCPConfiguration
 
             // ── Archive mode ─────────────────────────────────────────────────
             let mcpSources          = AppSettings.detectedOfficialMCPSources
@@ -69,6 +70,10 @@ extension ClaudeSession {
                 let exists = fm.fileExists(atPath: url.path)
                 let hasMCP = AppSettings.containsOfficialMCPConfiguration(at: url)
                 lines.append("  \(url.lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)): \(exists ? "exists" : "missing")\(hasMCP ? " ✓ has Lenny MCP" : "")")
+            }
+            let anyClaudeFileMCP = claudeConfigURLs.contains(where: AppSettings.containsOfficialMCPConfiguration(at:))
+            if !anyClaudeFileMCP && claudeConfigMCPViaList {
+                lines.append("  (claude mcp list)            : ✓ has Lenny MCP")
             }
             let codexConfigExists = fm.fileExists(atPath: codexConfigURL.path)
             lines.append("  \(codexConfigURL.lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)): \(codexConfigExists ? "exists" : "missing")\(codexConfigMCP ? " ✓ has Lenny MCP" : "")\((!codexConfigMCP && codexConfigMCPViaList) ? " ✓ via codex mcp list" : "")")

@@ -169,6 +169,10 @@ extension ClaudeSession {
                     }
                     return
                 }
+                // Successful turn via token injection — the reconnect is resolved.
+                if useOfficialMCP, officialMCPToken != nil, AppSettings.mcpReconnectNeeded {
+                    DispatchQueue.main.async { AppSettings.mcpReconnectNeeded = false }
+                }
                 self.finishCLIResponse(outputText, conversationKey: conversationKey)
                 return
             }

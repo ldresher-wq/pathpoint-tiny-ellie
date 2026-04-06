@@ -29,10 +29,11 @@ extension AppSettings {
     }
 
     static var hasDetectedCodexLogin: Bool {
+        guard executablePathForDetection(named: "codex") != nil else { return false }
+        if hasDetectedOpenAIAPIKey { return true }
+        if hasDetectedCodexAuthFile { return true }
+
         guard let executable = executablePathForDetection(named: "codex") else { return false }
-        if hasDetectedOpenAIAPIKey {
-            return true
-        }
         let result = runCommand(executablePath: executable, arguments: ["login", "status"])
         guard result.status == 0 else { return false }
 
@@ -40,11 +41,23 @@ extension AppSettings {
         if output.contains("not logged in") || output.contains("login required") {
             return false
         }
-        if output.contains("logged in") || output.contains("chatgpt") {
+        if output.contains("logged in") || output.contains("chatgpt") || output.contains("openai") {
             return true
         }
 
         return output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    /// Codex stores its auth in ~/.codex/auth.json — if it exists with content, the user is authenticated.
+    static var hasDetectedCodexAuthFile: Bool {
+        let authPath = homeDirectoryURL.appendingPathComponent(".codex/auth.json").path
+        guard let data = FileManager.default.contents(atPath: authPath),
+              !data.isEmpty,
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return false
+        }
+        // Any of these keys mean the user authenticated at some point
+        return json["OPENAI_API_KEY"] != nil || json["tokens"] != nil || json["token"] != nil || json["api_key"] != nil
     }
 
     static var hasDetectedClaudeLogin: Bool {
@@ -168,9 +181,12 @@ extension AppSettings {
             fallbackPaths = [
                 "\(home)/.local/bin/codex",
                 "\(home)/.volta/bin/codex",
+                "\(home)/.npm-global/bin/codex",
+                "\(home)/node_modules/.bin/codex",
                 "\(home)/.nvm/versions/node/current/bin/codex",
                 "/opt/homebrew/bin/codex",
-                "/usr/local/bin/codex"
+                "/usr/local/bin/codex",
+                "/usr/local/lib/node_modules/.bin/codex"
             ]
             // Scan all nvm node versions (newest first) in case "current" symlink doesn't exist
             let nvmNodeDir = "\(home)/.nvm/versions/node"

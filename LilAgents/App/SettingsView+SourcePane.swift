@@ -107,6 +107,7 @@ extension SettingsView {
 
         Button {
             archiveAccessMode = mode.rawValue
+            AppSettings.hasExplicitStarterPackChoice = (mode == .starterPack)
         } label: {
             HStack(alignment: .top, spacing: 14) {
                 Image(systemName: selected ? "largecircle.fill.circle" : "circle")

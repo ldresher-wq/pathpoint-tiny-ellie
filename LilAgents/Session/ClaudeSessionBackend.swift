@@ -343,18 +343,14 @@ extension ClaudeSession {
     }
 
     func effectiveArchiveAccessMode(environment: [String: String]) -> AppSettings.ArchiveAccessMode {
-        // An explicit starterPack choice by the user always wins.
-        if AppSettings.hasStoredArchiveAccessModePreference && AppSettings.archiveAccessMode == .starterPack {
+        // An explicit user choice to stay on Starter Pack always wins.
+        if AppSettings.hasExplicitStarterPackChoice {
             return .starterPack
         }
-        // Native CLI MCP config activates official mode when no explicit choice was made.
+        // Native CLI MCP config activates official mode automatically.
         let sources = AppSettings.detectedOfficialMCPSources
         if sources.contains(.claudeGlobalConfig) || sources.contains(.codexGlobalConfig) {
             return .officialMCP
-        }
-
-        guard AppSettings.archiveAccessMode != .starterPack else {
-            return .starterPack
         }
 
         return hasAnyOfficialMCPConfiguration(environment: environment) ? .officialMCP : .starterPack

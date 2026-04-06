@@ -156,7 +156,9 @@ struct SettingsView: View {
         detectedClaudeAvailable = nil
         detectedCodexAvailable = nil
         detectionRefreshID = UUID()
-        guard !AppSettings.hasStoredArchiveAccessModePreference else { return }
+        // Only skip re-evaluation if the user explicitly chose Starter Pack.
+        // Auto-written defaults don't count — native MCP detection should always upgrade.
+        guard !AppSettings.hasExplicitStarterPackChoice else { return }
         archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue
     }
 }

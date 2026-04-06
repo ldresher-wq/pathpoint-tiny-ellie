@@ -106,16 +106,17 @@ enum AppSettings {
 
     // MARK: - UserDefaults keys
 
-    static let preferredTransportKey    = "preferredTransport"
-    static let archiveAccessModeKey     = "archiveAccessMode"
-    static let officialLennyMCPTokenKey = "officialLennyMCPToken"
-    static let openAIAPIKeyKey          = "openAIAPIKey"
-    static let debugLoggingEnabledKey   = "debugLoggingEnabled"
-    static let preferredClaudeModelKey  = "preferredClaudeModel"
-    static let preferredCodexModelKey   = "preferredCodexModel"
-    static let preferredOpenAIModelKey  = "preferredOpenAIModel"
-    static let welcomePreviewModeKey    = "welcomePreviewMode"
-    static let mcpReconnectNeededKey    = "mcpReconnectNeeded"
+    static let preferredTransportKey              = "preferredTransport"
+    static let archiveAccessModeKey              = "archiveAccessMode"
+    static let hasExplicitStarterPackChoiceKey   = "hasExplicitStarterPackChoice"
+    static let officialLennyMCPTokenKey          = "officialLennyMCPToken"
+    static let openAIAPIKeyKey                   = "openAIAPIKey"
+    static let debugLoggingEnabledKey            = "debugLoggingEnabled"
+    static let preferredClaudeModelKey           = "preferredClaudeModel"
+    static let preferredCodexModelKey            = "preferredCodexModel"
+    static let preferredOpenAIModelKey           = "preferredOpenAIModel"
+    static let welcomePreviewModeKey             = "welcomePreviewMode"
+    static let mcpReconnectNeededKey             = "mcpReconnectNeeded"
 
     // MARK: - Preferences
 
@@ -137,6 +138,13 @@ enum AppSettings {
 
     static var hasStoredArchiveAccessModePreference: Bool {
         UserDefaults.standard.object(forKey: archiveAccessModeKey) != nil
+    }
+
+    /// True only when the user explicitly clicked "Starter Pack" in the source pane.
+    /// Programmatically written defaults do NOT set this flag.
+    static var hasExplicitStarterPackChoice: Bool {
+        get { UserDefaults.standard.bool(forKey: hasExplicitStarterPackChoiceKey) }
+        set { UserDefaults.standard.set(newValue, forKey: hasExplicitStarterPackChoiceKey) }
     }
 
     static var officialLennyMCPToken: String? {
@@ -174,16 +182,16 @@ enum AppSettings {
     }
 
     static var effectiveArchiveAccessMode: ArchiveAccessMode {
-        // An explicit starterPack choice by the user always wins.
-        if hasStoredArchiveAccessModePreference && archiveAccessMode == .starterPack {
+        // An explicit user choice to stay on Starter Pack always wins — but only
+        // if the user actually clicked the radio button (not just an auto-written default).
+        if hasExplicitStarterPackChoice {
             return .starterPack
         }
-        // Native CLI MCP config activates official mode when no explicit choice was made.
+        // Native CLI MCP config activates official mode automatically.
         let sources = detectedOfficialMCPSources
         if sources.contains(.claudeGlobalConfig) || sources.contains(.codexGlobalConfig) {
             return .officialMCP
         }
-        guard archiveAccessMode != .starterPack else { return .starterPack }
         return sources.isEmpty ? .starterPack : .officialMCP
     }
 
@@ -247,6 +255,7 @@ enum AppSettings {
         let managedKeys = [
             preferredTransportKey,
             archiveAccessModeKey,
+            hasExplicitStarterPackChoiceKey,
             officialLennyMCPTokenKey,
             openAIAPIKeyKey,
             debugLoggingEnabledKey,

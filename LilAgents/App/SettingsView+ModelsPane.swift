@@ -12,7 +12,11 @@ extension SettingsView {
 
             SettingsSectionCard(title: "Runtime", subtitle: modelSectionSubtitle) {
                 VStack(alignment: .leading, spacing: 14) {
-                    RuntimeSegmentedControl(selection: $preferredTransport)
+                    RuntimeSegmentedControl(
+                        selection: $preferredTransport,
+                        claudeAvailable: $detectedClaudeAvailable,
+                        codexAvailable: $detectedCodexAvailable
+                    )
 
                     SettingsInfoRow(
                         icon: selectedRuntimeIcon,
@@ -152,8 +156,9 @@ extension SettingsView {
         if let selected = AppSettings.PreferredTransport(rawValue: preferredTransport), selected != .automatic {
             return selected
         }
-        if AppSettings.hasDetectedClaudeLogin { return .claudeCode }
-        if AppSettings.hasDetectedCodexLogin  { return .codex }
+        // Use async-detected results — never call detection synchronously on the main thread
+        if detectedClaudeAvailable == true { return .claudeCode }
+        if detectedCodexAvailable == true  { return .codex }
         return .openAIAPI
     }
 
@@ -196,8 +201,8 @@ private struct RuntimeSegment {
 
 struct RuntimeSegmentedControl: View {
     @Binding var selection: String
-    @State private var claudeAvailable: Bool? = nil
-    @State private var codexAvailable: Bool? = nil
+    @Binding var claudeAvailable: Bool?
+    @Binding var codexAvailable: Bool?
 
     private var segments: [RuntimeSegment] {
         [

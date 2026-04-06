@@ -56,6 +56,9 @@ struct SettingsView: View {
     @State var sourcePaneStatusMessage: String?
     @State var sourcePaneErrorMessage: String?
     @State var detectionRefreshID = UUID()
+    // Async detection results — nil means "still checking"
+    @State var detectedClaudeAvailable: Bool? = nil
+    @State var detectedCodexAvailable: Bool? = nil
 
     let officialArchiveURL = URL(string: "https://www.lennysdata.com")!
 
@@ -150,6 +153,8 @@ struct SettingsView: View {
 
     func refreshDetectionStateAndDefaults() {
         AppSettings.refreshDetectionState()
+        detectedClaudeAvailable = nil
+        detectedCodexAvailable = nil
         detectionRefreshID = UUID()
         guard !AppSettings.hasStoredArchiveAccessModePreference else { return }
         archiveAccessMode = AppSettings.defaultArchiveAccessMode.rawValue

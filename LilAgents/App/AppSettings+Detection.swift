@@ -142,13 +142,21 @@ extension AppSettings {
     // MARK: - Executable path detection
 
     private static func executablePathForDetection(named name: String) -> String? {
+        // 1. Try the app process PATH first (fast, works if nvm is active in the environment)
         if let rawPath = ProcessInfo.processInfo.environment["PATH"],
            let path = executablePathForDetection(named: name, rawPath: rawPath) {
             return path
         }
 
-        let fallbackPaths: [String]
+        // 2. Try the full shell-resolved PATH (catches nvm, volta, fnm, etc. via ~/.zshrc)
+        let shellPath = resolveShellEnvironment()["PATH"] ?? ""
+        if !shellPath.isEmpty, let path = executablePathForDetection(named: name, rawPath: shellPath) {
+            return path
+        }
+
+        // 3. Try well-known hardcoded locations
         let home = homeDirectoryURL.path
+        var fallbackPaths: [String]
         switch name {
         case "claude":
             fallbackPaths = [
@@ -157,21 +165,29 @@ extension AppSettings {
                 "/usr/local/bin/claude"
             ]
         case "codex":
-            var codexPaths = [
+            fallbackPaths = [
                 "\(home)/.local/bin/codex",
+                "\(home)/.volta/bin/codex",
                 "\(home)/.nvm/versions/node/current/bin/codex",
                 "/opt/homebrew/bin/codex",
                 "/usr/local/bin/codex"
             ]
-            // Scan nvm node versions in case "current" symlink doesn't exist
+            // Scan all nvm node versions (newest first) in case "current" symlink doesn't exist
             let nvmNodeDir = "\(home)/.nvm/versions/node"
             if let versions = try? FileManager.default.contentsOfDirectory(atPath: nvmNodeDir) {
                 let sorted = versions.sorted { $0.localizedStandardCompare($1) == .orderedDescending }
                 for version in sorted {
-                    codexPaths.append("\(nvmNodeDir)/\(version)/bin/codex")
+                    fallbackPaths.append("\(nvmNodeDir)/\(version)/bin/codex")
                 }
             }
-            fallbackPaths = codexPaths
+            // Scan fnm node versions
+            let fnmNodeDir = "\(home)/.fnm/node-versions"
+            if let versions = try? FileManager.default.contentsOfDirectory(atPath: fnmNodeDir) {
+                let sorted = versions.sorted { $0.localizedStandardCompare($1) == .orderedDescending }
+                for version in sorted {
+                    fallbackPaths.append("\(fnmNodeDir)/\(version)/installation/bin/codex")
+                }
+            }
         default:
             fallbackPaths = []
         }
@@ -180,6 +196,7 @@ extension AppSettings {
             return path
         }
 
+        // 4. Last resort: ask the login shell directly
         return executablePathFromLoginShellForDetection(named: name)
     }
 

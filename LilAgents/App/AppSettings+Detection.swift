@@ -157,12 +157,21 @@ extension AppSettings {
                 "/usr/local/bin/claude"
             ]
         case "codex":
-            fallbackPaths = [
+            var codexPaths = [
                 "\(home)/.local/bin/codex",
                 "\(home)/.nvm/versions/node/current/bin/codex",
                 "/opt/homebrew/bin/codex",
                 "/usr/local/bin/codex"
             ]
+            // Scan nvm node versions in case "current" symlink doesn't exist
+            let nvmNodeDir = "\(home)/.nvm/versions/node"
+            if let versions = try? FileManager.default.contentsOfDirectory(atPath: nvmNodeDir) {
+                let sorted = versions.sorted { $0.localizedStandardCompare($1) == .orderedDescending }
+                for version in sorted {
+                    codexPaths.append("\(nvmNodeDir)/\(version)/bin/codex")
+                }
+            }
+            fallbackPaths = codexPaths
         default:
             fallbackPaths = []
         }

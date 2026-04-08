@@ -18,8 +18,6 @@
 		922A33A92F812F19008BF92C /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 922A33A82F812F19008BF92C /* Lottie */; };
 		9B5B7C6D4F4E4B11A1D2C3E4 /* WalkerCharacterSessionWiring+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */; };
 		A10000010000000000000001 /* LilAgentsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000001 /* LilAgentsApp.swift */; };
-		A10000010000000000000002 /* walk-bruce-01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000002 /* walk-bruce-01.mov */; };
-		A10000010000000000000003 /* walk-jazz-01.mov in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000005 /* walk-jazz-01.mov */; };
 		A10000010000000000000005 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000007 /* Assets.xcassets */; };
 		A10000010000000000000010 /* Sounds in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000010 /* Sounds */; };
 		A10000010000000000000020 /* PopoverTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000020 /* PopoverTheme.swift */; };
@@ -102,10 +100,8 @@
 		64CF291C594F4C8A9539291A /* TerminalView+TranscriptBubble.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TerminalView+TranscriptBubble.swift"; sourceTree = "<group>"; };
 		9B5B7C6D4F4E4B11A1D2C3E5 /* WalkerCharacterSessionWiring+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WalkerCharacterSessionWiring+Formatting.swift"; sourceTree = "<group>"; };
 		A10000020000000000000001 /* LilAgentsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LilAgentsApp.swift; sourceTree = "<group>"; };
-		A10000020000000000000002 /* walk-bruce-01.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "walk-bruce-01.mov"; sourceTree = "<group>"; };
 		A10000020000000000000003 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A10000020000000000000004 /* LilAgents.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LilAgents.entitlements; sourceTree = "<group>"; };
-		A10000020000000000000005 /* walk-jazz-01.mov */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = "walk-jazz-01.mov"; sourceTree = "<group>"; };
 		A10000020000000000000007 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A10000020000000000000010 /* Sounds */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Sounds; sourceTree = "<group>"; };
 		A10000020000000000000020 /* PopoverTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopoverTheme.swift; sourceTree = "<group>"; };
@@ -162,7 +158,7 @@
 		A10000020000000000000075 /* ClaudeSessionTransport+Archive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionTransport+Archive.swift"; sourceTree = "<group>"; };
 		A10000020000000000000076 /* ClaudeSessionTransport+Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionTransport+Diagnostics.swift"; sourceTree = "<group>"; };
 		A10000020000000000000077 /* MCPConnectionCards+OfficialMCP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MCPConnectionCards+OfficialMCP.swift"; sourceTree = "<group>"; };
-		A10000030000000000000001 /* Lenny.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; name = Lenny.app; path = "Lil-Lenny.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000030000000000000001 /* Lil-Lenny.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Lil-Lenny.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000120000000000000001 /* CharacterSprites */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CharacterSprites; sourceTree = "<group>"; };
 		A10000120000000000000002 /* ExpertAvatars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ExpertAvatars; sourceTree = "<group>"; };
 		A10000120000000000000003 /* fall-smoke-dust.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fall-smoke-dust.lottie"; sourceTree = "<group>"; };
@@ -216,8 +212,6 @@
 				A10000060000000000000012 /* Character */,
 				A10000060000000000000013 /* Terminal */,
 				A10000060000000000000014 /* Support */,
-				A10000020000000000000002 /* walk-bruce-01.mov */,
-				A10000020000000000000005 /* walk-jazz-01.mov */,
 				A10000020000000000000007 /* Assets.xcassets */,
 				A10000020000000000000010 /* Sounds */,
 				A10000120000000000000001 /* CharacterSprites */,
@@ -234,7 +228,7 @@
 		A10000050000000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A10000030000000000000001 /* Lenny.app */,
+				A10000030000000000000001 /* Lil-Lenny.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -367,7 +361,7 @@
 				922A33A82F812F19008BF92C /* Lottie */,
 			);
 			productName = LilAgents;
-			productReference = A10000030000000000000001 /* Lenny.app */;
+			productReference = A10000030000000000000001 /* Lil-Lenny.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -413,8 +407,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000010000000000000002 /* walk-bruce-01.mov in Resources */,
-				A10000010000000000000003 /* walk-jazz-01.mov in Resources */,
 				A10000010000000000000005 /* Assets.xcassets in Resources */,
 				A10000010000000000000010 /* Sounds in Resources */,
 				A10000110000000000000001 /* CharacterSprites in Resources */,
@@ -618,11 +610,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_ENTITLEMENTS = LilAgents/LilAgents.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 64KKU33NVH;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LilAgents/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Lil-Lenny";
@@ -636,6 +637,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hbshih.lenny;
 				PRODUCT_NAME = "Lil-Lenny";
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -645,11 +652,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				AUTOMATION_APPLE_EVENTS = NO;
 				CODE_SIGN_ENTITLEMENTS = LilAgents/LilAgents.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = 64KKU33NVH;
+				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LilAgents/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Lenny;
@@ -663,6 +679,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.hbshih.lenny;
 				PRODUCT_NAME = Lenny;
+				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
+				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
+				RUNTIME_EXCEPTION_ALLOW_UNSIGNED_EXECUTABLE_MEMORY = NO;
+				RUNTIME_EXCEPTION_DEBUGGING_TOOL = NO;
+				RUNTIME_EXCEPTION_DISABLE_EXECUTABLE_PAGE_PROTECTION = NO;
+				RUNTIME_EXCEPTION_DISABLE_LIBRARY_VALIDATION = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};

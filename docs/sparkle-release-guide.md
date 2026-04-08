@@ -5,7 +5,7 @@
 - Sparkle 2.9.0 integrated via SPM
 - `SPUStandardUpdaterController` wired in AppDelegate
 - `SUFeedURL` in Info.plist → `https://raw.githubusercontent.com/hbshih/lenny-lil-agents/main/appcast.xml`
-- `SUPublicEDKey` in Info.plist → `8QOCrY3j4crgz4iR5lmxyv+rA5vnqK6Qtd1XheMllP8=`
+- `SUPublicEDKey` in Info.plist → `KswNzJUt4oDOokMygU345j0XBs7c2nUtBcEGD1M/9Y4=`
 - `appcast.xml` at repo root — push to `main` to publish updates
 
 **Keep the private EdDSA key safe.** It pairs with the public key above.

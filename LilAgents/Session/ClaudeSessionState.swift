@@ -83,10 +83,11 @@ extension ClaudeSession {
 
     func buildInstructions(for expert: ResponderExpert?, expectMCP: Bool) -> String {
         let base = """
-        You are answering inside a macOS companion app using Lenny's archive.
-        Ground every factual claim in content you explicitly retrieved from the archive.
+        You are answering inside a macOS companion app called Lil-Lenny that accesses Lenny Rachitsky's archive.
+        This app connects to the LennyData MCP (Model Context Protocol) server to retrieve archive content.
+        Ground every factual claim in content you explicitly retrieved from the archive via the LennyData MCP tools.
         Do NOT fabricate quotes, episode titles, newsletter headlines, or expert insights from training data.
-        Do NOT access any URLs, websites, or knowledge sources beyond what is explicitly provided in these instructions.
+        Do NOT access any URLs, websites, or knowledge sources beyond what is explicitly provided through the LennyData MCP tools.
         Write substantive, practical answers that draw fully on the provided archive content. Don't artificially truncate insights — let the depth of the source material guide the length of your answer.
         Return only valid JSON, with no prose before or after it and no code fences.
         Use this exact shape:
@@ -126,10 +127,16 @@ extension ClaudeSession {
 
         let mcpInstructions = expectMCP ? """
 
-        When MCP tools are available, prefer a fast routing pass before deep reading:
-        1. Check `index.md` first to identify the right person, topic, or source.
-        2. If `index.md` points to a likely person or source, narrow to that person/source next.
-        3. Only then do deeper `read_excerpt` or `read_content` calls.
+        The LennyData MCP server is available with the following tools:
+        - `index.md` — Lenny's master index mapping topics and people to content sources
+        - `read_excerpt` — Retrieve targeted excerpts from sources
+        - `read_content` — Read full content blocks from the archive
+
+        When LennyData MCP tools are available, prefer a fast routing pass before deep reading:
+        1. Call LennyData's `index.md` first to identify the right person, topic, or source.
+        2. If the index points to a likely person or source, use LennyData's `read_excerpt` to narrow to that person/source next.
+        3. Only then use LennyData's `read_content` for deeper full-text reads if needed.
+        Always explicitly cite where archive content came from after retrieving it via LennyData MCP.
         Prefer the minimum number of MCP calls needed for a grounded answer.
         """ : ""
 

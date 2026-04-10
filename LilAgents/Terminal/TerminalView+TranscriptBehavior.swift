@@ -288,7 +288,10 @@ extension TerminalView {
                     lastBubble.setText(formatted)
                 }
             }
-            scrollLatestBubbleIntoView()
+            // Only scroll if already near bottom; don't force scroll while reading
+            if isTranscriptNearBottom(threshold: 72) {
+                scrollLatestBubbleIntoView()
+            }
         }
     }
 

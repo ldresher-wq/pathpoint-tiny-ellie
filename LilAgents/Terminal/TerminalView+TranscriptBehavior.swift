@@ -149,6 +149,11 @@ extension TerminalView {
     }
 
     private func appendStarterPackUpsellCard(compact: Bool = true) {
+        if requiresInitialConnectionSetup {
+            appendConnectionSetupCard()
+            return
+        }
+
         let upsell = StarterPackUpsellCardView(theme: theme, compact: compact)
         upsell.onConnectTapped = { [weak self] in
             self?.appendOfficialMCPSetupCard()
@@ -161,6 +166,19 @@ extension TerminalView {
 
         if !isReplayingTranscript {
             scrollTranscriptViewIntoView(upsell, topPadding: 12, bottomPadding: 28, preferBottomEdge: true)
+        }
+    }
+
+    private func appendConnectionSetupCard() {
+        let setupCard = ConnectionSetupCardView(theme: theme)
+        setupCard.onOpenSettings = { [weak self] in
+            self?.openAppSettings()
+        }
+        transcriptStack.addArrangedSubview(setupCard)
+        setupCard.widthAnchor.constraint(equalTo: transcriptStack.widthAnchor).isActive = true
+
+        if !isReplayingTranscript {
+            scrollTranscriptViewIntoView(setupCard, topPadding: 12, bottomPadding: 28, preferBottomEdge: true)
         }
     }
 
@@ -465,7 +483,7 @@ extension TerminalView {
             }
         }
 
-        if shouldShowStarterPackUpsell && assistantCount == 1 {
+        if shouldShowStarterPackUpsell && assistantCount == 1 && !requiresInitialConnectionSetup {
             appendStarterPackUpsellCard()
         }
 

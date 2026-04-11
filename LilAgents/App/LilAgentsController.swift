@@ -3,6 +3,8 @@ import AppKit
 class LilAgentsController {
     var characters: [WalkerCharacter] = []
     private var displayLink: CVDisplayLink?
+    private var fallbackDisplayTimer: Timer?
+    private var lastTickTimestamp: CFTimeInterval = 0
     var debugWindow: NSWindow?
     var pinnedScreenIndex: Int = -1
     private static let onboardingKey = "hasCompletedOnboarding"
@@ -220,12 +222,13 @@ class LilAgentsController {
 
     private func startDisplayLink() {
         CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
+        startFallbackDisplayTimer()
         guard let displayLink = displayLink else { return }
 
         let callback: CVDisplayLinkOutputCallback = { _, _, _, _, _, userInfo -> CVReturn in
             let controller = Unmanaged<LilAgentsController>.fromOpaque(userInfo!).takeUnretainedValue()
             DispatchQueue.main.async {
-                controller.tick()
+                controller.tick(source: .displayLink)
             }
             return kCVReturnSuccess
         }
@@ -233,6 +236,15 @@ class LilAgentsController {
         CVDisplayLinkSetOutputCallback(displayLink, callback,
                                        Unmanaged.passUnretained(self).toOpaque())
         CVDisplayLinkStart(displayLink)
+    }
+
+    private func startFallbackDisplayTimer() {
+        fallbackDisplayTimer?.invalidate()
+        let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            self?.tick(source: .fallbackTimer)
+        }
+        fallbackDisplayTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     var activeScreen: NSScreen? {
@@ -248,7 +260,18 @@ class LilAgentsController {
         return screen.visibleFrame.origin.y > screen.frame.origin.y
     }
 
-    func tick() {
+    private enum TickSource {
+        case displayLink
+        case fallbackTimer
+    }
+
+    private func tick(source: TickSource) {
+        let now = CACurrentMediaTime()
+        if source == .fallbackTimer, now - lastTickTimestamp < (1.0 / 90.0) {
+            return
+        }
+        lastTickTimestamp = now
+
         guard let metrics = currentDockMetrics() else { return }
         let screen = metrics.screen
         let dockX = metrics.dockX
@@ -259,7 +282,6 @@ class LilAgentsController {
 
         let activeChars = characters.filter { $0.window.isVisible }
 
-        let now = CACurrentMediaTime()
         let anyWalking = activeChars.contains { $0.isWalking }
         for char in activeChars {
             if char.isIdleForPopover { continue }
@@ -281,5 +303,6 @@ class LilAgentsController {
         if let displayLink = displayLink {
             CVDisplayLinkStop(displayLink)
         }
+        fallbackDisplayTimer?.invalidate()
     }
 }

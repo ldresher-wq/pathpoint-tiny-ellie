@@ -119,6 +119,21 @@ extension TerminalView {
             view.removeFromSuperview()
         }
 
+        if requiresInitialConnectionSetup {
+            let setupCard = ConnectionSetupCardView(theme: theme)
+            setupCard.onOpenSettings = { [weak self] in
+                self?.openAppSettings()
+            }
+            expertSuggestionLabel.isHidden = true
+            expertSuggestionStack.addArrangedSubview(setupCard)
+            setupCard.widthAnchor.constraint(equalTo: expertSuggestionStack.widthAnchor).isActive = true
+            welcomeChipsView = nil
+            expertSuggestionContainer.isHidden = false
+            expertSuggestionContainer.alphaValue = 1
+            relayoutPanels()
+            return
+        }
+
         // MCP reconnect: persisted failure flag from a previous turn.
         // Proactive: token-based path selected but no token saved yet (first-run / unconfigured).
         // Native MCP (codex mcp add / codex mcp login) is self-sufficient — no app token needed.

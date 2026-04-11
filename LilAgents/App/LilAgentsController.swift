@@ -8,6 +8,7 @@ class LilAgentsController {
     private var lastDisplayLinkTickAt: CFTimeInterval = 0
     private var lastFallbackTickAt: CFTimeInterval = 0
     private var lastMovementHealthLogAt: CFTimeInterval = 0
+    private var lastDockMetricsDebugSignature: String?
     var debugWindow: NSWindow?
     var pinnedScreenIndex: Int = -1
     private static let onboardingKey = "hasCompletedOnboarding"
@@ -143,19 +144,24 @@ class LilAgentsController {
     func currentDockMetrics() -> (screen: NSScreen, dockX: CGFloat, dockWidth: CGFloat, dockTopY: CGFloat)? {
         guard let screen = activeScreen else { return nil }
 
-        let screenWidth = screen.frame.width
         let dockX: CGFloat
         let dockWidth: CGFloat
         let dockTopY: CGFloat
 
         if screenHasDock(screen) {
-            (dockX, dockWidth) = getDockIconArea(screenWidth: screenWidth)
+            (dockX, dockWidth) = getDockIconArea(screen: screen)
             dockTopY = screen.visibleFrame.origin.y
         } else {
             let margin: CGFloat = 40.0
             dockX = screen.frame.origin.x + margin
-            dockWidth = screenWidth - margin * 2
+            dockWidth = screen.frame.width - margin * 2
             dockTopY = screen.frame.origin.y
+        }
+
+        let signature = "screen=\(screen.frame.debugDescription)|x=\(String(format: "%.1f", dockX))|w=\(String(format: "%.1f", dockWidth))|y=\(String(format: "%.1f", dockTopY))"
+        if lastDockMetricsDebugSignature != signature {
+            SessionDebugLogger.log("movement", "dock metrics \(signature)")
+            lastDockMetricsDebugSignature = signature
         }
 
         return (screen, dockX, dockWidth, dockTopY)
@@ -183,7 +189,7 @@ class LilAgentsController {
 
     // MARK: - Dock Geometry
 
-    private func getDockIconArea(screenWidth: CGFloat) -> (x: CGFloat, width: CGFloat) {
+    private func getDockIconArea(screen: NSScreen) -> (x: CGFloat, width: CGFloat) {
         let dockDefaults = UserDefaults(suiteName: "com.apple.dock")
         let tileSize = CGFloat(dockDefaults?.double(forKey: "tilesize") ?? 48)
         // Each dock slot is the icon + padding. The padding scales with tile size.
@@ -217,7 +223,20 @@ class LilAgentsController {
 
         // Small fudge factor for dock edge padding
         dockWidth *= 1.1
-        let dockX = (screenWidth - dockWidth) / 2.0
+        let minimumUsableWidth = max(260.0, min(screen.visibleFrame.width - 48.0, screen.frame.width * 0.45))
+
+        if dockWidth < minimumUsableWidth {
+            let fallbackMargin: CGFloat = 24.0
+            let fallbackWidth = max(screen.visibleFrame.width - fallbackMargin * 2, minimumUsableWidth)
+            let fallbackX = screen.visibleFrame.minX + fallbackMargin
+            SessionDebugLogger.log(
+                "movement",
+                "Dock metadata width \(String(format: "%.1f", dockWidth)) too small; using fallback range width=\(String(format: "%.1f", fallbackWidth))"
+            )
+            return (fallbackX, fallbackWidth)
+        }
+
+        let dockX = screen.frame.origin.x + (screen.frame.width - dockWidth) / 2.0
         return (dockX, dockWidth)
     }
 

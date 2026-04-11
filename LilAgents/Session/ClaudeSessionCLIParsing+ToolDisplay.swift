@@ -46,7 +46,7 @@ extension ClaudeSession {
         }
 
         if itemType.contains("web") && itemType.contains("search") {
-            return ("Web Search", "Searching the web")
+            return ("Episodes", "Searching episodes")
         }
 
         if itemType.contains("reasoning") || itemType.contains("thought") {
@@ -183,9 +183,9 @@ extension ClaudeSession {
             return ("Web Fetch", "Fetching from the web")
         case "websearch", "web_search":
             if let query = arguments["query"] as? String, !query.isEmpty {
-                return ("Web Search", "Searching for \(query)")
+                return ("Episodes", "Searching episodes for \(query)")
             }
-            return ("Web Search", "Searching the web")
+            return ("Episodes", "Searching episodes")
         case "bash":
             if let description = arguments["description"] as? String, !description.isEmpty {
                 return ("Bash", description)

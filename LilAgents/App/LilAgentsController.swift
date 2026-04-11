@@ -5,10 +5,6 @@ class LilAgentsController {
     private var displayLink: CVDisplayLink?
     private var fallbackDisplayTimer: Timer?
     private var lastTickTimestamp: CFTimeInterval = 0
-    private var lastDisplayLinkTickAt: CFTimeInterval = 0
-    private var lastFallbackTickAt: CFTimeInterval = 0
-    private var lastMovementHealthLogAt: CFTimeInterval = 0
-    private var lastDockMetricsDebugSignature: String?
     var debugWindow: NSWindow?
     var pinnedScreenIndex: Int = -1
     private static let onboardingKey = "hasCompletedOnboarding"
@@ -158,12 +154,6 @@ class LilAgentsController {
             dockTopY = screen.frame.origin.y
         }
 
-        let signature = "screen=\(screen.frame.debugDescription)|x=\(String(format: "%.1f", dockX))|w=\(String(format: "%.1f", dockWidth))|y=\(String(format: "%.1f", dockTopY))"
-        if lastDockMetricsDebugSignature != signature {
-            SessionDebugLogger.log("movement", "dock metrics \(signature)")
-            lastDockMetricsDebugSignature = signature
-        }
-
         return (screen, dockX, dockWidth, dockTopY)
     }
 
@@ -229,10 +219,6 @@ class LilAgentsController {
             let fallbackMargin: CGFloat = 24.0
             let fallbackWidth = max(screen.visibleFrame.width - fallbackMargin * 2, minimumUsableWidth)
             let fallbackX = screen.visibleFrame.minX + fallbackMargin
-            SessionDebugLogger.log(
-                "movement",
-                "Dock metadata width \(String(format: "%.1f", dockWidth)) too small; using fallback range width=\(String(format: "%.1f", fallbackWidth))"
-            )
             return (fallbackX, fallbackWidth)
         }
 
@@ -245,15 +231,11 @@ class LilAgentsController {
     private func startDisplayLink() {
         CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
         startFallbackDisplayTimer()
-        guard let displayLink = displayLink else {
-            SessionDebugLogger.log("movement", "CVDisplayLink unavailable, relying on fallback timer")
-            return
-        }
+        guard let displayLink = displayLink else { return }
 
         let callback: CVDisplayLinkOutputCallback = { _, _, _, _, _, userInfo -> CVReturn in
             let controller = Unmanaged<LilAgentsController>.fromOpaque(userInfo!).takeUnretainedValue()
             DispatchQueue.main.async {
-                controller.lastDisplayLinkTickAt = CACurrentMediaTime()
                 controller.tick(source: .displayLink)
             }
             return kCVReturnSuccess
@@ -261,23 +243,16 @@ class LilAgentsController {
 
         CVDisplayLinkSetOutputCallback(displayLink, callback,
                                        Unmanaged.passUnretained(self).toOpaque())
-        let startResult = CVDisplayLinkStart(displayLink)
-        if startResult == kCVReturnSuccess {
-            SessionDebugLogger.log("movement", "CVDisplayLink started successfully")
-        } else {
-            SessionDebugLogger.log("movement", "CVDisplayLink failed to start: \(startResult). Fallback timer remains active")
-        }
+        _ = CVDisplayLinkStart(displayLink)
     }
 
     private func startFallbackDisplayTimer() {
         fallbackDisplayTimer?.invalidate()
         let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
-            self?.lastFallbackTickAt = CACurrentMediaTime()
             self?.tick(source: .fallbackTimer)
         }
         fallbackDisplayTimer = timer
         RunLoop.main.add(timer, forMode: .common)
-        SessionDebugLogger.log("movement", "Fallback movement timer started at 60fps on main run loop")
     }
 
     var activeScreen: NSScreen? {
@@ -314,21 +289,6 @@ class LilAgentsController {
         updateDebugLine(dockX: dockX, dockWidth: dockWidth, dockTopY: dockTopY)
 
         let activeChars = characters.filter { $0.window.isVisible }
-        if now - lastMovementHealthLogAt >= 5.0 {
-            let sourceLabel = source == .displayLink ? "displayLink" : "fallbackTimer"
-            let displayLinkAge = lastDisplayLinkTickAt > 0 ? String(format: "%.2f", now - lastDisplayLinkTickAt) : "n/a"
-            let fallbackAge = lastFallbackTickAt > 0 ? String(format: "%.2f", now - lastFallbackTickAt) : "n/a"
-            let charSummary = activeChars.map { char in
-                let name = char.representedExpert?.name ?? char.focusedExpert?.name ?? char.videoName
-                return "\(name){visible:\(char.window.isVisible), walking:\(char.isWalking), paused:\(char.isPaused), idlePopover:\(char.isIdleForPopover), progress:\(String(format: "%.2f", char.positionProgress))}"
-            }.joined(separator: " ")
-            SessionDebugLogger.log(
-                "movement",
-                "tick source=\(sourceLabel) activeChars=\(activeChars.count) displayLinkAge=\(displayLinkAge)s fallbackAge=\(fallbackAge)s \(charSummary)"
-            )
-            lastMovementHealthLogAt = now
-        }
-
         let anyWalking = activeChars.contains { $0.isWalking }
         for char in activeChars {
             if char.isIdleForPopover { continue }

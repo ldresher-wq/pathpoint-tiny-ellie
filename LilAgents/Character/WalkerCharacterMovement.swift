@@ -51,10 +51,6 @@ extension WalkerCharacter {
         }
 
         setFacing(goingRight ? .right : .left)
-        SessionDebugLogger.log(
-            "movement",
-            "\(representedExpert?.name ?? focusedExpert?.name ?? videoName) startWalk direction=\(goingRight ? "right" : "left") start=\(String(format: "%.2f", walkStartPos)) end=\(String(format: "%.2f", walkEndPos)) travel=\(String(format: "%.1f", currentTravelDistance))"
-        )
     }
 
     func enterPause() {
@@ -63,10 +59,6 @@ extension WalkerCharacter {
         setFacing(.front)
         let delay = Double.random(in: 5.0...12.0)
         pauseEndTime = CACurrentMediaTime() + delay
-        SessionDebugLogger.log(
-            "movement",
-            "\(representedExpert?.name ?? focusedExpert?.name ?? videoName) enterPause progress=\(String(format: "%.2f", positionProgress)) delay=\(String(format: "%.1f", delay))"
-        )
     }
 
     func movementPosition(at videoTime: CFTimeInterval) -> CGFloat {
@@ -191,7 +183,6 @@ extension WalkerCharacter {
             let bottomPadding = displayHeight * 0.15
             let y = dockTopY - bottomPadding + yOffset
             window.setFrameOrigin(NSPoint(x: x, y: y))
-            debugMovementPositionIfNeeded(origin: NSPoint(x: x, y: y), now: now)
 
             if videoTime >= walkStop {
                 positionProgress = walkEndPos
@@ -206,19 +197,5 @@ extension WalkerCharacter {
 
         updateThinkingBubble()
         updateExpertNameTag()
-    }
-
-    private func debugMovementPositionIfNeeded(origin: NSPoint, now: CFTimeInterval) {
-        let shouldLogByTime = now - lastMovementDebugLogAt >= 2.0
-        let lastOrigin = lastMovementDebugOrigin ?? origin
-        let movedEnough = abs(lastOrigin.x - origin.x) >= 12 || abs(lastOrigin.y - origin.y) >= 6
-        guard shouldLogByTime || movedEnough else { return }
-
-        SessionDebugLogger.log(
-            "movement",
-            "\(representedExpert?.name ?? focusedExpert?.name ?? videoName) frame origin=(\(String(format: "%.1f", origin.x)), \(String(format: "%.1f", origin.y))) progress=\(String(format: "%.2f", positionProgress)) walking=\(isWalking) paused=\(isPaused)"
-        )
-        lastMovementDebugLogAt = now
-        lastMovementDebugOrigin = origin
     }
 }

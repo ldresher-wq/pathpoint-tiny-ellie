@@ -114,7 +114,7 @@ extension ClaudeSession {
             {
               "speaker": "Elena Verna",
               "kind": "expert",
-              "markdown": "Here is my perspective..."
+              "markdown": "I'd focus on the activation step first, because that's usually where growth loops either compound or stall."
             }
           ],
           "suggested_experts": ["Name One", "Name Two"],
@@ -123,6 +123,8 @@ extension ClaudeSession {
         `messages` should be a transcript-ready array of separate speaker messages.
         Use `kind: "lenny"` for Lil-Lenny orchestration messages and `kind: "expert"` for specialist responses.
         When one or more experts are relevant, Lil-Lenny should briefly call on them first, then each expert should speak in a separate message.
+        Expert messages must be written in first person from that expert's perspective.
+        Do not write expert messages in third person, such as "\(expert?.name ?? "The expert") would..." or "From \(expert?.name ?? "the expert")'s perspective...".
         Keep the Lil-Lenny orchestration line to one short sentence.
         If Lil-Lenny tags an expert in the orchestration line, use the visible `@Name` form.
         Do not include mini-bios, credentials, or long justification in the Lil-Lenny orchestration line.

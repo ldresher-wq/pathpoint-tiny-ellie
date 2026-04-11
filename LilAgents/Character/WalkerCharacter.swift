@@ -74,6 +74,8 @@ final class WalkerCharacter {
     var liveStatusFallbackIndex = 0
     var isDraggingHorizontally = false
     var usesExpandedHorizontalRange = false
+    var lastMovementDebugLogAt: CFTimeInterval = 0
+    var lastMovementDebugOrigin: NSPoint?
 
     init(videoName: String) {
         self.videoName = videoName

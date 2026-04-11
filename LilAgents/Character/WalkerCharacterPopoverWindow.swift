@@ -218,6 +218,10 @@ extension WalkerCharacter {
             session.focusedExpert = self.focusedExpert
             session.start()
         }
+        terminal.onReachedTranscriptBottom = { [weak self] in
+            guard let self else { return }
+            self.claudeSession?.markConversationRead(for: self.focusedExpert)
+        }
         terminal.setReturnToLennyVisible(false)
         container.addSubview(terminal)
 

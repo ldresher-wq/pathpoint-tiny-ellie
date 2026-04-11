@@ -104,11 +104,20 @@ extension ClaudeSession {
                         }
 
                     case "response.output_text.delta":
+                        let delta = (event["delta"] as? String)
+                            ?? (event["text"] as? String)
+                            ?? ""
                         if !hasStartedWriting {
                             hasStartedWriting = true
                             DispatchQueue.main.async { [weak self] in
                                 guard let self, !self.isCancellingTurn else { return }
                                 self.onToolUse?("Writing", ["summary": "Writing the answer…"])
+                            }
+                        }
+                        if !delta.isEmpty {
+                            DispatchQueue.main.async { [weak self] in
+                                guard let self, !self.isCancellingTurn else { return }
+                                self.onTextDelta?(delta)
                             }
                         }
 

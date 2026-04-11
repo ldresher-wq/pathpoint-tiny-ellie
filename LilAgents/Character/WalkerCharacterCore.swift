@@ -187,6 +187,7 @@ extension WalkerCharacter {
         guard let session = claudeSession, let terminalView else { return }
         let activeHistory = session.history(for: focusedExpert)
         let conversationKey = session.key(for: focusedExpert)
+        let lastReadHistoryCount = session.lastReadHistoryCount(for: focusedExpert)
 
         if let expert = focusedExpert {
             if activeHistory.isEmpty {
@@ -206,7 +207,11 @@ extension WalkerCharacter {
                 return
             }
 
-            terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: expert))
+            terminalView.replayConversation(
+                activeHistory,
+                expertSuggestions: session.expertSuggestionEntries(for: expert),
+                restoreStrategy: .focusUnreadBoundary(lastReadHistoryCount: lastReadHistoryCount)
+            )
             terminalView.renderedConversationKey = conversationKey
             if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 terminalView.setLiveStatus(
@@ -239,7 +244,11 @@ extension WalkerCharacter {
             return
         }
 
-        terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: nil))
+        terminalView.replayConversation(
+            activeHistory,
+            expertSuggestions: session.expertSuggestionEntries(for: nil),
+            restoreStrategy: .focusUnreadBoundary(lastReadHistoryCount: lastReadHistoryCount)
+        )
         terminalView.renderedConversationKey = conversationKey
 
         if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {

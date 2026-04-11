@@ -1,6 +1,12 @@
 import Foundation
 
 extension ClaudeSession {
+    private enum OfficialArchiveLookupTuning {
+        static let searchLimit = 4
+        static let excerptRadius = 420
+        static let inlineSnippetThreshold = 180
+    }
+
     func fetchOfficialArchiveContext(
         message: String,
         expert: ResponderExpert?,
@@ -15,12 +21,12 @@ extension ClaudeSession {
 
         Task {
             do {
-                let client = try LennyArchiveClient(token: token)
+                let client = try officialArchiveClient(token: token)
                 SessionDebugLogger.log("official-archive", "starting official archive lookup. query=\(query)")
 
                 let searchArguments: [String: Any] = [
                     "query": query,
-                    "limit": 6
+                    "limit": OfficialArchiveLookupTuning.searchLimit
                 ]
                 let searchStep = processDisplay(for: "search_content", arguments: searchArguments)
                 await MainActor.run {
@@ -28,7 +34,10 @@ extension ClaudeSession {
                     appendHistory(Message(role: .toolUse, text: "\(searchStep.title): \(searchStep.summary)"), to: conversationKey)
                 }
 
-                let searchOutput = try await client.searchContent(query: query, limit: 6)
+                let searchOutput = try await client.searchContent(
+                    query: query,
+                    limit: OfficialArchiveLookupTuning.searchLimit
+                )
                 SessionDebugLogger.logMultiline(
                     "official-archive",
                     header: "search_content returned for query=\(query)",
@@ -57,32 +66,48 @@ extension ClaudeSession {
                 }
 
                 let topMatch = searchEnvelope.results[0]
-                let excerptArguments: [String: Any] = [
-                    "filename": topMatch.filename,
-                    "query": query,
-                    "radius": 700
-                ]
-                let excerptStep = processDisplay(for: "read_excerpt", arguments: excerptArguments)
-                await MainActor.run {
-                    onToolUse?(excerptStep.title, ["summary": excerptStep.summary])
-                    appendHistory(Message(role: .toolUse, text: "\(excerptStep.title): \(excerptStep.summary)"), to: conversationKey)
-                }
-
                 let excerptOutput: [String: Any]
-                do {
-                    excerptOutput = try await client.readExcerpt(filename: topMatch.filename, query: query, radius: 700)
-                    SessionDebugLogger.logMultiline(
-                        "official-archive",
-                        header: "read_excerpt returned for file=\(topMatch.filename)",
-                        body: flattenedArchiveText(from: excerptOutput) ?? String(describing: excerptOutput)
-                    )
-                    let excerptSummary = processResultDisplay(for: "read_excerpt", arguments: excerptArguments, output: excerptOutput)
+                if shouldFetchFocusedExcerpt(for: topMatch) {
+                    let excerptArguments: [String: Any] = [
+                        "filename": topMatch.filename,
+                        "query": query,
+                        "radius": OfficialArchiveLookupTuning.excerptRadius
+                    ]
+                    let excerptStep = processDisplay(for: "read_excerpt", arguments: excerptArguments)
                     await MainActor.run {
-                        onToolResult?(excerptSummary, false)
-                        appendHistory(Message(role: .toolResult, text: excerptSummary), to: conversationKey)
+                        onToolUse?(excerptStep.title, ["summary": excerptStep.summary])
+                        appendHistory(Message(role: .toolUse, text: "\(excerptStep.title): \(excerptStep.summary)"), to: conversationKey)
                     }
-                } catch {
-                    SessionDebugLogger.log("official-archive", "read_excerpt failed for file=\(topMatch.filename): \(error.localizedDescription)")
+
+                    do {
+                        excerptOutput = try await client.readExcerpt(
+                            filename: topMatch.filename,
+                            query: query,
+                            radius: OfficialArchiveLookupTuning.excerptRadius
+                        )
+                        SessionDebugLogger.logMultiline(
+                            "official-archive",
+                            header: "read_excerpt returned for file=\(topMatch.filename)",
+                            body: flattenedArchiveText(from: excerptOutput) ?? String(describing: excerptOutput)
+                        )
+                        let excerptSummary = processResultDisplay(
+                            for: "read_excerpt",
+                            arguments: excerptArguments,
+                            output: excerptOutput
+                        )
+                        await MainActor.run {
+                            onToolResult?(excerptSummary, false)
+                            appendHistory(Message(role: .toolResult, text: excerptSummary), to: conversationKey)
+                        }
+                    } catch {
+                        SessionDebugLogger.log("official-archive", "read_excerpt failed for file=\(topMatch.filename): \(error.localizedDescription)")
+                        excerptOutput = [:]
+                    }
+                } else {
+                    SessionDebugLogger.log(
+                        "official-archive",
+                        "skipping read_excerpt for file=\(topMatch.filename) because search snippet already has enough context"
+                    )
                     excerptOutput = [:]
                 }
 
@@ -96,12 +121,25 @@ extension ClaudeSession {
                     )))
                 }
             } catch {
+                resetOfficialArchiveClient()
                 SessionDebugLogger.log("official-archive", "official archive lookup failed: \(error.localizedDescription)")
                 await MainActor.run {
                     completion(.failure(error))
                 }
             }
         }
+    }
+
+    private func shouldFetchFocusedExcerpt(for result: SearchResult) -> Bool {
+        compactSearchSnippet(for: result).count < OfficialArchiveLookupTuning.inlineSnippetThreshold
+    }
+
+    private func compactSearchSnippet(for result: SearchResult) -> String {
+        let rawSnippet = result.snippet ?? result.snippets?.first?.text ?? ""
+        return rawSnippet
+            .replacingOccurrences(of: "\n", with: " ")
+            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     private func decodeSearchEnvelope(from output: Any?) -> SearchEnvelope? {
@@ -122,11 +160,7 @@ extension ClaudeSession {
 
     private func officialArchivePromptContext(from envelope: SearchEnvelope, excerptOutput: Any?) -> String {
         let matches = envelope.results.prefix(4).enumerated().map { index, result in
-            let rawSnippet = result.snippet ?? result.snippets?.first?.text ?? ""
-            let compactSnippet = rawSnippet
-                .replacingOccurrences(of: "\n", with: " ")
-                .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let compactSnippet = compactSearchSnippet(for: result)
             let snippet = compactSnippet.isEmpty ? "No snippet available." : String(compactSnippet.prefix(260))
             return """
             \(index + 1). [\(result.type.capitalized)] \(result.title) (\(result.date))

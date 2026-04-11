@@ -1,6 +1,12 @@
 import AppKit
 
 extension TerminalView {
+    @objc func handleTranscriptBoundsDidChange(_ notification: Notification) {
+        guard notification.object as? NSClipView === scrollView.contentView else { return }
+        guard isTranscriptNearBottom(threshold: 72) else { return }
+        onReachedTranscriptBottom?()
+    }
+
     private func resetWelcomeStateTracking() {
         currentWelcomeArchiveMode = nil
         currentWelcomeSuggestions = []
@@ -388,14 +394,25 @@ extension TerminalView {
         setLiveStatus(displaySummary ?? summary, isBusy: !isError, isError: isError, experts: experts)
     }
 
-    func replayHistory(_ messages: [ClaudeSession.Message]) {
-        replayConversation(messages, expertSuggestions: [])
+    func replayHistory(
+        _ messages: [ClaudeSession.Message],
+        restoreStrategy: TranscriptReplayRestoreStrategy = .preserveVisiblePosition
+    ) {
+        replayConversation(messages, expertSuggestions: [], restoreStrategy: restoreStrategy)
     }
 
-    func replayConversation(_ messages: [ClaudeSession.Message], expertSuggestions: [ExpertSuggestionEntry]) {
+    func replayConversation(
+        _ messages: [ClaudeSession.Message],
+        expertSuggestions: [ExpertSuggestionEntry],
+        restoreStrategy: TranscriptReplayRestoreStrategy = .preserveVisiblePosition
+    ) {
         let t = theme
         let previousOffsetY = scrollView.contentView.bounds.origin.y
         let shouldStickToBottom = isTranscriptNearBottom(threshold: 72)
+        let unreadBoundaryCount: Int? = {
+            guard case .focusUnreadBoundary(let lastReadHistoryCount) = restoreStrategy else { return nil }
+            return lastReadHistoryCount
+        }()
 
         isShowingInitialWelcomeState = false
         resetWelcomeStateTracking()
@@ -406,8 +423,10 @@ extension TerminalView {
         var lastRole: ClaudeSession.Message.Role?
         var assistantCount = 0
         let suggestionsByAnchor = Dictionary(grouping: expertSuggestions, by: \.anchorHistoryCount)
+        var unreadAnchorView: NSView?
 
         for (index, msg) in messages.enumerated() {
+            let priorSubviewCount = transcriptStack.arrangedSubviews.count
             switch msg.role {
             case .user:
                 appendUser(msg.text)
@@ -426,9 +445,22 @@ extension TerminalView {
             lastRole = msg.role
 
             let anchorHistoryCount = index + 1
+            if unreadAnchorView == nil,
+               let unreadBoundaryCount,
+               anchorHistoryCount > unreadBoundaryCount,
+               transcriptStack.arrangedSubviews.count > priorSubviewCount {
+                unreadAnchorView = transcriptStack.arrangedSubviews.last
+            }
             if let entries = suggestionsByAnchor[anchorHistoryCount] {
                 for entry in entries {
+                    let priorSuggestionSubviewCount = transcriptStack.arrangedSubviews.count
                     appendSuggestionEntryView(entry)
+                    if unreadAnchorView == nil,
+                       let unreadBoundaryCount,
+                       anchorHistoryCount > unreadBoundaryCount,
+                       transcriptStack.arrangedSubviews.count > priorSuggestionSubviewCount {
+                        unreadAnchorView = transcriptStack.arrangedSubviews.last
+                    }
                 }
             }
         }
@@ -443,15 +475,24 @@ extension TerminalView {
         isReplayingTranscript = false
         resizeTranscriptToFitContent()
 
-        if shouldStickToBottom {
-            scrollToBottom()
-        } else if let lastUserBubble = transcriptStack.arrangedSubviews.last(where: { ($0 as? ChatBubbleView)?.isUser == true }) {
-            scrollTranscriptViewIntoView(lastUserBubble, topPadding: 12, bottomPadding: 0)
-        } else if let docView = scrollView.documentView {
-            let maxOffsetY = max(0, docView.bounds.height - scrollView.contentSize.height)
-            let restoredOffsetY = min(previousOffsetY, maxOffsetY)
-            docView.scroll(NSPoint(x: 0, y: restoredOffsetY))
-            scrollView.reflectScrolledClipView(scrollView.contentView)
+        switch restoreStrategy {
+        case .focusUnreadBoundary(let lastReadHistoryCount):
+            if messages.count > lastReadHistoryCount, let unreadAnchorView {
+                scrollTranscriptViewIntoView(unreadAnchorView, topPadding: 12, bottomPadding: 28)
+            } else {
+                scrollToBottom()
+            }
+        case .preserveVisiblePosition:
+            if shouldStickToBottom {
+                scrollToBottom()
+            } else if let lastUserBubble = transcriptStack.arrangedSubviews.last(where: { ($0 as? ChatBubbleView)?.isUser == true }) {
+                scrollTranscriptViewIntoView(lastUserBubble, topPadding: 12, bottomPadding: 0)
+            } else if let docView = scrollView.documentView {
+                let maxOffsetY = max(0, docView.bounds.height - scrollView.contentSize.height)
+                let restoredOffsetY = min(previousOffsetY, maxOffsetY)
+                docView.scroll(NSPoint(x: 0, y: restoredOffsetY))
+                scrollView.reflectScrolledClipView(scrollView.contentView)
+            }
         }
     }
 
@@ -463,6 +504,7 @@ extension TerminalView {
                 docView.scroll(NSPoint(x: 0, y: maxScroll))
             }
         }
+        onReachedTranscriptBottom?()
     }
 
     func scrollLatestBubbleIntoView() {

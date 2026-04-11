@@ -1,6 +1,11 @@
 import AppKit
 
 class TerminalView: NSView {
+    enum TranscriptReplayRestoreStrategy {
+        case preserveVisiblePosition
+        case focusUnreadBoundary(lastReadHistoryCount: Int)
+    }
+
     let scrollView = NSScrollView()
     let transcriptContainer = FlippedView()
     let transcriptStack = NSStackView()
@@ -31,6 +36,7 @@ class TerminalView: NSView {
     var onCloseRequested: (() -> Void)?
     var onRefreshSetupState: (() -> Void)?
     var onApprovalResponse: ((ClaudeSession.ApprovalChoice) -> Void)?
+    var onReachedTranscriptBottom: (() -> Void)?
 
     var characterColor: NSColor?
     var themeOverride: PopoverTheme?
@@ -84,6 +90,7 @@ class TerminalView: NSView {
 
     deinit {
         liveStatusAvatarTimer?.invalidate()
+        NotificationCenter.default.removeObserver(self, name: NSView.boundsDidChangeNotification, object: scrollView.contentView)
         if let settingsObserver {
             NotificationCenter.default.removeObserver(settingsObserver)
         }

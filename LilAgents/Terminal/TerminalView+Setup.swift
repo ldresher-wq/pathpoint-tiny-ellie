@@ -26,6 +26,13 @@ extension TerminalView {
         scrollView.contentView.drawsBackground = false
         scrollView.contentView.backgroundColor = .clear
         scrollView.contentInsets = NSEdgeInsets(top: 2, left: 0, bottom: 8, right: 0)
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTranscriptBoundsDidChange(_:)),
+            name: NSView.boundsDidChangeNotification,
+            object: scrollView.contentView
+        )
 
         transcriptStack.orientation = .vertical
         transcriptStack.alignment = .leading

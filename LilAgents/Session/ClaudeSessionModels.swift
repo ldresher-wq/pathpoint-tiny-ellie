@@ -167,6 +167,7 @@ struct ConversationState {
     var previousResponseID: String?
     var history: [ClaudeSession.Message] = []
     var expertSuggestionEntries: [ExpertSuggestionEntry] = []
+    var lastReadHistoryCount: Int = 0
 }
 
 struct TranscriptSpeaker: Equatable {

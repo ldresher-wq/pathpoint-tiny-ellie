@@ -33,9 +33,41 @@ extension WalkerCharacter {
             self?.updateExpertNameTag()
         }
 
+        session.onTextDelta = { [weak self] delta in
+            guard let self, let tv = self.terminalView else { return }
+            tv.appendStreamingText(delta)
+        }
+
         session.onText = { [weak self] text in
             guard let self, let tv = self.terminalView else { return }
+            let trimmedIncoming = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedCurrent = tv.currentAssistantText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if tv.currentAssistantText.isEmpty {
+                tv.appendStreamingText(text)
+                return
+            }
+
+            guard trimmedIncoming != trimmedCurrent else { return }
+
             tv.currentAssistantText = text
+            let formatted = TerminalMarkdownRenderer.render(text, theme: tv.theme)
+            if let lastBubble = tv.transcriptStack.arrangedSubviews.last as? ChatBubbleView {
+                lastBubble.setText(formatted)
+                let isNearBottom: Bool = {
+                    tv.resizeTranscriptToFitContent()
+                    guard let docView = tv.scrollView.documentView else { return true }
+                    let visibleHeight = tv.scrollView.contentSize.height
+                    let maxOffsetY = max(0, docView.bounds.height - visibleHeight)
+                    let currentOffsetY = tv.scrollView.contentView.bounds.origin.y
+                    return maxOffsetY - currentOffsetY <= 72
+                }()
+                if isNearBottom {
+                    tv.scrollLatestBubbleIntoView()
+                }
+            } else {
+                tv.appendStreamingText(text)
+            }
         }
 
         session.onTurnComplete = { [weak self] in

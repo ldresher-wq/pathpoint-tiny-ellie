@@ -20,6 +20,19 @@ extension ClaudeSession {
         conversations[key] = state
     }
 
+    func lastReadHistoryCount(for expert: ResponderExpert?) -> Int {
+        conversations[key(for: expert)]?.lastReadHistoryCount ?? 0
+    }
+
+    func markConversationRead(for expert: ResponderExpert?) {
+        let conversationKey = key(for: expert)
+        var state = conversations[conversationKey] ?? ConversationState()
+        let historyCount = state.history.count
+        guard historyCount > state.lastReadHistoryCount else { return }
+        state.lastReadHistoryCount = historyCount
+        conversations[conversationKey] = state
+    }
+
     func expertSuggestionEntries(for expert: ResponderExpert?) -> [ExpertSuggestionEntry] {
         conversations[key(for: expert)]?.expertSuggestionEntries ?? []
     }

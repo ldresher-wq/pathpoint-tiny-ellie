@@ -107,6 +107,7 @@ enum AppSettings {
     // MARK: - UserDefaults keys
 
     static let preferredTransportKey              = "preferredTransport"
+    static let hasExplicitPreferredTransportChoiceKey = "hasExplicitPreferredTransportChoice"
     static let archiveAccessModeKey              = "archiveAccessMode"
     static let hasExplicitStarterPackChoiceKey   = "hasExplicitStarterPackChoice"
     static let officialLennyMCPTokenKey          = "officialLennyMCPToken"
@@ -126,6 +127,11 @@ enum AppSettings {
             return PreferredTransport(rawValue: rawValue) ?? .automatic
         }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: preferredTransportKey) }
+    }
+
+    static var hasExplicitPreferredTransportChoice: Bool {
+        get { UserDefaults.standard.bool(forKey: hasExplicitPreferredTransportChoiceKey) }
+        set { UserDefaults.standard.set(newValue, forKey: hasExplicitPreferredTransportChoiceKey) }
     }
 
     static var archiveAccessMode: ArchiveAccessMode {
@@ -254,6 +260,7 @@ enum AppSettings {
         let defaults = UserDefaults.standard
         let managedKeys = [
             preferredTransportKey,
+            hasExplicitPreferredTransportChoiceKey,
             archiveAccessModeKey,
             hasExplicitStarterPackChoiceKey,
             officialLennyMCPTokenKey,

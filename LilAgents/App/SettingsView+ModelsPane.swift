@@ -153,6 +153,12 @@ extension SettingsView {
     // MARK: - Model/transport helpers
 
     var effectiveModelTransport: AppSettings.PreferredTransport {
+        if !AppSettings.hasExplicitPreferredTransportChoice {
+            if detectedClaudeAvailable == true { return .claudeCode }
+            if detectedCodexAvailable == true  { return .codex }
+            return .openAIAPI
+        }
+
         if let selected = AppSettings.PreferredTransport(rawValue: preferredTransport), selected != .automatic {
             return selected
         }
@@ -235,8 +241,8 @@ struct RuntimeSegmentedControl: View {
             claudeAvailable = c
             codexAvailable  = d
 
-            // Auto-select the best runtime if the user has never explicitly chosen one
-            if selection == AppSettings.PreferredTransport.automatic.rawValue {
+            // Keep auto-resolving the best runtime until the user explicitly picks one.
+            if !AppSettings.hasExplicitPreferredTransportChoice {
                 if c {
                     selection = AppSettings.PreferredTransport.claudeCode.rawValue
                 } else if d {
@@ -255,6 +261,7 @@ struct RuntimeSegmentedControl: View {
         let isAvailable  = segment.available == true
 
         Button {
+            AppSettings.hasExplicitPreferredTransportChoice = true
             selection = segment.tag
         } label: {
             VStack(spacing: 2) {

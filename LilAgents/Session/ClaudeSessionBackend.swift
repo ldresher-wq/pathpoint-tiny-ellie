@@ -76,7 +76,9 @@ extension ClaudeSession {
                 return
             }
 
-            let preferredTransport = AppSettings.preferredTransport
+            let preferredTransport = AppSettings.hasExplicitPreferredTransportChoice
+                ? AppSettings.preferredTransport
+                : AppSettings.PreferredTransport.automatic
             let archiveMode = self.effectiveArchiveAccessMode(environment: environment)
             let preferenceKey = self.backendPreferenceKey(environment: environment)
             SessionDebugLogger.log("backend", "resolving preferred backend. archiveMode=\(archiveMode.rawValue) preferredTransport=\(preferredTransport.rawValue)")
@@ -185,9 +187,12 @@ extension ClaudeSession {
     }
 
     func backendPreferenceKey(environment: [String: String]) -> String {
-        [
+        let preferredTransport = AppSettings.hasExplicitPreferredTransportChoice
+            ? AppSettings.preferredTransport
+            : AppSettings.PreferredTransport.automatic
+        return [
             effectiveArchiveAccessMode(environment: environment).rawValue,
-            AppSettings.preferredTransport.rawValue,
+            preferredTransport.rawValue,
             AppSettings.preferredClaudeModel.rawValue,
             AppSettings.preferredCodexModel.rawValue,
             AppSettings.preferredOpenAIModel.rawValue,

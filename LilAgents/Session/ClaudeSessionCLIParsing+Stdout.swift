@@ -1,6 +1,22 @@
 import Foundation
 
 extension ClaudeSession {
+    func claudeCLIStreamText(from json: [String: Any]) -> String? {
+        if let message = json["message"] as? [String: Any],
+           let text = claudeCLIAssistantText(fromMessage: message) {
+            return text
+        }
+
+        if let role = (json["role"] as? String)?.lowercased(),
+           role == "assistant",
+           let content = json["content"] as? [[String: Any]],
+           let text = claudeCLIAssistantText(fromContent: content) {
+            return text
+        }
+
+        return nil
+    }
+
     func extractCodexCLIResult(from stdout: String) -> String? {
         var assistantFallback: String?
         let lines = stdout.components(separatedBy: .newlines)
@@ -168,6 +184,17 @@ extension ClaudeSession {
         return nil
     }
 
+    private func claudeCLIAssistantText(fromMessage message: [String: Any]) -> String? {
+        let role = (message["role"] as? String)?.lowercased()
+        guard role == "assistant" else { return nil }
+
+        if let content = message["content"] as? [[String: Any]] {
+            return claudeCLIAssistantText(fromContent: content)
+        }
+
+        return nil
+    }
+
     private func codexItemPayload(from json: [String: Any]) -> [String: Any]? {
         if let item = json["item"] as? [String: Any] {
             return item
@@ -207,6 +234,18 @@ extension ClaudeSession {
         let title = pieces.first ?? summary
         return (title.count > 42 ? String(title.prefix(42)) + "…" : title, summarizedModelNarration(summary))
     }
+
+    private func claudeCLIAssistantText(fromContent content: [[String: Any]]) -> String? {
+        let pieces = content.compactMap { block -> String? in
+            let type = ((block["type"] as? String) ?? "").lowercased()
+            guard type == "text" else { return nil }
+            return extractTextPayload(from: block)
+        }.filter { !$0.isEmpty }
+
+        guard !pieces.isEmpty else { return nil }
+        return pieces.joined(separator: "\n\n")
+    }
+
     func summarizedModelNarration(_ text: String) -> String {
         let compact = text
             .replacingOccurrences(of: "\n", with: " ")

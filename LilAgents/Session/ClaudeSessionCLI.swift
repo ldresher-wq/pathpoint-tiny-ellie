@@ -73,6 +73,7 @@ extension ClaudeSession {
         // Set from the init event so the completion handler can detect a missing server
         // without relying on response-text pattern matching.
         var lennyMCPFoundInInit = false
+        var streamedAssistantText = ""
 
         runProcess(
             executablePath: executablePath,
@@ -103,13 +104,21 @@ extension ClaudeSession {
                 }
 
                 if let data = line.data(using: .utf8),
-                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                   let event = self.claudeCLIStreamEvent(from: json) {
-                    let experts = self.expertsFromTransport(
-                        payload: json,
-                        textCandidates: [event.summary, line]
-                    )
-                    self.onToolUse?(event.title, ["summary": event.summary, "experts": experts])
+                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                    if let assistantText = self.claudeCLIStreamText(from: json),
+                       !assistantText.isEmpty,
+                       assistantText != streamedAssistantText {
+                        streamedAssistantText = assistantText
+                        self.onText?(assistantText)
+                    }
+
+                    if let event = self.claudeCLIStreamEvent(from: json) {
+                        let experts = self.expertsFromTransport(
+                            payload: json,
+                            textCandidates: [event.summary, line]
+                        )
+                        self.onToolUse?(event.title, ["summary": event.summary, "experts": experts])
+                    }
                 } else if !line.hasPrefix("{") && !line.hasPrefix("}") {
                     let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
                     guard !trimmed.isEmpty else { return }

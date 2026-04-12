@@ -1,8 +1,8 @@
 # Lil-Lenny
 
-<video src="Lenny-Ads.mp4" width="960" height="540" controls></video>
+[![Watch the demo on YouTube](hero-thumbnail.png)](https://youtu.be/RT_v6hCTKsQ?si=FymFHXf_Y3pQI2pE)
 
-If the embedded video does not render in your GitHub client, [watch it here](Lenny-Ads.mp4).
+Watch the demo on YouTube.
 
 Lil-Lenny is a tiny macOS companion that lives above your Dock and lets you chat with Lenny Rachitsky's archive without switching contexts.
 

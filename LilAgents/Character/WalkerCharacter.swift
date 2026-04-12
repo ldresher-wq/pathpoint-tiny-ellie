@@ -49,11 +49,13 @@ final class WalkerCharacter {
     var expertNameWindow: NSWindow?
     var popoverTitleLabel: NSTextField?
     var popoverSubtitleLabel: NSTextField?
+    var popoverExpertSwitcherButton: HoverButton?
     var popoverReturnButton: NSButton?
     var popoverSettingsButton: HoverButton?
     var popoverExpandButton: HoverButton?
     var popoverPinButton: HoverButton?
     var popoverCloseButton: HoverButton?
+    var expertSwitcherPopover: NSPopover?
     var isPopoverExpanded = false
     var isPopoverPinned = false
     static let defaultPopoverHeight: CGFloat = 560

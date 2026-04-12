@@ -2,7 +2,7 @@
 
 [![Watch the demo on YouTube](LennyDemo.gif)](https://youtu.be/RT_v6hCTKsQ?si=FymFHXf_Y3pQI2pE)
 
-Watch the demo on YouTube.
+Watch the demo on YouTube: [youtu.be/RT_v6hCTKsQ](https://youtu.be/RT_v6hCTKsQ?si=FymFHXf_Y3pQI2pE)
 
 Download Lil-Lenny and play around with it here: [Lil-Lenny.dmg](https://github.com/hbshih/lenny-lil-agents/releases/download/release/Lil-Lenny.dmg)
 

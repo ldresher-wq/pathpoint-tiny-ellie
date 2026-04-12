@@ -1,8 +1,10 @@
 # Lil-Lenny
 
-[![Watch the demo on YouTube](hero-thumbnail.png)](https://youtu.be/RT_v6hCTKsQ?si=FymFHXf_Y3pQI2pE)
+[![Watch the demo on YouTube](LennyDemo.gif)](https://youtu.be/RT_v6hCTKsQ?si=FymFHXf_Y3pQI2pE)
 
 Watch the demo on YouTube.
+
+Download Lil-Lenny and play around with it here: [Lil-Lenny.dmg](https://github.com/hbshih/lenny-lil-agents/releases/download/release/Lil-Lenny.dmg)
 
 Lil-Lenny is a tiny macOS companion that lives above your Dock and lets you chat with Lenny Rachitsky's archive without switching contexts.
 

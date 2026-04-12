@@ -30,12 +30,14 @@ extension WalkerCharacter {
 
         let imageView = NSImageView(frame: hostView.bounds)
         imageView.imageScaling = .scaleProportionallyUpOrDown
+        imageView.animates = true
         imageView.autoresizingMask = [.width, .height]
         hostView.addSubview(imageView)
         self.imageView = imageView
         setFacing(.front)
 
         window.contentView = hostView
+        updateCharacterTooltip()
         window.orderFrontRegardless()
     }
 
@@ -135,6 +137,7 @@ extension WalkerCharacter {
         positionProgress = position
         hideBubble()
         setPersona(.expert(expert))
+        updateCharacterTooltip()
         updateExpertNameTag()
         window.orderFrontRegardless()
     }
@@ -142,19 +145,31 @@ extension WalkerCharacter {
     func hideCompanionAvatar() {
         representedExpert = nil
         isCompanionAvatar = false
+        updateCharacterTooltip()
         hideBubble()
         hideExpertNameTag()
         window.orderOut(nil)
     }
 
     func focus(on expert: ResponderExpert?) {
+        let wasExpertMode = focusedExpert != nil
         focusedExpert = expert
         claudeSession?.focusedExpert = expert
         if let expert {
+            isWalking = false
+            isPaused = true
+            pauseEndTime = .greatestFiniteMagnitude
+            setFacing(.front)
             setPersona(.expert(expert))
         } else {
             setPersona(.lenny)
+            if wasExpertMode, !movementLocked, !isDraggingHorizontally, !isOnboarding {
+                isPaused = true
+                isWalking = false
+                pauseEndTime = CACurrentMediaTime() + Double.random(in: 0.6...1.4)
+            }
         }
+        updateCharacterTooltip()
         updateExpertNameTag()
         refreshPopoverHeader()
         if !isIdleForPopover {
@@ -167,35 +182,85 @@ extension WalkerCharacter {
     func restoreTranscriptState() {
         updateInputPlaceholder()
         terminalView?.setReturnToLennyVisible(focusedExpert != nil)
+        terminalView?.isExpertMode = focusedExpert != nil
 
         guard let session = claudeSession, let terminalView else { return }
         let activeHistory = session.history(for: focusedExpert)
         let conversationKey = session.key(for: focusedExpert)
-        let transcriptAlreadyRendered =
-            terminalView.renderedConversationKey == conversationKey &&
-            !terminalView.transcriptStack.arrangedSubviews.isEmpty
+        let lastReadHistoryCount = session.lastReadHistoryCount(for: focusedExpert)
 
         if let expert = focusedExpert {
             if activeHistory.isEmpty {
-                if !transcriptAlreadyRendered {
-                    terminalView.showExpertGreeting(for: expert)
+                terminalView.renderedConversationKey = conversationKey
+                terminalView.showExpertGreeting(for: expert)
+                if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    terminalView.setLiveStatus(
+                        currentActivityStatus,
+                        isBusy: true,
+                        isError: false,
+                        experts: [expert]
+                    )
+                } else {
+                    terminalView.clearTranscriptLiveStatus()
                 }
-            } else {
-                terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: expert))
+                terminalView.hideExpertSuggestions(clearState: false)
+                return
             }
+
+            terminalView.replayConversation(
+                activeHistory,
+                expertSuggestions: session.expertSuggestionEntries(for: expert),
+                restoreStrategy: .focusUnreadBoundary(lastReadHistoryCount: lastReadHistoryCount)
+            )
             terminalView.renderedConversationKey = conversationKey
+            if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                terminalView.setLiveStatus(
+                    currentActivityStatus,
+                    isBusy: true,
+                    isError: false,
+                    experts: [expert]
+                )
+            } else {
+                terminalView.clearTranscriptLiveStatus()
+            }
             terminalView.hideExpertSuggestions(clearState: false)
             return
         }
 
         if activeHistory.isEmpty {
-            if !transcriptAlreadyRendered {
-                terminalView.showWelcomeGreeting()
+            terminalView.renderedConversationKey = conversationKey
+            terminalView.showWelcomeGreeting()
+            if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                terminalView.setLiveStatus(
+                    currentActivityStatus,
+                    isBusy: true,
+                    isError: false,
+                    experts: session.livePresenceExperts
+                )
+            } else {
+                terminalView.clearTranscriptLiveStatus()
             }
-        } else {
-            terminalView.replayConversation(activeHistory, expertSuggestions: session.expertSuggestionEntries(for: nil))
+            terminalView.hideExpertSuggestions()
+            return
         }
+
+        terminalView.replayConversation(
+            activeHistory,
+            expertSuggestions: session.expertSuggestionEntries(for: nil),
+            restoreStrategy: .focusUnreadBoundary(lastReadHistoryCount: lastReadHistoryCount)
+        )
         terminalView.renderedConversationKey = conversationKey
+
+        if session.isBusy, !currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            terminalView.setLiveStatus(
+                currentActivityStatus,
+                isBusy: true,
+                isError: false,
+                experts: session.livePresenceExperts
+            )
+        } else {
+            terminalView.clearTranscriptLiveStatus()
+        }
 
         let persistedEntries = session.expertSuggestionEntries(for: nil)
         guard persistedEntries.isEmpty else {
@@ -216,17 +281,27 @@ extension WalkerCharacter {
 
     private func loadDirectionalImages() {
         directionalImages[.front] = loadImage(named: "main-front.png")
-        directionalImages[.left] = loadImage(named: "main-left.png")
-        directionalImages[.right] = loadImage(named: "main-right.png")
+        directionalImages[.left] = loadImage(named: "lenny-walk-left.gif", fallback: "main-left.png")
+        directionalImages[.right] = loadImage(named: "lenny-walk-right.gif", fallback: "main-right.png")
         directionalImages[.back] = loadImage(named: "main-back.png")
     }
 
-    private func loadImage(named name: String) -> NSImage {
+    private func loadImage(named name: String, fallback: String? = nil) -> NSImage {
         guard let resourceURL = Bundle.main.resourceURL else {
             return NSImage(size: NSSize(width: displayWidth, height: displayHeight))
         }
-        let path = resourceURL.appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory).appendingPathComponent(name).path
-        return NSImage(contentsOfFile: path) ?? NSImage(size: NSSize(width: displayWidth, height: displayHeight))
+        let baseURL = resourceURL.appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory)
+        let primaryPath = baseURL.appendingPathComponent(name).path
+        if let image = NSImage(contentsOfFile: primaryPath) {
+            return image
+        }
+        if let fallback {
+            let fallbackPath = baseURL.appendingPathComponent(fallback).path
+            if let image = NSImage(contentsOfFile: fallbackPath) {
+                return image
+            }
+        }
+        return NSImage(size: NSSize(width: displayWidth, height: displayHeight))
     }
 
     func setFacing(_ facing: WalkerFacing) {
@@ -257,6 +332,16 @@ extension WalkerCharacter {
             terminalView.characterColor = characterColor
         }
         playHandoffEffect(from: previousPersona, to: persona)
+    }
+
+    private func updateCharacterTooltip() {
+        let tooltip: String
+        if let expert = focusedExpert ?? representedExpert {
+            tooltip = "Ask \(expert.name)"
+        } else {
+            tooltip = "Ask Lil-Lenny"
+        }
+        window.contentView?.toolTip = tooltip
     }
 
     private func loadExpertAvatar(at path: String) -> NSImage {

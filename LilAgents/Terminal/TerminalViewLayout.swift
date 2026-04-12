@@ -11,6 +11,7 @@ extension TerminalView {
         static let bottomInset: CGFloat = 14
         static let interSectionSpacing: CGFloat = 24
         static let panelGap: CGFloat = 6
+        static let welcomePanelGapFromComposer: CGFloat = 12
     }
 
     func relayoutPanels() {
@@ -33,18 +34,27 @@ extension TerminalView {
         if expertSuggestionContainer.isHidden {
             welcomePanelHeight = 0
         } else {
+            // Set a non-zero frame before layout to avoid constraint conflicts:
+            // expertSuggestionStack uses translatesAutoresizingMaskIntoConstraints=true,
+            // so a height=0 frame generates a required height==0 constraint that fights
+            // with HoverChipView's NSImageView.height==16 constraint.
+            expertSuggestionStack.frame = NSRect(x: 0, y: 0, width: max(width, 1), height: 500)
             expertSuggestionStack.layoutSubtreeIfNeeded()
-            welcomePanelHeight = max(118, expertSuggestionStack.fittingSize.height + 24)
+            welcomePanelHeight = ceil(expertSuggestionStack.fittingSize.height)
         }
 
-        expertSuggestionContainer.frame = NSRect(x: Layout.padding, y: bottomCursor, width: width, height: welcomePanelHeight)
+        let welcomePanelY = welcomePanelHeight > 0 ? bottomCursor + Layout.welcomePanelGapFromComposer : bottomCursor
+        expertSuggestionContainer.frame = NSRect(x: Layout.padding, y: welcomePanelY, width: width, height: welcomePanelHeight)
         expertSuggestionLabel.frame = NSRect(x: 16, y: max(0, welcomePanelHeight - 28), width: width - 32, height: 16)
         expertSuggestionStack.frame = NSRect(x: 0, y: 0, width: width, height: max(0, welcomePanelHeight))
-        bottomCursor += welcomePanelHeight
+        bottomCursor = welcomePanelY + welcomePanelHeight
 
         let scrollTop = frame.height - Layout.topInset
-        let scrollY = bottomCursor + Layout.interSectionSpacing
-        let scrollHeight = max(160, scrollTop - scrollY)
+        let sectionGap: CGFloat = expertSuggestionContainer.isHidden ? Layout.interSectionSpacing : 10
+        let rawScrollY = bottomCursor + sectionGap
+        let minScrollHeight: CGFloat = 120
+        let scrollHeight = max(minScrollHeight, scrollTop - rawScrollY)
+        let scrollY = scrollTop - scrollHeight
         scrollView.frame = NSRect(x: Layout.padding, y: scrollY, width: width, height: scrollHeight)
         
         transcriptContainer.frame.size.width = width

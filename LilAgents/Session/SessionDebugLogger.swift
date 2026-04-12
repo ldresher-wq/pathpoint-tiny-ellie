@@ -3,13 +3,20 @@ import Foundation
 enum SessionDebugLogger {
     static func log(_ category: String, _ message: String) {
         guard AppSettings.debugLoggingEnabled else { return }
-        let timestamp = ISO8601DateFormatter().string(from: Date())
-        print("[Lenny][\(timestamp)][\(category)] \(redactSensitiveValues(in: message))")
+        printFormatted(category: category, message: message)
     }
 
     static func logMultiline(_ category: String, header: String, body: String) {
         guard AppSettings.debugLoggingEnabled else { return }
         log(category, "\(header)\n\(body)")
+    }
+
+    static func trace(_ category: String, _ message: String) {
+        printFormatted(category: category, message: message)
+    }
+
+    static func traceMultiline(_ category: String, header: String, body: String) {
+        trace(category, "\(header)\n\(body)")
     }
 
     static func summarizeEnvironment(_ environment: [String: String]) -> String {
@@ -34,6 +41,11 @@ enum SessionDebugLogger {
     static func summarizeAttachments(_ attachments: [SessionAttachment]) -> String {
         guard !attachments.isEmpty else { return "none" }
         return attachments.map { "\($0.displayName) [\($0.kind)]" }.joined(separator: ", ")
+    }
+
+    private static func printFormatted(category: String, message: String) {
+        let timestamp = ISO8601DateFormatter().string(from: Date())
+        print("[Lenny][\(timestamp)][\(category)] \(redactSensitiveValues(in: message))")
     }
 
     private static func redactSensitiveValues(in text: String) -> String {

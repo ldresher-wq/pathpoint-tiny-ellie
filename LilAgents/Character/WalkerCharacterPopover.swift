@@ -16,6 +16,17 @@ extension WalkerCharacter {
 
         terminalView?.inputField.isEditable = false
         terminalView?.updatePlaceholder("")
+
+        // Reset transcript to a clean state on each call so repeated clicks don't accumulate content
+        if let tv = terminalView {
+            tv.currentAssistantText = ""
+            let views = tv.transcriptStack.arrangedSubviews
+            views.forEach { view in
+                tv.transcriptStack.removeArrangedSubview(view)
+                view.removeFromSuperview()
+            }
+        }
+
         let welcome = """
         Ask Lil-Lenny anything about product, growth, leadership, pricing, startups, or AI.
 
@@ -66,16 +77,19 @@ extension WalkerCharacter {
         showingCompletion = false
         hideBubble()
 
+        if popoverWindow == nil {
+            createPopoverWindow()
+        }
+
         if claudeSession == nil {
             let session = ClaudeSession()
             session.focusedExpert = focusedExpert
             claudeSession = session
             wireSession(session)
             session.start()
-        }
-
-        if popoverWindow == nil {
-            createPopoverWindow()
+        } else if claudeSession?.isRunning != true {
+            claudeSession?.focusedExpert = focusedExpert
+            claudeSession?.start()
         }
 
         refreshPopoverHeader()

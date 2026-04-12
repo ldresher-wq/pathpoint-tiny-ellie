@@ -27,7 +27,9 @@ extension WalkerCharacter {
     func playHandoffEffect(from previousPersona: WalkerPersona, to newPersona: WalkerPersona) {
         guard case .lenny = previousPersona else {
             if case .lenny = newPersona {
-                showHandoffCloud(accent: NSColor(red: 0.96, green: 0.63, blue: 0.23, alpha: 1.0), trailing: true)
+                if !showImportedGuestArrivalEffect() {
+                    showHandoffCloud(accent: NSColor(red: 0.96, green: 0.63, blue: 0.23, alpha: 1.0), trailing: true)
+                }
             } else {
                 showHandoffCloud(accent: NSColor(red: 0.72, green: 0.9, blue: 1.0, alpha: 1.0), trailing: false)
             }

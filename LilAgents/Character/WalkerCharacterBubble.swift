@@ -193,7 +193,7 @@ extension WalkerCharacter {
         thinkingBubbleWindow = win
     }
 
-    func playCompletionSound() {
+    static func playSelectionSound() {
         guard Self.soundsEnabled else { return }
         var idx: Int
         repeat {
@@ -206,5 +206,9 @@ extension WalkerCharacter {
            let sound = NSSound(contentsOf: url, byReference: true) {
             sound.play()
         }
+    }
+
+    func playCompletionSound() {
+        Self.playSelectionSound()
     }
 }

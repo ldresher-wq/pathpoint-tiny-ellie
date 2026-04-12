@@ -7,12 +7,22 @@
         <language>en</language>
         <!--
             To publish a new release:
-            1. Build, sign, notarize, staple the app
-            2. Create zip: ditto -c -k - -keepParent Lenny.app Lenny-vX.Y.zip
-            3. Sign for Sparkle: sign_update Lenny-vX.Y.zip
-            4. Add a new <item> below with the edSignature and length
-            5. Upload zip to GitHub Releases
-            6. Commit appcast.xml and push
+            1. Build, sign, notarize, staple the app via DMG Canvas
+            2. Sign for Sparkle: sign_update LilLenny.dmg
+            3. Add a new <item> below with the edSignature and length
+            4. Upload DMG to GitHub Releases
+            5. Commit appcast.xml and push
         -->
+        <item>
+            <title>Version 1.0</title>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0</sparkle:shortVersionString>
+            <pubDate>Sat, 12 Apr 2026 00:00:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/hbshih/lenny-lil-agents/releases/download/release/LilLenny.dmg"
+                sparkle:edSignature="C+Zi8w/A4Le9Qn3vX15kitFTpcw4yCzzxPOuLSboZ6MePqeVxscy5n1jyNTfpljVmjO3kiq4C7ETsLhJP8gFDQ=="
+                length="28879705"
+                type="application/octet-stream" />
+        </item>
     </channel>
 </rss>

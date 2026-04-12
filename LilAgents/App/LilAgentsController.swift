@@ -3,6 +3,8 @@ import AppKit
 class LilAgentsController {
     var characters: [WalkerCharacter] = []
     private var displayLink: CVDisplayLink?
+    private var fallbackDisplayTimer: Timer?
+    private var lastTickTimestamp: CFTimeInterval = 0
     var debugWindow: NSWindow?
     var pinnedScreenIndex: Int = -1
     private static let onboardingKey = "hasCompletedOnboarding"
@@ -20,7 +22,7 @@ class LilAgentsController {
         lenny.decelStart = 7.8
         lenny.walkStop = 8.4
         lenny.walkAmountRange = 0.35...0.6
-        lenny.yOffset = -4
+        lenny.yOffset = 4
         lenny.characterColor = NSColor(red: 0.96, green: 0.63, blue: 0.23, alpha: 1.0)
         lenny.positionProgress = 0.9
         lenny.pauseEndTime = CACurrentMediaTime() + Double.random(in: 0.5...2.0)
@@ -135,38 +137,20 @@ class LilAgentsController {
         }
     }
 
-    private func companionPositions(count: Int, mainPosition: CGFloat) -> [CGFloat] {
-        switch count {
-        case 0:
-            return []
-        case 1:
-            return [mainPosition < 0.55 ? 0.78 : 0.22]
-        case 2:
-            return [0.2, 0.8]
-        default:
-            let candidates: [CGFloat] = [0.12, 0.3, 0.5, 0.7, 0.88]
-            let filtered = candidates.filter { abs($0 - mainPosition) > 0.08 }
-            let chosen = (filtered.isEmpty ? candidates : filtered)
-                .sorted { abs($0 - mainPosition) > abs($1 - mainPosition) }
-            return Array(chosen.prefix(count)).sorted()
-        }
-    }
-
     func currentDockMetrics() -> (screen: NSScreen, dockX: CGFloat, dockWidth: CGFloat, dockTopY: CGFloat)? {
         guard let screen = activeScreen else { return nil }
 
-        let screenWidth = screen.frame.width
         let dockX: CGFloat
         let dockWidth: CGFloat
         let dockTopY: CGFloat
 
         if screenHasDock(screen) {
-            (dockX, dockWidth) = getDockIconArea(screenWidth: screenWidth)
+            (dockX, dockWidth) = getDockIconArea(screen: screen)
             dockTopY = screen.visibleFrame.origin.y
         } else {
             let margin: CGFloat = 40.0
             dockX = screen.frame.origin.x + margin
-            dockWidth = screenWidth - margin * 2
+            dockWidth = screen.frame.width - margin * 2
             dockTopY = screen.frame.origin.y
         }
 
@@ -195,7 +179,7 @@ class LilAgentsController {
 
     // MARK: - Dock Geometry
 
-    private func getDockIconArea(screenWidth: CGFloat) -> (x: CGFloat, width: CGFloat) {
+    private func getDockIconArea(screen: NSScreen) -> (x: CGFloat, width: CGFloat) {
         let dockDefaults = UserDefaults(suiteName: "com.apple.dock")
         let tileSize = CGFloat(dockDefaults?.double(forKey: "tilesize") ?? 48)
         // Each dock slot is the icon + padding. The padding scales with tile size.
@@ -229,7 +213,16 @@ class LilAgentsController {
 
         // Small fudge factor for dock edge padding
         dockWidth *= 1.1
-        let dockX = (screenWidth - dockWidth) / 2.0
+        let minimumUsableWidth = max(260.0, min(screen.visibleFrame.width - 48.0, screen.frame.width * 0.45))
+
+        if dockWidth < minimumUsableWidth {
+            let fallbackMargin: CGFloat = 24.0
+            let fallbackWidth = max(screen.visibleFrame.width - fallbackMargin * 2, minimumUsableWidth)
+            let fallbackX = screen.visibleFrame.minX + fallbackMargin
+            return (fallbackX, fallbackWidth)
+        }
+
+        let dockX = screen.frame.origin.x + (screen.frame.width - dockWidth) / 2.0
         return (dockX, dockWidth)
     }
 
@@ -237,19 +230,29 @@ class LilAgentsController {
 
     private func startDisplayLink() {
         CVDisplayLinkCreateWithActiveCGDisplays(&displayLink)
+        startFallbackDisplayTimer()
         guard let displayLink = displayLink else { return }
 
         let callback: CVDisplayLinkOutputCallback = { _, _, _, _, _, userInfo -> CVReturn in
             let controller = Unmanaged<LilAgentsController>.fromOpaque(userInfo!).takeUnretainedValue()
             DispatchQueue.main.async {
-                controller.tick()
+                controller.tick(source: .displayLink)
             }
             return kCVReturnSuccess
         }
 
         CVDisplayLinkSetOutputCallback(displayLink, callback,
                                        Unmanaged.passUnretained(self).toOpaque())
-        CVDisplayLinkStart(displayLink)
+        _ = CVDisplayLinkStart(displayLink)
+    }
+
+    private func startFallbackDisplayTimer() {
+        fallbackDisplayTimer?.invalidate()
+        let timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
+            self?.tick(source: .fallbackTimer)
+        }
+        fallbackDisplayTimer = timer
+        RunLoop.main.add(timer, forMode: .common)
     }
 
     var activeScreen: NSScreen? {
@@ -265,7 +268,18 @@ class LilAgentsController {
         return screen.visibleFrame.origin.y > screen.frame.origin.y
     }
 
-    func tick() {
+    private enum TickSource {
+        case displayLink
+        case fallbackTimer
+    }
+
+    private func tick(source: TickSource) {
+        let now = CACurrentMediaTime()
+        if source == .fallbackTimer, now - lastTickTimestamp < (1.0 / 90.0) {
+            return
+        }
+        lastTickTimestamp = now
+
         guard let metrics = currentDockMetrics() else { return }
         let screen = metrics.screen
         let dockX = metrics.dockX
@@ -275,8 +289,6 @@ class LilAgentsController {
         updateDebugLine(dockX: dockX, dockWidth: dockWidth, dockTopY: dockTopY)
 
         let activeChars = characters.filter { $0.window.isVisible }
-
-        let now = CACurrentMediaTime()
         let anyWalking = activeChars.contains { $0.isWalking }
         for char in activeChars {
             if char.isIdleForPopover { continue }
@@ -298,5 +310,6 @@ class LilAgentsController {
         if let displayLink = displayLink {
             CVDisplayLinkStop(displayLink)
         }
+        fallbackDisplayTimer?.invalidate()
     }
 }

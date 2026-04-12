@@ -20,6 +20,19 @@ extension ClaudeSession {
         conversations[key] = state
     }
 
+    func lastReadHistoryCount(for expert: ResponderExpert?) -> Int {
+        conversations[key(for: expert)]?.lastReadHistoryCount ?? 0
+    }
+
+    func markConversationRead(for expert: ResponderExpert?) {
+        let conversationKey = key(for: expert)
+        var state = conversations[conversationKey] ?? ConversationState()
+        let historyCount = state.history.count
+        guard historyCount > state.lastReadHistoryCount else { return }
+        state.lastReadHistoryCount = historyCount
+        conversations[conversationKey] = state
+    }
+
     func expertSuggestionEntries(for expert: ResponderExpert?) -> [ExpertSuggestionEntry] {
         conversations[key(for: expert)]?.expertSuggestionEntries ?? []
     }
@@ -81,39 +94,82 @@ extension ClaudeSession {
         onTurnComplete?()
     }
 
-    func buildInstructions(for expert: ResponderExpert?) -> String {
+    func buildInstructions(for expert: ResponderExpert?, expectMCP: Bool) -> String {
         let base = """
-        You are answering inside a macOS companion app using Lenny's archive.
-        Prefer retrieved archive evidence over generic knowledge.
-        Keep the answer concise and practical.
+        You are answering inside a macOS companion app called Lil-Lenny that accesses Lenny Rachitsky's archive.
+        This app connects to the LennyData MCP (Model Context Protocol) server to retrieve archive content.
+        Ground every factual claim in content you explicitly retrieved from the archive via the LennyData MCP tools.
+        Do NOT fabricate quotes, episode titles, newsletter headlines, or expert insights from training data.
+        Do NOT access any URLs, websites, or knowledge sources beyond what is explicitly provided through the LennyData MCP tools.
+        Write substantive, practical answers that draw fully on the provided archive content. Don't artificially truncate insights — let the depth of the source material guide the length of your answer.
         Return only valid JSON, with no prose before or after it and no code fences.
         Use this exact shape:
         {
-          "answer_markdown": "markdown answer here",
+          "messages": [
+            {
+              "speaker": "Lil-Lenny",
+              "kind": "lenny",
+              "markdown": "Bringing in Elena Verna for a sharper growth perspective."
+            },
+            {
+              "speaker": "Elena Verna",
+              "kind": "expert",
+              "markdown": "I'd focus on the activation step first, because that's usually where growth loops either compound or stall."
+            }
+          ],
           "suggested_experts": ["Name One", "Name Two"],
           "suggest_expert_prompt": true
         }
+        `messages` should be a transcript-ready array of separate speaker messages.
+        Use `kind: "lenny"` for Lil-Lenny orchestration messages and `kind: "expert"` for specialist responses.
+        When one or more experts are relevant, Lil-Lenny should briefly call on them first, then each expert should speak in a separate message.
+        Expert messages must be written in first person from that expert's perspective.
+        Do not write expert messages in third person, such as "\(expert?.name ?? "The expert") would..." or "From \(expert?.name ?? "the expert")'s perspective...".
+        Keep the Lil-Lenny orchestration line to one short sentence.
+        If Lil-Lenny tags an expert in the orchestration line, use the visible `@Name` form.
+        Do not include mini-bios, credentials, or long justification in the Lil-Lenny orchestration line.
+        Let the expert messages carry the actual substance.
+        If you materially relied on 2 or more experts, do not collapse them into one Lil-Lenny summary block.
+        In that case, return:
+        1. one short Lil-Lenny orchestration message
+        2. one separate expert message for each expert you materially relied on
+        Keep expert messages concise if needed, but preserve separate speakers.
+        `suggested_experts` should match the experts who actually spoke or materially informed the answer.
+        If no specialist is warranted, return a single Lil-Lenny message.
         `suggested_experts` should include up to 3 relevant archive experts you explicitly relied on or cited.
         If there are no useful expert suggestions, return an empty array and set `suggest_expert_prompt` to false.
-        When MCP tools are available, prefer a fast routing pass before deep reading:
-        1. Check `index.md` first to identify the right person, topic, or source.
-        2. If `index.md` points to a likely person or source, narrow to that person/source next.
-        3. Only then do deeper `read_excerpt` or `read_content` calls.
-        Prefer the minimum number of MCP calls needed for a grounded answer.
         """
 
+        let mcpInstructions = expectMCP ? """
+
+        The LennyData MCP server is available with the following tools:
+        - `index.md` — Lenny's master index mapping topics and people to content sources
+        - `read_excerpt` — Retrieve targeted excerpts from sources
+        - `read_content` — Read full content blocks from the archive
+
+        When LennyData MCP tools are available, prefer a fast routing pass before deep reading:
+        1. Call LennyData's `index.md` first to identify the right person, topic, or source.
+        2. If the index points to a likely person or source, use LennyData's `read_excerpt` to narrow to that person/source next.
+        3. Only then use LennyData's `read_content` for deeper full-text reads if needed.
+        Always explicitly cite where archive content came from after retrieving it via LennyData MCP.
+        Prefer the minimum number of MCP calls needed for a grounded answer.
+        """ : ""
+
         if let expert {
-            return base + """
+            return base + mcpInstructions + """
 
             The user explicitly switched into \(expert.name)'s avatar.
             Answer in first person as \(expert.name).
-            If MCP tools are available, check `index.md` for \(expert.name) first, then stay in that person's context unless the user asks to pivot.
+            Return exactly one expert message spoken by \(expert.name), unless the user explicitly asks to compare with others.
+            \(expectMCP ? "If MCP tools are available, check `index.md` for \(expert.name) first, then stay in that person's context unless the user asks to pivot." : "Use the provided archive context for \(expert.name) if available, and stay in that person's context unless the user asks to pivot.")
+            Do not mention the archive, MCP, retrieval, references, or source-gathering process in the final answer unless the user explicitly asks about it.
+            Speak as \(expert.name), not as an assistant describing \(expert.name).
             \(expert.responseScript)
             \(expertContextPrompt(expert.archiveContext))
             """
         }
 
-        return base
+        return base + mcpInstructions
     }
 
     func buildUserPrompt(message: String, attachments: [SessionAttachment], expert: ResponderExpert?, archiveContext: String? = nil) -> String {
@@ -187,14 +243,15 @@ extension ClaudeSession {
     }
 
     func buildConversationPrompt(message: String, attachments: [SessionAttachment], expert: ResponderExpert?, conversationKey: String, archiveContext: String?, expectMCP: Bool) -> String {
-        let instructions = buildInstructions(for: expert)
+        let instructions = buildInstructions(for: expert, expectMCP: expectMCP)
         let priorMessages = promptHistory(for: conversationKey, expert: expert)
         let transcript = priorMessages.compactMap { message -> String? in
             switch message.role {
             case .user:
                 return "User: \(trimPromptContext(message.text, limit: 700))"
             case .assistant:
-                return "Assistant: \(trimPromptContext(message.text, limit: 1_400))"
+                let label = message.speaker?.name ?? "Assistant"
+                return "\(label): \(trimPromptContext(message.text, limit: 1_400))"
             case .error:
                 return "System error: \(trimPromptContext(message.text, limit: 500))"
             case .toolUse, .toolResult:
@@ -217,7 +274,11 @@ extension ClaudeSession {
             sections.append("Attachment context:\n\(attachmentContext)")
         }
 
-        sections.append(expectMCP ? "Use the Lenny archive MCP tools whenever they help. Start with `index.md` for fast routing, then narrow to the right person/source, then read deeper only as needed. In expert mode, route through `index.md` to that person first. Return only the JSON object described above." : "Answer using the bundled starter archive context above. Be explicit when the starter pack does not include enough evidence. Return only the JSON object described above.")
+        if expectMCP {
+            sections.append("Retrieve information ONLY using the Lenny archive MCP tools. Do not use WebFetch, WebSearch, or any other tool. Do not draw on training data for archive-specific content. Start with `index.md` for fast routing, then narrow to the right person/source, then read deeper only as needed. In expert mode, route through `index.md` to that person first. Return only the JSON object described above.")
+        } else {
+            sections.append("Retrieve information ONLY from the GitHub URLs explicitly provided above (the index.json and the podcast/newsletter files). Do not use WebSearch. Do not fetch from any other website. Do not use training knowledge for archive-specific content. Answer based solely on what you retrieved. Return only the JSON object described above.")
+        }
         return sections.joined(separator: "\n\n")
     }
 
@@ -249,5 +310,28 @@ extension ClaudeSession {
                 return "Document attachment: \(attachment.displayName)\n\(extractedText)"
             }
         }.joined(separator: "\n\n")
+    }
+
+    func assistantMessages(from segments: [AssistantSegment]) -> [Message] {
+        segments.map { segment in
+            Message(
+                role: .assistant,
+                text: segment.markdown,
+                speaker: segment.speaker,
+                followUpExpert: segment.followUpExpert
+            )
+        }
+    }
+
+    func lennySpeaker() -> TranscriptSpeaker {
+        TranscriptSpeaker(name: "Lil-Lenny", avatarPath: nil, kind: .lenny)
+    }
+
+    func systemSpeaker() -> TranscriptSpeaker {
+        TranscriptSpeaker(name: "System", avatarPath: nil, kind: .system)
+    }
+
+    func speaker(for expert: ResponderExpert) -> TranscriptSpeaker {
+        TranscriptSpeaker(name: expert.name, title: expert.title, avatarPath: expert.avatarPath, kind: .expert)
     }
 }

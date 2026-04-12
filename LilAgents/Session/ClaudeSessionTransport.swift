@@ -1,26 +1,28 @@
+import Darwin
 import Foundation
 
 extension ClaudeSession {
-    func preferredWorkingDirectoryURL() -> URL {
-        FileManager.default.homeDirectoryForCurrentUser
-    }
-
     func start() {
+        guard !isRunning else {
+            SessionDebugLogger.log("session", "start() called but already running — ignoring")
+            return
+        }
+        isRunning = true
         SessionDebugLogger.log("session", "start() called")
+        logStartupDiagnostics()
         resolvePreferredBackend { [weak self] backend, environment, message in
             guard let self else { return }
             SessionDebugLogger.log("session", "start() backend resolution completed. backend=\(String(describing: backend)) environment=\(SessionDebugLogger.summarizeEnvironment(environment))")
             guard let backend else {
                 let msg = message ?? self.backendSetupMessage(environment: environment)
                 SessionDebugLogger.log("session", "start() failed: \(msg)")
-                self.onError?(msg)
-                self.appendHistory(Message(role: .error, text: msg), to: self.key(for: self.focusedExpert))
+                self.isRunning = false
+                self.onSetupRequired?(msg)
                 return
             }
 
             self.selectedBackend = backend
-            self.isRunning = true
-            SessionDebugLogger.log("session", "session ready. selectedBackend=\(backendStatusMessage(for: backend))")
+            SessionDebugLogger.log("session", "session ready. selectedBackend=\(self.backendStatusMessage(for: backend, environment: environment))")
             self.onSessionReady?()
         }
     }
@@ -28,7 +30,9 @@ extension ClaudeSession {
     func send(message: String, attachments: [SessionAttachment] = []) {
         let activeExpert = focusedExpert
         let conversationKey = key(for: activeExpert)
+        isCancellingTurn = false
         pendingExperts.removeAll()
+        liveToolCallsByID.removeAll()
         assistantExplicitlyRequestedExperts = false
         appendHistory(Message(role: .user, text: historyText(message: message, attachments: attachments)), to: conversationKey)
         isBusy = true
@@ -40,42 +44,59 @@ extension ClaudeSession {
 
         resolvePreferredBackend { [weak self] backend, environment, messageText in
             guard let self else { return }
+            guard !self.isCancellingTurn else {
+                self.isBusy = false
+                return
+            }
             SessionDebugLogger.log("turn", "resolved backend=\(String(describing: backend)) environment=\(SessionDebugLogger.summarizeEnvironment(environment))")
             guard let backend else {
                 SessionDebugLogger.log("turn", "backend resolution failed: \(messageText ?? "unknown error")")
-                self.failTurn(messageText ?? self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                self.isBusy = false
+                self.onSetupRequired?(messageText ?? self.backendSetupMessage(environment: environment))
                 return
             }
 
             self.selectedBackend = backend
-            let status = self.backendStatusMessage(for: backend)
+            let archiveMode = self.effectiveArchiveAccessMode(environment: environment)
+            let status = self.backendStatusMessage(for: backend, environment: environment)
             self.onToolResult?(status, false)
             self.appendHistory(Message(role: .toolResult, text: status), to: conversationKey)
 
-            let archiveMode = AppSettings.effectiveArchiveAccessMode
             let sourceSummary = archiveMode == .starterPack
-                ? "Source: Starter pack"
-                : "Source: Official Lenny MCP"
+                ? "Source: Lenny's public archive (GitHub)"
+                : "Source: Official Lenny archive"
             self.onToolResult?(sourceSummary, false)
             self.appendHistory(Message(role: .toolResult, text: sourceSummary), to: conversationKey)
 
             if archiveMode == .starterPack {
-                let localResult = self.searchStarterArchive(message: message, expert: activeExpert)
-                let expertNames = localResult.experts.map(\.name).joined(separator: ", ")
-                SessionDebugLogger.logMultiline(
-                    "starter-pack",
-                    header: "starter pack search complete. summary=\(localResult.summary) result=\(localResult.resultSummary) experts=\(expertNames)",
-                    body: localResult.promptContext
-                )
-                self.onToolUse?("Searching Starter Pack", ["summary": localResult.summary])
-                self.appendHistory(Message(role: .toolUse, text: "Searching Starter Pack: \(localResult.summary)"), to: conversationKey)
-                self.onToolResult?(localResult.resultSummary, false)
-                self.appendHistory(Message(role: .toolResult, text: localResult.resultSummary), to: conversationKey)
-                self.pendingExperts = localResult.experts
-                SessionDebugLogger.log("experts", "staged \(localResult.experts.count) starter-pack expert candidate(s) until response completion")
-
                 switch backend {
+                case .openAIResponsesAPI:
+                    guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
+                        SessionDebugLogger.log("turn", "starter pack openai fallback but OPENAI_API_KEY missing")
+                        self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                        return
+                    }
+                    SessionDebugLogger.log("archive", "openai path: pre-fetching GitHub archive. expert=\(activeExpert?.name ?? "none")")
+                    self.prefetchGitHubArchiveContext(message: message, expert: activeExpert, conversationKey: conversationKey) { [weak self] context in
+                        guard let self else { return }
+                        self.callOpenAI(
+                            message: message,
+                            attachments: attachments,
+                            apiKey: key,
+                            expert: activeExpert,
+                            conversationKey: conversationKey,
+                            mcpToken: nil,
+                            archiveContext: context.isEmpty ? nil : context
+                        )
+                    }
+
                 case let .claudeCodeCLI(path):
+                    let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                    SessionDebugLogger.log("archive", "using GitHub archive context (CLI). backend=\(backend) expert=\(activeExpert?.name ?? "none")")
+                    self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                    self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                    self.onToolResult?("Archive ready", false)
+                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                     self.callClaudeCodeCLI(
                         executablePath: path,
                         message: message,
@@ -83,11 +104,18 @@ extension ClaudeSession {
                         environment: environment,
                         expert: activeExpert,
                         conversationKey: conversationKey,
-                        archiveContext: localResult.promptContext,
-                        officialMCPToken: nil
+                        archiveContext: archiveContext,
+                        officialMCPToken: nil,
+                        useOfficialMCP: false
                     )
 
                 case let .codexCLI(path):
+                    let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                    SessionDebugLogger.log("archive", "using GitHub archive context (Codex). backend=\(backend) expert=\(activeExpert?.name ?? "none")")
+                    self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                    self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                    self.onToolResult?("Archive ready", false)
+                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                     self.callCodexCLI(
                         executablePath: path,
                         message: message,
@@ -95,16 +123,135 @@ extension ClaudeSession {
                         environment: environment,
                         expert: activeExpert,
                         conversationKey: conversationKey,
-                        archiveContext: localResult.promptContext,
-                        useBundledMCP: false
+                        archiveContext: archiveContext,
+                        useOfficialMCP: false
                     )
+                }
+                return
+            }
 
-                case .openAIResponsesAPI:
-                    guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
-                        SessionDebugLogger.log("turn", "starter pack mode selected openai fallback but OPENAI_API_KEY missing")
-                        self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
-                        return
+            // ── Native CLI MCP path ────────────────────────────────────────────────────
+            // The CLI already has Lenny MCP configured with its own credentials;
+            // invoke it directly without injecting a token or fetching context via HTTP.
+            //
+            // Yield to token injection when the user has an explicit settings/env token.
+            // This covers the expired-token recovery case: after the banner install the
+            // native config file may still hold a stale token, while the settings token
+            // is fresh. Token injection writes a temp --mcp-config with --strict-mcp-config
+            // so only the fresh bearer-token server is loaded, bypassing stale entries.
+            let hasExplicitToken = self.officialMCPToken(from: environment) != nil
+            if archiveMode == .officialMCP, self.backendHasNativeMCPConfiguration(backend), !hasExplicitToken {
+                SessionDebugLogger.log("archive", "native MCP path: backend=\(backend) — dispatching with useOfficialMCP=true, no token injection")
+                self.onToolUse?("Connecting to archive", ["summary": "Connecting to the official Lenny archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Connecting to archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                self.dispatchResolvedBackend(
+                    backend,
+                    message: message,
+                    attachments: attachments,
+                    environment: environment,
+                    expert: activeExpert,
+                    conversationKey: conversationKey,
+                    archiveContext: nil,
+                    officialMCPToken: nil,
+                    useOfficialMCP: true
+                )
+                return
+            }
+
+            // ── Settings / env bearer-token MCP path ───────────────────────────────
+            // Also reached when native config exists but user has a settings token
+            // (hasExplicitToken bypassed the native path above).
+            if let token = self.officialMCPToken(from: environment) {
+                // For both CLI backends, inject the token directly via the CLI's own
+                // MCP config mechanism. This is strictly better than HTTP pre-fetch:
+                // Claude can call multiple MCP tools interactively rather than getting
+                // a single pre-fetched context blob. It also bypasses any stale OAuth
+                // entries in the native config (--strict-mcp-config loads only ours).
+                if case .claudeCodeCLI = backend {
+                    SessionDebugLogger.log("archive", "claude CLI settings token: injecting via --mcp-config --strict-mcp-config. token=\(String(token.prefix(8)))...")
+                    self.onToolUse?("Connecting to archive", ["summary": "Connecting to the official Lenny archive"])
+                    self.appendHistory(Message(role: .toolUse, text: "Connecting to archive"), to: conversationKey)
+                    self.onToolResult?("Archive ready", false)
+                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                    self.dispatchResolvedBackend(
+                        backend,
+                        message: message,
+                        attachments: attachments,
+                        environment: environment,
+                        expert: activeExpert,
+                        conversationKey: conversationKey,
+                        archiveContext: nil,
+                        officialMCPToken: token,
+                        useOfficialMCP: true
+                    )
+                    return
+                }
+
+                if case .codexCLI = backend, self.backendSupportsOfficialMCP(backend, environment: environment) {
+                    self.dispatchResolvedBackend(
+                        backend,
+                        message: message,
+                        attachments: attachments,
+                        environment: environment,
+                        expert: activeExpert,
+                        conversationKey: conversationKey,
+                        archiveContext: nil,
+                        officialMCPToken: token,
+                        useOfficialMCP: true
+                    )
+                    return
+                }
+
+                // OpenAI backend: no CLI to inject into, so HTTP pre-fetch is the only option.
+                self.fetchOfficialArchiveContext(
+                    message: message,
+                    expert: activeExpert,
+                    token: token,
+                    conversationKey: conversationKey
+                ) { [weak self] result in
+                    guard let self else { return }
+                    switch result {
+                    case .failure(let error):
+                        let normalizedError = self.normalizedLennyMCPAuthError(from: error.localizedDescription) ?? error.localizedDescription
+                        self.failTurn(normalizedError, conversationKey: conversationKey)
+
+                    case let .success(officialResult):
+                        self.pendingExperts = officialResult.experts
+                        SessionDebugLogger.log(
+                            "experts",
+                            "staged \(officialResult.experts.count) official-archive expert candidate(s) until response completion"
+                        )
+                        self.dispatchResolvedBackend(
+                            backend,
+                            message: message,
+                            attachments: attachments,
+                            environment: environment,
+                            expert: activeExpert,
+                            conversationKey: conversationKey,
+                            archiveContext: officialResult.promptContext,
+                            officialMCPToken: nil,
+                            useOfficialMCP: false
+                        )
                     }
+                }
+                return
+            }
+
+            // No explicit MCP token — fall back to GitHub archive rather than attempting
+            // MCP via the global config (which may time out or lack auth).
+            SessionDebugLogger.log("archive", "no MCP token, using GitHub archive fallback")
+
+            switch backend {
+            case .openAIResponsesAPI:
+                guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
+                    self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                    return
+                }
+                SessionDebugLogger.log("archive", "openai path: pre-fetching GitHub archive. expert=\(activeExpert?.name ?? "none")")
+                self.prefetchGitHubArchiveContext(message: message, expert: activeExpert, conversationKey: conversationKey) { [weak self] context in
+                    guard let self else { return }
                     self.callOpenAI(
                         message: message,
                         attachments: attachments,
@@ -112,14 +259,16 @@ extension ClaudeSession {
                         expert: activeExpert,
                         conversationKey: conversationKey,
                         mcpToken: nil,
-                        archiveContext: localResult.promptContext
+                        archiveContext: context.isEmpty ? nil : context
                     )
                 }
-                return
-            }
 
-            switch backend {
             case let .claudeCodeCLI(path):
+                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                 self.callClaudeCodeCLI(
                     executablePath: path,
                     message: message,
@@ -127,11 +276,16 @@ extension ClaudeSession {
                     environment: environment,
                     expert: activeExpert,
                     conversationKey: conversationKey,
-                    archiveContext: nil,
-                    officialMCPToken: self.officialMCPToken(from: environment)
+                    archiveContext: archiveContext,
+                    officialMCPToken: nil,
+                    useOfficialMCP: false
                 )
-
             case let .codexCLI(path):
+                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
+                self.onToolUse?("Searching Lenny archive", ["summary": "Fetching from Lenny's public archive"])
+                self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive"), to: conversationKey)
+                self.onToolResult?("Archive ready", false)
+                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
                 self.callCodexCLI(
                     executablePath: path,
                     message: message,
@@ -139,120 +293,103 @@ extension ClaudeSession {
                     environment: environment,
                     expert: activeExpert,
                     conversationKey: conversationKey,
-                    archiveContext: nil,
-                    useBundledMCP: self.officialMCPToken(from: environment) != nil
-                )
-
-            case .openAIResponsesAPI:
-                guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
-                    SessionDebugLogger.log("turn", "official MCP path selected openai fallback but OPENAI_API_KEY missing")
-                    self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
-                    return
-                }
-                guard let token = self.officialMCPToken(from: environment) else {
-                    SessionDebugLogger.log("turn", "official MCP path selected openai fallback but no official token available")
-                    self.failTurn("Official MCP mode is enabled, but no official Lenny token is configured for direct API usage. Add your own bearer token in Settings or switch back to the starter pack.", conversationKey: conversationKey)
-                    return
-                }
-                self.callOpenAI(
-                    message: message,
-                    attachments: attachments,
-                    apiKey: key,
-                    expert: activeExpert,
-                    conversationKey: conversationKey,
-                    mcpToken: token,
-                    archiveContext: nil
+                    archiveContext: archiveContext,
+                    useOfficialMCP: false
                 )
             }
         }
     }
 
     func terminate() {
+        currentProcess?.terminate()
+        currentProcess = nil
+        currentDataTask?.cancel()
+        currentDataTask = nil
+        currentStreamingTask?.cancel()
+        currentStreamingTask = nil
         isRunning = false
         isBusy = false
+        livePresenceExperts.removeAll()
+        liveToolCallsByID.removeAll()
         onProcessExit?()
     }
 
-    func searchStarterArchive(message: String, expert: ResponderExpert?) -> (promptContext: String, experts: [ResponderExpert], summary: String, resultSummary: String) {
-        let query = [expert?.name, message]
-            .compactMap { $0 }
-            .joined(separator: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        SessionDebugLogger.log("starter-pack", "search query=\(query)")
-        let matches = LocalArchive.shared.search(query: query, limit: 4)
-
-        if matches.isEmpty {
-            let promptContext = """
-            The bundled starter archive did not contain a strong match for this query.
-            Be transparent that the starter pack only includes 10 newsletters and 50 podcast transcripts.
-            Suggest switching Settings to Official Lenny MCP for the full archive if needed.
-            """
-            return (
-                promptContext,
-                [],
-                "Searching the bundled starter pack",
-                "No strong matches found in the bundled starter pack"
-            )
-        }
-
-        let contextLines = matches.enumerated().map { index, match in
-            let subtitle = match.entry.subtitle ?? match.entry.description ?? ""
-            let subtitleSuffix = subtitle.isEmpty ? "" : "\nSubtitle: \(subtitle)"
-            return """
-            \(index + 1). [\(match.entry.typeLabel.capitalized)] \(match.entry.title) (\(match.entry.date))
-            File: \(match.entry.filename)\(subtitleSuffix)
-            Excerpt: \(match.excerpt)
-            """
-        }
-        let promptContext = contextLines.joined(separator: "\n\n")
-
-        let experts = matches.compactMap { match -> ResponderExpert? in
-            let name = match.entry.guest ?? speakerName(fromTitle: match.entry.title)
-            guard let name, let avatarPath = avatarPath(for: name) else { return nil }
-            return ResponderExpert(
-                name: name,
-                avatarPath: avatarPath,
-                archiveContext: "- \(match.entry.title) (\(match.entry.date)): \(match.excerpt)",
-                responseScript: responseScript(for: name, context: "- \(match.entry.title) (\(match.entry.date)): \(match.excerpt)")
-            )
-        }
-
-        let uniqueExperts = experts.reduce(into: [ResponderExpert]()) { partial, expert in
-            if !partial.contains(where: { $0.name == expert.name }) {
-                partial.append(expert)
+    func cancelActiveTurn() {
+        isCancellingTurn = true
+        if let process = currentProcess {
+            let processID = process.processIdentifier
+            if process.isRunning {
+                // SIGKILL the process and its entire process group immediately.
+                // claude (Node.js) and codex ignore SIGINT/SIGTERM, and codex
+                // runs wrapped in /usr/bin/script so we must kill the group.
+                kill(processID, SIGKILL)
+                kill(-processID, SIGKILL)
             }
         }
-
-        return (
-            promptContext,
-            Array(uniqueExperts.prefix(3)),
-            "Searching the bundled starter pack",
-            "Loaded \(matches.count) starter-pack match\(matches.count == 1 ? "" : "es")"
-        )
+        currentProcess = nil
+        currentDataTask?.cancel()
+        currentDataTask = nil
+        currentStreamingTask?.cancel()
+        currentStreamingTask = nil
+        isBusy = false
+        pendingExperts.removeAll()
+        assistantExplicitlyRequestedExperts = false
+        livePresenceExperts.removeAll()
+        liveToolCallsByID.removeAll()
     }
 
-    func publishPendingExperts(fallbackText: String? = nil) {
-        let experts = pendingExperts
-        pendingExperts.removeAll()
-        let assistantRequestedExperts = assistantExplicitlyRequestedExperts
-        assistantExplicitlyRequestedExperts = false
+    private func dispatchResolvedBackend(
+        _ backend: Backend,
+        message: String,
+        attachments: [SessionAttachment],
+        environment: [String: String],
+        expert: ResponderExpert?,
+        conversationKey: String,
+        archiveContext: String?,
+        officialMCPToken: String?,
+        useOfficialMCP: Bool
+    ) {
+        switch backend {
+        case let .claudeCodeCLI(path):
+            self.callClaudeCodeCLI(
+                executablePath: path,
+                message: message,
+                attachments: attachments,
+                environment: environment,
+                expert: expert,
+                conversationKey: conversationKey,
+                archiveContext: archiveContext,
+                officialMCPToken: officialMCPToken,
+                useOfficialMCP: useOfficialMCP
+            )
 
-        guard assistantRequestedExperts else {
-            if let fallbackText, fallbackText.contains("\"answer_markdown\"") {
-                SessionDebugLogger.log("experts", "skipping staged experts because assistant output was not parsed cleanly")
-            } else {
-                SessionDebugLogger.log("experts", "skipping staged experts because assistant did not explicitly request them")
+        case let .codexCLI(path):
+            self.callCodexCLI(
+                executablePath: path,
+                message: message,
+                attachments: attachments,
+                environment: environment,
+                expert: expert,
+                conversationKey: conversationKey,
+                archiveContext: archiveContext,
+                useOfficialMCP: useOfficialMCP
+            )
+
+        case .openAIResponsesAPI:
+            guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
+                SessionDebugLogger.log("turn", "selected openai backend but OPENAI_API_KEY missing")
+                self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
+                return
             }
-            return
+            self.callOpenAI(
+                message: message,
+                attachments: attachments,
+                apiKey: key,
+                expert: expert,
+                conversationKey: conversationKey,
+                mcpToken: useOfficialMCP ? officialMCPToken : nil,
+                archiveContext: archiveContext
+            )
         }
-
-        guard !experts.isEmpty else {
-            SessionDebugLogger.log("experts", "no staged experts to publish")
-            return
-        }
-
-        let names = experts.map(\.name).joined(separator: ", ")
-        SessionDebugLogger.log("experts", "publishing \(experts.count) expert candidate(s) after response completion: \(names)")
-        onExpertsUpdated?(experts)
     }
 }

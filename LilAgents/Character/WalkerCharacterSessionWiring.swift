@@ -2,16 +2,72 @@ import AppKit
 
 extension WalkerCharacter {
     func wireSession(_ session: ClaudeSession) {
+        terminalView?.onApprovalResponse = { [weak session] choice in
+            session?.submitApprovalChoice(choice)
+        }
+
+        session.onSessionReady = { [weak self] in
+            guard let self, let terminalView = self.terminalView else { return }
+            let wasRequiringSetup = terminalView.requiresInitialConnectionSetup
+            terminalView.requiresInitialConnectionSetup = false
+            terminalView.endStreaming()
+            if terminalView.isShowingInitialWelcomeState, self.focusedExpert == nil, wasRequiringSetup {
+                terminalView.showWelcomeGreeting(forceRefresh: true)
+            }
+        }
+
+        session.onSetupRequired = { [weak self] _ in
+            self?.stopLiveStatusFallback()
+            self?.setCurrentActivityStatus("")
+            self?.claudeSession?.isBusy = false
+            self?.claudeSession?.pendingExperts.removeAll()
+            self?.claudeSession?.assistantExplicitlyRequestedExperts = false
+            if let terminalView = self?.terminalView {
+                terminalView.endStreaming()
+                terminalView.clearLiveStatus()
+                terminalView.requiresInitialConnectionSetup = true
+                if self?.focusedExpert == nil {
+                    terminalView.showWelcomeGreeting(forceRefresh: true)
+                }
+            }
+            self?.updateExpertNameTag()
+        }
+
+        session.onTextDelta = { [weak self] delta in
+            guard let self, let tv = self.terminalView else { return }
+            tv.appendStreamingText(delta)
+        }
+
         session.onText = { [weak self] text in
             guard let self, let tv = self.terminalView else { return }
-            // Emit the speaker label before the very first chunk of a response
-            if !tv.isStreaming {
-                tv.isStreaming = true
-                tv.currentAssistantText = ""
-                let speakerName = self.focusedExpert?.name ?? tv.theme.titleString
-                tv.beginAssistantTurn(name: speakerName)
+            let trimmedIncoming = text.trimmingCharacters(in: .whitespacesAndNewlines)
+            let trimmedCurrent = tv.currentAssistantText.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if tv.currentAssistantText.isEmpty {
+                tv.appendStreamingText(text)
+                return
             }
-            tv.appendStreamingText(text)
+
+            guard trimmedIncoming != trimmedCurrent else { return }
+
+            tv.currentAssistantText = text
+            let formatted = TerminalMarkdownRenderer.render(text, theme: tv.theme)
+            if let lastBubble = tv.transcriptStack.arrangedSubviews.last as? ChatBubbleView {
+                lastBubble.setText(formatted)
+                let isNearBottom: Bool = {
+                    tv.resizeTranscriptToFitContent()
+                    guard let docView = tv.scrollView.documentView else { return true }
+                    let visibleHeight = tv.scrollView.contentSize.height
+                    let maxOffsetY = max(0, docView.bounds.height - visibleHeight)
+                    let currentOffsetY = tv.scrollView.contentView.bounds.origin.y
+                    return maxOffsetY - currentOffsetY <= 72
+                }()
+                if isNearBottom {
+                    tv.scrollLatestBubbleIntoView()
+                }
+            } else {
+                tv.appendStreamingText(text)
+            }
         }
 
         session.onTurnComplete = { [weak self] in
@@ -19,7 +75,7 @@ extension WalkerCharacter {
             let stagedExperts = self.terminalView?.deferredExpertSuggestions ?? []
             SessionDebugLogger.log("ui", "onTurnComplete fired. focusedExpert=\(self.focusedExpert?.name ?? "none") stagedExperts=\(stagedExperts.map(\.name).joined(separator: ", "))")
             self.stopLiveStatusFallback()
-            self.currentActivityStatus = ""
+            self.setCurrentActivityStatus("")
             self.terminalView?.endStreaming()
             self.terminalView?.clearLiveStatus()
             self.playCompletionSound()
@@ -27,26 +83,30 @@ extension WalkerCharacter {
             self.updateExpertNameTag()
             if self.focusedExpert != nil {
                 self.terminalView?.hideExpertSuggestions(clearState: false)
-            } else {
-                if !stagedExperts.isEmpty {
+            } else if !stagedExperts.isEmpty,
+                      let session = self.claudeSession {
+                let alreadyRenderedExperts = session.history(for: nil).contains { $0.role == .assistant && $0.followUpExpert != nil }
+                if !alreadyRenderedExperts {
                     let names = stagedExperts.map(\.name).joined(separator: ", ")
-                    self.claudeSession?.appendExpertSuggestionEntry(stagedExperts, for: nil)
+                    session.appendExpertSuggestionEntry(stagedExperts, for: nil)
                     SessionDebugLogger.log("ui", "appended expert suggestion prompt to transcript: \(names)")
                 }
-                if let session = self.claudeSession {
-                    self.terminalView?.replayConversation(
-                        session.history(for: nil),
-                        expertSuggestions: session.expertSuggestionEntries(for: nil)
-                    )
-                }
+            }
+            if let session = self.claudeSession {
+                self.terminalView?.replayConversation(
+                    session.history(for: self.focusedExpert),
+                    expertSuggestions: session.expertSuggestionEntries(for: self.focusedExpert)
+                )
+                session.livePresenceExperts = []
             }
             self.terminalView?.deferredExpertSuggestions = []
         }
 
         session.onError = { [weak self] text in
             self?.stopLiveStatusFallback()
-            self?.currentActivityStatus = ""
-            self?.terminalView?.setLiveStatus(text, isBusy: false, isError: true)
+            self?.setCurrentActivityStatus("")
+            self?.terminalView?.endStreaming()
+            self?.terminalView?.clearLiveStatus()
             self?.terminalView?.appendError(text)
             self?.updateExpertNameTag()
         }
@@ -54,10 +114,12 @@ extension WalkerCharacter {
         session.onToolUse = { [weak self] toolName, input in
             guard let self else { return }
             let summary = self.formatToolInput(input)
+            let explicitExperts = input["experts"] as? [ResponderExpert] ?? []
+            let experts = self.mergedLiveExperts(explicitExperts, from: summary)
             let liveStatus = self.formatLiveStatus(toolName: toolName, summary: summary)
             self.noteLiveStatusEvent()
-            self.currentActivityStatus = liveStatus
-            self.terminalView?.setLiveStatus(liveStatus, isBusy: true, isError: false)
+            self.setCurrentActivityStatus(liveStatus)
+            self.terminalView?.setLiveStatus(liveStatus, isBusy: true, isError: false, experts: experts)
             self.updateExpertNameTag()
 
             if toolName.lowercased().contains("planning") {
@@ -68,18 +130,26 @@ extension WalkerCharacter {
         session.onToolResult = { [weak self] summary, isError in
             if let self {
                 self.noteLiveStatusEvent()
-                self.currentActivityStatus = summary
+                let liveSummary = self.formatLiveResultStatus(summary, isError: isError)
+                if !liveSummary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    self.setCurrentActivityStatus(liveSummary)
+                } else {
+                    SessionDebugLogger.log("avatar-status", "ignored empty tool result summary while busy")
+                }
                 if isError {
                     self.stopLiveStatusFallback()
                 }
+                let experts = self.mergedLiveExperts([], from: summary)
+                self.terminalView?.appendToolResult(summary: summary, displaySummary: liveSummary, isError: isError, experts: experts)
+                self.updateExpertNameTag()
+                return
             }
-            self?.terminalView?.appendToolResult(summary: summary, isError: isError)
-            self?.updateExpertNameTag()
         }
 
         session.onProcessExit = { [weak self] in
             self?.stopLiveStatusFallback()
             self?.terminalView?.endStreaming()
+            self?.terminalView?.clearLiveStatus()
             self?.terminalView?.appendError("Archive session ended.")
         }
 
@@ -89,85 +159,74 @@ extension WalkerCharacter {
             let names = experts.map(\.name).joined(separator: ", ")
             SessionDebugLogger.log("ui", "onExpertsUpdated received \(experts.count) expert(s): \(names)")
         }
+
+        session.onApprovalRequested = { [weak self] request in
+            guard let self else { return }
+            self.noteLiveStatusEvent()
+            self.setCurrentActivityStatus("Waiting for approval")
+            self.terminalView?.setLiveStatus("Waiting for approval", isBusy: true, isError: false, experts: self.claudeSession?.livePresenceExperts ?? [])
+            self.terminalView?.setApprovalRequest(request)
+            self.updateExpertNameTag()
+        }
+
+        session.onApprovalCleared = { [weak self] in
+            self?.terminalView?.clearApprovalRequest()
+        }
+
+        session.onMCPAuthFailure = { [weak self] in
+            // failTurn was already called before this fires.
+            // Mark reconnect needed (persists across restarts) then show the panel.
+            AppSettings.mcpReconnectNeeded = true
+            self?.terminalView?.showOfficialMCPSetupPanel()
+        }
     }
 
-    func formatToolInput(_ input: [String: Any]) -> String {
-        if let summary = input["summary"] as? String { return summary }
-        if let cmd = input["command"] as? String { return cmd }
-        if let path = input["file_path"] as? String { return path }
-        if let pattern = input["pattern"] as? String { return pattern }
-        if let query = input["query"] as? String { return query }
-        return input.keys.sorted().prefix(3).joined(separator: ", ")
-    }
+    func setCurrentActivityStatus(_ status: String) {
+        currentActivityStatus = status
 
-    func formatLiveStatus(toolName: String, summary: String) -> String {
-        let lowered = toolName.lowercased()
-        let trimmedSummary = summary
-            .replacingOccurrences(of: "\n", with: " ")
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-
-        func combine(prefix: String, summary: String) -> String {
-            guard !summary.isEmpty else { return prefix }
-            if summary.hasPrefix(prefix) || summary.contains(":") {
-                return summary
-            }
-            return "\(prefix): \(summary)"
+        let compact = compactLiveStatus(status)
+        if compact.isEmpty {
+            SessionDebugLogger.trace("avatar-status", "cleared")
+        } else {
+            SessionDebugLogger.trace("avatar-status", "showing \(compact)")
         }
-
-        if lowered.contains("planning") {
-            return trimmedSummary.isEmpty ? "On it…" : trimmedSummary
-        }
-        if lowered.contains("calling model") {
-            return combine(prefix: "Calling Model", summary: trimmedSummary)
-        }
-        if lowered.contains("calling mcp tool") {
-            return combine(prefix: "Calling MCP Tool", summary: trimmedSummary)
-        }
-        if lowered.contains("search") || lowered.contains("reading") || lowered.contains("browse") {
-            return combine(prefix: toolName, summary: trimmedSummary)
-        }
-        if lowered.contains("writing") || lowered.contains("generating") {
-            return trimmedSummary.isEmpty ? "Writing answer" : trimmedSummary
-        }
-        if lowered.contains("running") || lowered.contains("progress") || lowered.contains("thinking") {
-            return trimmedSummary.isEmpty ? toolName : trimmedSummary
-        }
-        return combine(prefix: toolName, summary: trimmedSummary)
-    }
-
-    func compactLiveStatus(_ status: String) -> String {
-        let trimmed = status.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return trimmed }
-
-        if trimmed.hasPrefix("Calling MCP Tool:") {
-            let toolPortion = trimmed.replacingOccurrences(of: "Calling MCP Tool: ", with: "")
-            let toolName = toolPortion.components(separatedBy: ":").first?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "MCP"
-            return "MCP: \(toolName)"
-        }
-
-        if trimmed.hasPrefix("Calling Model:") {
-            let modelPortion = trimmed.replacingOccurrences(of: "Calling Model: ", with: "")
-            return String(modelPortion.prefix(32))
-        }
-
-        if trimmed.hasPrefix("Calling "), let range = trimmed.range(of: " in ") {
-            return String(trimmed[..<range.lowerBound])
-        }
-
-        if trimmed.lowercased().hasPrefix("writing") {
-            return "Writing"
-        }
-
-        if trimmed.lowercased().hasPrefix("loaded ") {
-            return "Loaded"
-        }
-
-        return String(trimmed.prefix(32))
     }
 
     func noteLiveStatusEvent() {
         lastLiveStatusEventAt = Date()
+    }
+
+    func extractLiveExperts(from text: String) -> [ResponderExpert] {
+        guard let session = claudeSession else { return [] }
+        let fromText = detectedLiveExperts(from: text)
+        if !fromText.isEmpty { return fromText }
+        return session.livePresenceExperts
+    }
+
+    func detectedLiveExperts(from text: String) -> [ResponderExpert] {
+        guard let session = claudeSession else { return [] }
+        return session.expertsFromAssistantText(text)
+    }
+
+    func mergedLiveExperts(_ explicitExperts: [ResponderExpert], from text: String) -> [ResponderExpert] {
+        if let focusedExpert {
+            claudeSession?.livePresenceExperts = [focusedExpert]
+            return [focusedExpert]
+        }
+
+        let fromText = detectedLiveExperts(from: text)
+        let existing = claudeSession?.livePresenceExperts ?? []
+
+        var merged: [ResponderExpert] = []
+        for expert in existing + explicitExperts + fromText where !merged.contains(where: { $0.name == expert.name }) {
+            merged.append(expert)
+        }
+
+        if !merged.isEmpty {
+            claudeSession?.livePresenceExperts = merged
+        }
+
+        return merged
     }
 
     func startLiveStatusFallback() {
@@ -209,7 +268,7 @@ extension WalkerCharacter {
         ])
         let normalizedCurrent = currentActivityStatus.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
         if !normalizedCurrent.isEmpty, !genericStatuses.contains(normalizedCurrent) {
-            terminalView?.setLiveStatus(currentActivityStatus, isBusy: true, isError: false)
+            terminalView?.setLiveStatus(currentActivityStatus, isBusy: true, isError: false, experts: claudeSession?.livePresenceExperts ?? [])
             updateExpertNameTag()
             lastLiveStatusEventAt = Date()
             return
@@ -224,8 +283,8 @@ extension WalkerCharacter {
 
         let index = min(liveStatusFallbackIndex, fallbackStatuses.count - 1)
         let nextStatus = fallbackStatuses[index]
-        currentActivityStatus = nextStatus
-        terminalView?.setLiveStatus(nextStatus, isBusy: true, isError: false)
+        setCurrentActivityStatus(nextStatus)
+        terminalView?.setLiveStatus(nextStatus, isBusy: true, isError: false, experts: claudeSession?.livePresenceExperts ?? [])
         updateExpertNameTag()
 
         if liveStatusFallbackIndex < fallbackStatuses.count - 1 {

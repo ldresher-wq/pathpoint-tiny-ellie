@@ -1,6 +1,11 @@
 import AppKit
 
 class TerminalView: NSView {
+    enum TranscriptReplayRestoreStrategy {
+        case preserveVisiblePosition
+        case focusUnreadBoundary(lastReadHistoryCount: Int)
+    }
+
     let scrollView = NSScrollView()
     let transcriptContainer = FlippedView()
     let transcriptStack = NSStackView()
@@ -19,14 +24,19 @@ class TerminalView: NSView {
     let expertSuggestionStack = NSStackView()
     let attachButton = HoverButton(title: "", target: nil, action: nil)
     let sendButton = HoverButton(title: "", target: nil, action: nil)
+    let composerStatusLabel = NSTextField(labelWithString: "Generating...")
     let returnButton = NSButton(title: "Back to Lil-Lenny", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
+    var onStopRequested: (() -> Void)?
     var onReturnToLenny: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?
     var onSelectExpertSuggestion: ((UUID, ResponderExpert) -> Void)?
     var onEditExpertSuggestion: ((UUID) -> Void)?
     var onTogglePinned: (() -> Void)?
     var onCloseRequested: (() -> Void)?
+    var onRefreshSetupState: (() -> Void)?
+    var onApprovalResponse: ((ClaudeSession.ApprovalChoice) -> Void)?
+    var onReachedTranscriptBottom: (() -> Void)?
 
     var characterColor: NSColor?
     var themeOverride: PopoverTheme?
@@ -39,14 +49,34 @@ class TerminalView: NSView {
     var deferredExpertSuggestions: [ResponderExpert] = []
     var currentExpertSuggestions: [ResponderExpert] = []
     var lastPickedExpert: ResponderExpert?
+    var isShowingInitialWelcomeState = false
     var transcriptSuggestionView: NSView?
+    var transcriptLiveStatusView: NSView?
+    var transcriptApprovalView: NSView?
     var renderedConversationKey: String?
     var expertSuggestionsCollapsed = false
     var liveStatusAvatarTimer: Timer?
     var liveStatusAvatarPaths: [String] = []
     var liveStatusAvatarIndex = 0
+    var streamingPresentationInterrupted = false
+    var currentStreamingSpeakerName: String?
     var isPinnedOpen = false
     var isShowingDropTarget = false
+    var isExpertMode = false
+    var isReplayingTranscript = false
+    var starterPackWelcomeBannerDismissed = false
+    /// Session-only flag: set when the user explicitly dismisses the proactive
+    /// MCP setup banner. Resets on the next app open so they get a reminder.
+    var mcpSetupBannerDismissedThisSession = false
+    var currentWelcomeArchiveMode: AppSettings.ArchiveAccessMode?
+    var currentWelcomeSuggestions: [(String, String, String)] = []
+    var lastRenderedWelcomeSignature: String?
+    var lastObservedWelcomePreviewMode = AppSettings.welcomePreviewMode
+    var isShowingOfficialMCPSetupPanel = false
+    var requiresInitialConnectionSetup = false
+    var lastObservedFirstRunConfigurationSignature: String?
+    var settingsObserver: NSObjectProtocol?
+    let officialMCPURL = URL(string: "https://www.lennysdata.com")!
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -60,6 +90,10 @@ class TerminalView: NSView {
 
     deinit {
         liveStatusAvatarTimer?.invalidate()
+        NotificationCenter.default.removeObserver(self, name: NSView.boundsDidChangeNotification, object: scrollView.contentView)
+        if let settingsObserver {
+            NotificationCenter.default.removeObserver(settingsObserver)
+        }
     }
 
     var theme: PopoverTheme {

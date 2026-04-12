@@ -33,7 +33,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        AppSettings.prefetchDetectionState()
         controller = LilAgentsController()
+        NotificationCenter.default.addObserver(self, selector: #selector(handleResetAllData), name: .lilLennyDidResetData, object: nil)
         controller?.onExpertsChanged = { [weak self] experts in
             self?.updateExpertStatusItems(experts)
         }
@@ -48,12 +50,37 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         controller?.characters.forEach { $0.claudeSession?.terminate() }
     }
 
+    @objc private func handleResetAllData() {
+        controller?.returnToGenie()
+        controller?.clearDebugExpertSuggestions()
+
+        controller?.characters.forEach { character in
+            character.claudeSession?.terminate()
+            character.claudeSession = nil
+            character.terminalView?.endStreaming()
+            character.terminalView?.clearLiveStatus()
+            character.terminalView?.hideExpertSuggestions()
+            character.terminalView?.requiresInitialConnectionSetup = false
+            if character.isIdleForPopover {
+                character.terminalView?.showWelcomeGreeting(forceRefresh: true)
+                // Immediately recreate the session so the user can send a message
+                // without hitting nil → perpetual spinner (isStreaming=true, send dropped).
+                let session = ClaudeSession()
+                session.focusedExpert = character.focusedExpert
+                character.claudeSession = session
+                character.wireSession(session)
+                session.start()
+            }
+        }
+    }
+
     // MARK: - Menu Bar
 
     func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem?.button {
             button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "figure.walk", accessibilityDescription: "Lil-Lenny")
+            button.image?.isTemplate = false
             button.toolTip = "Open Lil-Lenny"
         }
 
@@ -254,6 +281,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
                 defer: false
             )
             window.title = "Lil-Lenny Settings"
+            window.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 11)
+            window.collectionBehavior = [.canJoinAllSpaces]
             let hostingController = NSHostingController(rootView: SettingsView())
             window.contentViewController = hostingController
             window.setContentSize(NSSize(width: 600, height: 460))
@@ -263,6 +292,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         }
 
         settingsWindow?.makeKeyAndOrderFront(nil)
+        settingsWindow?.orderFrontRegardless()
     }
 
     @objc func installPendingUpdate() {
@@ -274,104 +304,4 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
     @objc func quitApp() {
         NSApp.terminate(nil)
     }
-
-    private func updateExpertStatusItems(_ experts: [ResponderExpert]) {
-        expertStatusItems.forEach { NSStatusBar.system.removeStatusItem($0) }
-        expertStatusItems.removeAll()
-        visibleExperts = Array(experts.prefix(3))
-
-        for (index, expert) in visibleExperts.enumerated() {
-            let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-            if let button = item.button {
-                button.image = statusImage(for: expert.avatarPath)
-                button.imagePosition = .imageLeading
-                button.title = initials(for: expert.name)
-                button.imageScaling = .scaleProportionallyUpOrDown
-                button.toolTip = "Switch to \(expert.name)"
-                button.tag = index
-                button.target = self
-                button.action = #selector(selectExpert(_:))
-            }
-            expertStatusItems.append(item)
-        }
-    }
-
-    private func statusImage(for path: String) -> NSImage? {
-        let resolvedPath = pngAvatarPath(for: path) ?? path
-        guard let image = NSImage(contentsOfFile: resolvedPath) else { return nil }
-        image.size = NSSize(width: 18, height: 18)
-        image.isTemplate = false
-        return image
-    }
-
-    private func pngAvatarPath(for path: String) -> String? {
-        guard path.lowercased().hasSuffix(".webp"),
-              let image = NSImage(contentsOfFile: path),
-              let tiff = image.tiffRepresentation,
-              let bitmap = NSBitmapImageRep(data: tiff),
-              let pngData = bitmap.representation(using: .png, properties: [:]) else {
-            return nil
-        }
-
-        let cacheDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("lenny-avatar-cache", isDirectory: true)
-        try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
-
-        let fileName = URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent + ".png"
-        let pngURL = cacheDir.appendingPathComponent(fileName)
-
-        if !FileManager.default.fileExists(atPath: pngURL.path) {
-            try? pngData.write(to: pngURL)
-        }
-
-        return pngURL.path
-    }
-
-    private func initials(for name: String) -> String {
-        let parts = name.split(separator: " ").prefix(2)
-        return parts.compactMap { $0.first.map(String.init) }.joined()
-    }
-
-    @objc func selectExpert(_ sender: NSStatusBarButton) {
-        guard sender.tag >= 0, sender.tag < visibleExperts.count else { return }
-        controller?.focus(on: visibleExperts[sender.tag])
-    }
-
-    private func updateFocusedExpert(_ expert: ResponderExpert?) {
-        focusedExpert = expert
-        char1Item?.title = expert?.name ?? "Show Lil-Lenny"
-        backToLennyItem?.isEnabled = expert != nil
-        if let button = statusItem?.button {
-            button.toolTip = expert == nil ? "Open Lil-Lenny" : "Current guide: \(expert!.name)"
-        }
-    }
-
-    private func refreshPendingUpdateMenuItem() {
-        installUpdateItem?.isHidden = !pendingScheduledUpdate
-    }
-
-    var supportsGentleScheduledUpdateReminders: Bool {
-        true
-    }
-
-    func standardUserDriverShouldHandleShowingScheduledUpdate(_ update: SUAppcastItem, andInImmediateFocus immediateFocus: Bool) -> Bool {
-        immediateFocus
-    }
-
-    func standardUserDriverWillHandleShowingUpdate(_ handleShowingUpdate: Bool, forUpdate update: SUAppcastItem, state: SPUUserUpdateState) {
-        guard !handleShowingUpdate, !state.userInitiated else { return }
-        pendingScheduledUpdate = true
-        refreshPendingUpdateMenuItem()
-    }
-
-    func standardUserDriverDidReceiveUserAttention(forUpdate update: SUAppcastItem) {
-        pendingScheduledUpdate = false
-        refreshPendingUpdateMenuItem()
-    }
-
-    func standardUserDriverWillFinishUpdateSession() {
-        pendingScheduledUpdate = false
-        refreshPendingUpdateMenuItem()
-    }
 }
-
-extension AppDelegate: NSMenuDelegate {}

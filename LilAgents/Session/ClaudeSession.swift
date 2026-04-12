@@ -7,7 +7,6 @@ final class ClaudeSession {
         static let lennyMCPURL = "https://mcp.lennysdata.com/mcp"
         static let lennyMCPServerLabel = "lennysdata"
         static let lennyMCPAuthEnvVar = "LENNYSDATA_MCP_AUTH_TOKEN"
-        static let lennyToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzY29wZSI6Im1jcDpyZWFkIGFyY2hpdmU6ZnVsbCIsInRpZXIiOiJlbGlnaWJsZSIsImNsaWVudF9pZCI6Imxlbm55c2RhdGEtcGVyc29uYWwiLCJraW5kIjoicGVyc29uYWwiLCJyZXNvdXJjZSI6Imh0dHBzOi8vbWNwLmxlbm55c2RhdGEuY29tL21jcCIsInZlciI6MywiaXNzIjoiaHR0cHM6Ly93d3cubGVubnlzZGF0YS5jb20vIiwic3ViIjoiaGJzaGloQGdtYWlsLmNvbSIsImF1ZCI6Imh0dHBzOi8vbWNwLmxlbm55c2RhdGEuY29tL21jcCIsImlhdCI6MTc3NDQ3OTQwNSwiZXhwIjoxNzc3MDcxNDA1fQ.GL2l1xbWvq4lPcyr2gyXSoTlR0EWFKLek-fUigzZwac"
         static let lennyAllowedTools = ["search_content", "read_excerpt", "read_content", "list_content"]
         static let avatarsDirectory = "ExpertAvatars"
     }
@@ -18,6 +17,19 @@ final class ClaudeSession {
         case openAIResponsesAPI
     }
 
+    struct ApprovalRequest: Equatable {
+        let serverName: String
+        let toolName: String
+        var details: [String] = []
+    }
+
+    enum ApprovalChoice: String {
+        case allow = "1"
+        case allowForSession = "2"
+        case alwaysAllow = "3"
+        case cancel = "4"
+    }
+
     var isRunning = false
     var isBusy = false
     var conversations: [String: ConversationState] = [:]
@@ -25,19 +37,35 @@ final class ClaudeSession {
     var selectedBackend: Backend?
     var selectedBackendPreferenceKey: String?
     var pendingExperts: [ResponderExpert] = []
+    var livePresenceExperts: [ResponderExpert] = []
+    var liveToolCallsByID: [String: (name: String, arguments: [String: Any])] = [:]
     var assistantExplicitlyRequestedExperts = false
+    var currentProcess: Process?
+    var currentProcessStdin: FileHandle?
+    var currentDataTask: URLSessionDataTask?
+    var currentStreamingTask: Task<Void, Never>?
+    var isCancellingTurn = false
+    var pendingApprovalRequest: ApprovalRequest?
 
+    var onTextDelta: ((String) -> Void)?
     var onText: ((String) -> Void)?
     var onError: ((String) -> Void)?
     var onToolUse: ((String, [String: Any]) -> Void)?
     var onToolResult: ((String, Bool) -> Void)?
     var onSessionReady: (() -> Void)?
+    var onSetupRequired: ((String) -> Void)?
     var onTurnComplete: (() -> Void)?
     var onProcessExit: (() -> Void)?
     var onExpertsUpdated: (([ResponderExpert]) -> Void)?
+    var onApprovalRequested: ((ApprovalRequest) -> Void)?
+    var onApprovalCleared: (() -> Void)?
+    var onMCPAuthFailure: (() -> Void)?
 
     static var shellEnvironment: [String: String]?
+    static var shellEnvironmentResolvedAt: Date?
     static var openAIKey: String?
+    private(set) var cachedOfficialArchiveToken: String?
+    private(set) var cachedOfficialArchiveClient: LennyArchiveClient?
 
     func selectedClaudeModel() -> String? {
         let model = AppSettings.preferredClaudeModel
@@ -63,5 +91,21 @@ final class ClaudeSession {
 
     func selectedOpenAIModelLabel() -> String {
         AppSettings.preferredOpenAIModel.label
+    }
+
+    func officialArchiveClient(token: String) throws -> LennyArchiveClient {
+        if cachedOfficialArchiveToken == token, let cachedOfficialArchiveClient {
+            return cachedOfficialArchiveClient
+        }
+
+        let client = try LennyArchiveClient(token: token)
+        cachedOfficialArchiveToken = token
+        cachedOfficialArchiveClient = client
+        return client
+    }
+
+    func resetOfficialArchiveClient() {
+        cachedOfficialArchiveToken = nil
+        cachedOfficialArchiveClient = nil
     }
 }

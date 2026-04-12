@@ -1,6 +1,8 @@
 import Foundation
 
 extension ClaudeSession {
+    private var shellEnvironmentCacheLifetime: TimeInterval { 5 }
+
     func resolveOpenAIKey(completion: @escaping (String?) -> Void) {
         resolveShellEnvironment { environment in
             completion(environment["OPENAI_API_KEY"])
@@ -8,7 +10,9 @@ extension ClaudeSession {
     }
 
     func resolveShellEnvironment(completion: @escaping ([String: String]) -> Void) {
-        if let cached = Self.shellEnvironment {
+        if let cached = Self.shellEnvironment,
+           let resolvedAt = Self.shellEnvironmentResolvedAt,
+           Date().timeIntervalSince(resolvedAt) < shellEnvironmentCacheLifetime {
             Self.openAIKey = cached["OPENAI_API_KEY"]
             SessionDebugLogger.log("env", "using cached shell environment: \(SessionDebugLogger.summarizeEnvironment(cached))")
             completion(cached)
@@ -37,7 +41,21 @@ extension ClaudeSession {
                     }
                 }
 
+                // Settings key always takes priority over the shell environment.
+                if let storedKey = AppSettings.openAIAPIKey, !storedKey.isEmpty {
+                    environment["OPENAI_API_KEY"] = storedKey
+                    SessionDebugLogger.log("env", "using locally stored OPENAI_API_KEY from Settings (overrides shell env)")
+                }
+
+                if (environment[Constants.lennyMCPAuthEnvVar] ?? "").isEmpty,
+                   let storedToken = AppSettings.officialLennyMCPToken,
+                   !storedToken.isEmpty {
+                    environment[Constants.lennyMCPAuthEnvVar] = storedToken
+                    SessionDebugLogger.log("env", "using locally stored \(Constants.lennyMCPAuthEnvVar) from Settings")
+                }
+
                 Self.shellEnvironment = environment
+                Self.shellEnvironmentResolvedAt = Date()
                 Self.openAIKey = environment["OPENAI_API_KEY"]
                 SessionDebugLogger.log("env", "resolved shell environment: \(SessionDebugLogger.summarizeEnvironment(environment))")
                 completion(environment)
@@ -58,9 +76,12 @@ extension ClaudeSession {
                 return
             }
 
-            let preferredTransport = AppSettings.preferredTransport
+            let preferredTransport = AppSettings.hasExplicitPreferredTransportChoice
+                ? AppSettings.preferredTransport
+                : AppSettings.PreferredTransport.automatic
+            let archiveMode = self.effectiveArchiveAccessMode(environment: environment)
             let preferenceKey = self.backendPreferenceKey(environment: environment)
-            SessionDebugLogger.log("backend", "resolving preferred backend. archiveMode=\(AppSettings.effectiveArchiveAccessMode.rawValue) preferredTransport=\(preferredTransport.rawValue)")
+            SessionDebugLogger.log("backend", "resolving preferred backend. archiveMode=\(archiveMode.rawValue) preferredTransport=\(preferredTransport.rawValue)")
 
             if let selectedBackend = self.selectedBackend,
                self.selectedBackendPreferenceKey == preferenceKey {
@@ -80,30 +101,82 @@ extension ClaudeSession {
                 return
             }
 
+            // ── Priority 1: Claude Code with native Lenny MCP in .claude.json ──────────
             self.resolveClaudeCodeBackend(environment: environment) { claudeBackend in
-                if let claudeBackend {
-                    SessionDebugLogger.log("backend", "selected Claude backend")
+                if let claudeBackend, self.backendHasNativeMCPConfiguration(claudeBackend) {
+                    SessionDebugLogger.log("backend", "selected Claude backend — native MCP config detected")
                     self.selectedBackend = claudeBackend
                     self.selectedBackendPreferenceKey = preferenceKey
                     completion(claudeBackend, environment, nil)
                     return
                 }
 
+                // ── Priority 2: Codex with native Lenny MCP in .codex/config.toml ─────────
                 self.resolveCodexBackend(environment: environment) { codexBackend in
-                    if let codexBackend {
-                        SessionDebugLogger.log("backend", "selected Codex backend")
+                    if let codexBackend, self.backendHasNativeMCPConfiguration(codexBackend) {
+                        SessionDebugLogger.log("backend", "selected Codex backend — native MCP config detected")
                         self.selectedBackend = codexBackend
                         self.selectedBackendPreferenceKey = preferenceKey
                         completion(codexBackend, environment, nil)
                         return
                     }
 
+                    // ── Priority 3+: token-based or starter-pack (original ordering) ────────
+                    if let claudeBackend {
+                        if archiveMode == .officialMCP {
+                            if self.backendSupportsOfficialMCP(claudeBackend, environment: environment) {
+                                SessionDebugLogger.log("backend", "selected Claude backend with token-based MCP support")
+                                self.selectedBackend = claudeBackend
+                                self.selectedBackendPreferenceKey = preferenceKey
+                                completion(claudeBackend, environment, nil)
+                                return
+                            }
+                            SessionDebugLogger.log("backend", "Claude backend available but lacks official MCP support")
+                        } else {
+                            SessionDebugLogger.log("backend", "selected Claude backend (starter pack)")
+                            self.selectedBackend = claudeBackend
+                            self.selectedBackendPreferenceKey = preferenceKey
+                            completion(claudeBackend, environment, nil)
+                            return
+                        }
+                    }
+
+                    if let codexBackend {
+                        if archiveMode == .officialMCP {
+                            if self.backendSupportsOfficialMCP(codexBackend, environment: environment) {
+                                SessionDebugLogger.log("backend", "selected Codex backend with token-based MCP support")
+                                self.selectedBackend = codexBackend
+                                self.selectedBackendPreferenceKey = preferenceKey
+                                completion(codexBackend, environment, nil)
+                                return
+                            }
+                            SessionDebugLogger.log("backend", "Codex backend available but lacks official MCP support")
+                        } else {
+                            SessionDebugLogger.log("backend", "selected Codex backend (starter pack)")
+                            self.selectedBackend = codexBackend
+                            self.selectedBackendPreferenceKey = preferenceKey
+                            completion(codexBackend, environment, nil)
+                            return
+                        }
+                    }
+
                     if let key = environment["OPENAI_API_KEY"], !key.isEmpty {
-                        SessionDebugLogger.log("backend", "selected direct OpenAI Responses API backend")
-                        self.selectedBackend = .openAIResponsesAPI
-                        self.selectedBackendPreferenceKey = preferenceKey
-                        completion(.openAIResponsesAPI, environment, nil)
-                        return
+                        if archiveMode == .officialMCP {
+                            if self.backendSupportsOfficialMCP(.openAIResponsesAPI, environment: environment) {
+                                SessionDebugLogger.log("backend", "selected direct OpenAI Responses API backend with official MCP support")
+                                self.selectedBackend = .openAIResponsesAPI
+                                self.selectedBackendPreferenceKey = preferenceKey
+                                completion(.openAIResponsesAPI, environment, nil)
+                                return
+                            }
+                            SessionDebugLogger.log("backend", "OpenAI API available but lacks official MCP token")
+                        } else {
+                            SessionDebugLogger.log("backend", "selected direct OpenAI Responses API backend")
+                            self.selectedBackend = .openAIResponsesAPI
+                            self.selectedBackendPreferenceKey = preferenceKey
+                            completion(.openAIResponsesAPI, environment, nil)
+                            return
+                        }
                     }
 
                     SessionDebugLogger.log("backend", "no backend available")
@@ -114,9 +187,12 @@ extension ClaudeSession {
     }
 
     func backendPreferenceKey(environment: [String: String]) -> String {
-        [
-            AppSettings.effectiveArchiveAccessMode.rawValue,
-            AppSettings.preferredTransport.rawValue,
+        let preferredTransport = AppSettings.hasExplicitPreferredTransportChoice
+            ? AppSettings.preferredTransport
+            : AppSettings.PreferredTransport.automatic
+        return [
+            effectiveArchiveAccessMode(environment: environment).rawValue,
+            preferredTransport.rawValue,
             AppSettings.preferredClaudeModel.rawValue,
             AppSettings.preferredCodexModel.rawValue,
             AppSettings.preferredOpenAIModel.rawValue,
@@ -128,12 +204,18 @@ extension ClaudeSession {
     }
 
     func resolveForcedBackend(_ preferredTransport: AppSettings.PreferredTransport, environment: [String: String], completion: @escaping (Backend?, [String: String], String?) -> Void) {
+        let archiveMode = effectiveArchiveAccessMode(environment: environment)
+
         switch preferredTransport {
         case .automatic:
             completion(nil, environment, nil)
         case .claudeCode:
             resolveClaudeCodeBackend(environment: environment) { backend in
                 if let backend {
+                    if archiveMode == .officialMCP, !self.backendSupportsOfficialMCP(backend, environment: environment) {
+                        completion(nil, environment, "Claude Code is selected in Settings, but the official Lenny MCP is not configured there. Configure it in Claude Code, save a bearer token in Settings, or switch to Starter Pack.")
+                        return
+                    }
                     SessionDebugLogger.log("backend", "selected forced Claude backend")
                     completion(backend, environment, nil)
                 } else {
@@ -143,6 +225,10 @@ extension ClaudeSession {
         case .codex:
             resolveCodexBackend(environment: environment) { backend in
                 if let backend {
+                    if archiveMode == .officialMCP, !self.backendSupportsOfficialMCP(backend, environment: environment) {
+                        completion(nil, environment, "Codex is selected in Settings, but the official Lenny MCP is not configured there. Configure it in Codex, save a bearer token in Settings, or switch to Starter Pack.")
+                        return
+                    }
                     SessionDebugLogger.log("backend", "selected forced Codex backend")
                     completion(backend, environment, nil)
                 } else {
@@ -151,6 +237,10 @@ extension ClaudeSession {
             }
         case .openAIAPI:
             if let key = environment["OPENAI_API_KEY"], !key.isEmpty {
+                if archiveMode == .officialMCP, !self.backendSupportsOfficialMCP(.openAIResponsesAPI, environment: environment) {
+                    completion(nil, environment, "Direct OpenAI API is selected in Settings, but official archive mode requires a bearer token. Save one in Settings or switch to Starter Pack.")
+                    return
+                }
                 SessionDebugLogger.log("backend", "selected forced direct OpenAI Responses API backend")
                 completion(.openAIResponsesAPI, environment, nil)
             } else {
@@ -202,9 +292,8 @@ extension ClaudeSession {
             arguments: ["login", "status"],
             environment: environment,
             workingDirectory: nil
-        ) { status, stdout, _ in
-            let normalized = stdout.lowercased()
-            let isLoggedIn = status == 0 && (normalized.contains("logged in") || normalized.contains("chatgpt"))
+        ) { status, stdout, stderr in
+            let isLoggedIn = self.isCodexAuthenticated(exitCode: status, stdout: stdout, stderr: stderr)
             SessionDebugLogger.log("backend", "codex login status exitCode=\(status) authenticated=\(isLoggedIn)")
             completion(isLoggedIn ? .codexCLI(path: executable) : nil)
         }
@@ -230,6 +319,20 @@ extension ClaudeSession {
         return exitCode == 0
     }
 
+    func isCodexAuthenticated(exitCode: Int32, stdout: String, stderr: String) -> Bool {
+        guard exitCode == 0 else { return false }
+
+        let normalized = "\(stdout)\n\(stderr)".lowercased()
+        if normalized.contains("not logged in") || normalized.contains("login required") {
+            return false
+        }
+        if normalized.contains("logged in") || normalized.contains("chatgpt") {
+            return true
+        }
+
+        return normalized.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
     func officialMCPToken(from environment: [String: String]) -> String? {
         if let override = AppSettings.officialLennyMCPToken {
             SessionDebugLogger.log("mcp", "using official MCP token from Settings")
@@ -244,8 +347,54 @@ extension ClaudeSession {
         return nil
     }
 
-    func backendStatusMessage(for backend: Backend) -> String {
-        let archiveLabel = AppSettings.effectiveArchiveAccessMode == .starterPack
+    func effectiveArchiveAccessMode(environment: [String: String]) -> AppSettings.ArchiveAccessMode {
+        // An explicit user choice to stay on Starter Pack always wins.
+        if AppSettings.hasExplicitStarterPackChoice {
+            return .starterPack
+        }
+        // Native CLI MCP config activates official mode automatically.
+        let sources = AppSettings.detectedOfficialMCPSources
+        if sources.contains(.claudeGlobalConfig) || sources.contains(.codexGlobalConfig) {
+            return .officialMCP
+        }
+
+        return hasAnyOfficialMCPConfiguration(environment: environment) ? .officialMCP : .starterPack
+    }
+
+    func hasAnyOfficialMCPConfiguration(environment: [String: String]) -> Bool {
+        officialMCPToken(from: environment) != nil || AppSettings.hasDetectedOfficialMCPConfiguration
+    }
+
+    /// True when the backend can invoke the Lenny MCP server using its own locally
+    /// stored credentials (no separate bearer token required from the app).
+    func backendHasNativeMCPConfiguration(_ backend: Backend) -> Bool {
+        switch backend {
+        case .claudeCodeCLI:
+            return AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
+        case .codexCLI:
+            return AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
+        case .openAIResponsesAPI:
+            return false
+        }
+    }
+
+    func backendSupportsOfficialMCP(_ backend: Backend, environment: [String: String]) -> Bool {
+        if officialMCPToken(from: environment) != nil {
+            return true
+        }
+        switch backend {
+        case .claudeCodeCLI:
+            return AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
+        case .codexCLI:
+            return AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
+        case .openAIResponsesAPI:
+            return false
+        }
+    }
+
+    func backendStatusMessage(for backend: Backend, environment: [String: String]? = nil) -> String {
+        let archiveMode = environment.map { effectiveArchiveAccessMode(environment: $0) } ?? AppSettings.effectiveArchiveAccessMode
+        let archiveLabel = archiveMode == .starterPack
             ? "bundled starter archive"
             : "official Lenny MCP"
         switch backend {
@@ -266,17 +415,14 @@ extension ClaudeSession {
         let hasCustomMCPKey = !(environment[Constants.lennyMCPAuthEnvVar] ?? "").isEmpty
 
         var lines = [
-            "No default AI transport is configured yet.",
+            "Lenny is not connected yet.",
             "",
-            "Current transport preference: `\(AppSettings.preferredTransport.rawValue)`",
+            "Open Settings to connect one of these:",
+            "1. Claude Code",
+            "2. Codex / ChatGPT",
+            "3. OpenAI API",
             "",
-            "Supported transports:",
-            "1. Claude Code CLI with `ANTHROPIC_API_KEY` or Claude login",
-            "2. Codex CLI with ChatGPT login or `OPENAI_API_KEY`",
-            "3. Direct OpenAI API with `OPENAI_API_KEY`",
-            "",
-            "Free mode uses the bundled starter archive locally.",
-            "Official MCP mode requires your own Lenny setup in Settings or your own token via `\(Constants.lennyMCPAuthEnvVar)`."
+            "Free mode works with the bundled Starter Pack after you connect a provider."
         ]
 
         if hasAnthropicKey || hasOpenAIKey || hasCustomMCPKey {

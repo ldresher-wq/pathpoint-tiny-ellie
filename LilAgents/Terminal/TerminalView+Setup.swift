@@ -5,10 +5,11 @@ extension TerminalView {
         let t = theme
         wantsLayer = true
         layer?.backgroundColor = NSColor.clear.cgColor
+        isExpertMode = false
 
         // Corner radius design system:
-        //   Window: 18  ·  Composer shell: full pill  ·  Attachment strip: full pill  ·  Buttons: circle
-        let composerRadius = Layout.composerHeight / 2
+        //   Window: 18  ·  Composer shell: 18  ·  Attachment strip: full pill  ·  Buttons: circle
+        let composerRadius: CGFloat = 18
         let attachmentRadius = Layout.attachmentStripHeight / 2
         scrollView.frame = NSRect(
             x: Layout.padding,
@@ -25,6 +26,13 @@ extension TerminalView {
         scrollView.contentView.drawsBackground = false
         scrollView.contentView.backgroundColor = .clear
         scrollView.contentInsets = NSEdgeInsets(top: 2, left: 0, bottom: 8, right: 0)
+        scrollView.contentView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTranscriptBoundsDidChange(_:)),
+            name: NSView.boundsDidChangeNotification,
+            object: scrollView.contentView
+        )
 
         transcriptStack.orientation = .vertical
         transcriptStack.alignment = .leading
@@ -67,7 +75,7 @@ extension TerminalView {
         expertSuggestionLabel.autoresizingMask = [.width]
         expertSuggestionLabel.font = NSFont.systemFont(ofSize: 11, weight: .medium)
         expertSuggestionLabel.textColor = t.textDim
-        expertSuggestionLabel.stringValue = "Pick a specialist for a more specific follow-up."
+        expertSuggestionLabel.stringValue = "Have follow-up questions? Chat with these experts."
         expertSuggestionLabel.isHidden = true
         expertSuggestionContainer.addSubview(expertSuggestionLabel)
 
@@ -166,7 +174,7 @@ extension TerminalView {
         sendButton.contentTintColor = .white
         sendButton.toolTip = "Send"
         sendButton.target = self
-        sendButton.action = #selector(inputSubmitted)
+        sendButton.action = #selector(sendOrStopTapped)
         composerPanel.addSubview(sendButton)
 
         attachButton.frame = NSRect(x: attachX, y: attachY, width: controlButtonSize, height: controlButtonSize)
@@ -216,44 +224,34 @@ extension TerminalView {
         inputField.action = #selector(inputSubmitted)
         composerPanel.addSubview(inputField)
 
-        liveStatusSpinner.style = .spinning
-        liveStatusSpinner.controlSize = .small
-        liveStatusSpinner.frame = NSRect(x: 16, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
-        liveStatusSpinner.isDisplayedWhenStopped = false
-        liveStatusSpinner.isHidden = true
-        composerPanel.addSubview(liveStatusSpinner)
-
-        liveStatusAvatarView.frame = NSRect(x: 16, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)  // 16px left, vertically centered
-        liveStatusAvatarView.wantsLayer = true
-        liveStatusAvatarView.layer?.cornerRadius = 13
-        liveStatusAvatarView.layer?.masksToBounds = true
-        liveStatusAvatarView.layer?.borderWidth = 1
-        liveStatusAvatarView.layer?.borderColor = t.separatorColor.withAlphaComponent(0.35).cgColor
-        liveStatusAvatarView.imageAlignment = .alignCenter
-        liveStatusAvatarView.imageScaling = .scaleProportionallyUpOrDown
-        liveStatusAvatarView.isHidden = true
-        composerPanel.addSubview(liveStatusAvatarView)
-
-        liveStatusLabel.isEditable = false
-        liveStatusLabel.drawsBackground = false
-        liveStatusLabel.isBordered = false
-        liveStatusLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
-        liveStatusLabel.textColor = t.accentColor
-        liveStatusLabel.lineBreakMode = .byTruncatingTail
-        liveStatusLabel.isHidden = true
-        liveStatusLabel.frame = NSRect(x: 52, y: (Layout.composerHeight - 18) / 2, width: composerPanel.frame.width - 52 - rightInset - controlButtonSize - 8, height: 18)
-        liveStatusLabel.autoresizingMask = [.width]
-        composerPanel.addSubview(liveStatusLabel)
+        composerStatusLabel.isEditable = false
+        composerStatusLabel.drawsBackground = false
+        composerStatusLabel.isBordered = false
+        composerStatusLabel.font = NSFont.systemFont(ofSize: 13, weight: .medium)
+        composerStatusLabel.textColor = t.textDim
+        composerStatusLabel.lineBreakMode = .byTruncatingTail
+        composerStatusLabel.isHidden = true
+        composerStatusLabel.frame = NSRect(x: 16, y: (Layout.composerHeight - 18) / 2, width: composerPanel.frame.width - 16 - rightInset - controlButtonSize - 8, height: 18)
+        composerStatusLabel.autoresizingMask = [.width]
+        composerPanel.addSubview(composerStatusLabel)
 
         registerForDraggedTypes([.fileURL, .URL, .string, .tiff, .png])
+        settingsObserver = NotificationCenter.default.addObserver(
+            forName: UserDefaults.didChangeNotification,
+            object: UserDefaults.standard,
+            queue: .main
+        ) { [weak self] _ in
+            self?.refreshFirstRunStateIfNeeded()
+        }
         refreshComposerContentLayout()
         relayoutPanels()
+        lastObservedFirstRunConfigurationSignature = firstRunConfigurationSignature()
     }
 
     func refreshComposerContentLayout(showingStatus: Bool? = nil) {
         guard let composerPanel = inputField.superview else { return }
 
-        let isShowingStatus = showingStatus ?? !liveStatusLabel.isHidden
+        let isShowingStatus = showingStatus ?? !composerStatusLabel.isHidden
         let controlButtonSize: CGFloat = 34
         let rightInset: CGFloat = 11
         let sideInset: CGFloat = 16
@@ -273,54 +271,13 @@ extension TerminalView {
             height: Layout.composerHeight - 16
         )
 
-        liveStatusSpinner.frame = NSRect(x: sideInset, y: (Layout.composerHeight - 16) / 2, width: 16, height: 16)
-        liveStatusAvatarView.frame = NSRect(x: sideInset, y: (Layout.composerHeight - 26) / 2, width: 26, height: 26)
-
-        let statusLeading: CGFloat = liveStatusAvatarView.isHidden ? 16 : 52
+        let statusLeading: CGFloat = sideInset
         let statusTrailingInset: CGFloat = isShowingStatus ? 16 : (rightInset + controlButtonSize + 8)
-        liveStatusLabel.frame = NSRect(
+        composerStatusLabel.frame = NSRect(
             x: statusLeading,
             y: (Layout.composerHeight - 18) / 2,
             width: max(80, composerPanel.bounds.width - statusLeading - statusTrailingInset),
             height: 18
         )
-    }
-
-    @objc func inputSubmitted() {
-        let text = inputField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty || !pendingAttachments.isEmpty else { return }
-
-        // Dismiss welcome chips when user sends their first message
-        hideWelcomeSuggestionsPanel()
-        clearTranscriptSuggestionView()
-
-        let attachments = pendingAttachments
-        inputField.stringValue = ""
-        pendingAttachments.removeAll()
-        refreshAttachmentPreviews()
-
-        appendUser(text, attachments: attachments)
-        isStreaming = true
-        currentAssistantText = ""
-        onSendMessage?(text, attachments)
-    }
-
-    @objc func returnToLennyTapped() {
-        onReturnToLenny?()
-    }
-
-    @objc func attachButtonTapped() {
-        presentAttachmentPicker()
-    }
-
-    func updatePlaceholder(_ text: String) {
-        placeholderText = text
-        guard let paddedCell = inputField.cell as? PaddedTextFieldCell else { return }
-        let t = theme
-        paddedCell.placeholderAttributedString = NSAttributedString(
-            string: text,
-            attributes: [.font: t.font, .foregroundColor: t.textDim]
-        )
-        inputField.needsDisplay = true
     }
 }

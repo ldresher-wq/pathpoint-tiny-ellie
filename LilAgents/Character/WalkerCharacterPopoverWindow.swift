@@ -7,14 +7,14 @@ extension WalkerCharacter {
 
     func refreshPopoverHeader() {
         popoverTitleLabel?.stringValue = focusedExpert?.name ?? resolvedTheme.titleString
-        popoverSubtitleLabel?.stringValue = focusedExpert == nil ? "Your desktop shortcut to LennyData." : "Specialist follow-up"
+        popoverSubtitleLabel?.stringValue = focusedExpert?.title ?? "Your desktop shortcut to LennyData."
         popoverReturnButton?.isHidden = focusedExpert == nil
     }
 
     func createPopoverWindow() {
         let t = resolvedTheme
         let popoverWidth: CGFloat = 468
-        let popoverHeight: CGFloat = 460
+        let popoverHeight: CGFloat = WalkerCharacter.defaultPopoverHeight
         let shellCornerRadius: CGFloat = 18
 
         let win = KeyableWindow(
@@ -59,7 +59,7 @@ extension WalkerCharacter {
         titleBar.addSubview(titleLabel)
         popoverTitleLabel = titleLabel
 
-        let subtitle = NSTextField(labelWithString: focusedExpert == nil ? "Your desktop shortcut to LennyData." : "Specialist follow-up")
+        let subtitle = NSTextField(labelWithString: focusedExpert?.title ?? "Your desktop shortcut to LennyData.")
         subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         subtitle.textColor = t.textDim.withAlphaComponent(0.75)
         subtitle.frame = NSRect(x: 20, y: 5, width: popoverWidth - 244, height: 14)
@@ -176,8 +176,20 @@ extension WalkerCharacter {
         terminal.autoresizingMask = [.width, .height]
         terminal.isPinnedOpen = isPopoverPinned
         terminal.onSendMessage = { [weak self] message, attachments in
+            self?.noteLiveStatusEvent()
+            self?.setCurrentActivityStatus("Getting things moving…")
+            self?.updateExpertNameTag()
             self?.claudeSession?.focusedExpert = self?.focusedExpert
             self?.claudeSession?.send(message: message, attachments: attachments)
+        }
+        terminal.onStopRequested = { [weak self] in
+            guard let self else { return }
+            self.claudeSession?.cancelActiveTurn()
+            self.stopLiveStatusFallback()
+            self.setCurrentActivityStatus("")
+            self.terminalView?.endStreaming()
+            self.terminalView?.clearLiveStatus()
+            self.updateExpertNameTag()
         }
         terminal.onReturnToLenny = { [weak self] in
             self?.controller?.returnToGenie()
@@ -200,6 +212,15 @@ extension WalkerCharacter {
         }
         terminal.onCloseRequested = { [weak self] in
             self?.closePopoverFromButton()
+        }
+        terminal.onRefreshSetupState = { [weak self] in
+            guard let self, let session = self.claudeSession, !session.isRunning else { return }
+            session.focusedExpert = self.focusedExpert
+            session.start()
+        }
+        terminal.onReachedTranscriptBottom = { [weak self] in
+            guard let self else { return }
+            self.claudeSession?.markConversationRead(for: self.focusedExpert)
         }
         terminal.setReturnToLennyVisible(false)
         container.addSubview(terminal)

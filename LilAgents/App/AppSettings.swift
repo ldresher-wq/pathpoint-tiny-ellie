@@ -254,6 +254,10 @@ enum AppSettings {
         set { UserDefaults.standard.set(newValue.rawValue, forKey: welcomePreviewModeKey) }
     }
 
+    static var showsDeveloperTools: Bool {
+        ProcessInfo.processInfo.arguments.contains("#debug")
+    }
+
     // MARK: - Reset
 
     static func resetAllData() throws {

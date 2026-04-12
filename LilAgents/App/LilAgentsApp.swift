@@ -133,13 +133,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         displayItem.submenu = displayMenu
         menu.addItem(displayItem)
 
-        menu.addItem(NSMenuItem.separator())
+        if AppSettings.showsDeveloperTools {
+            menu.addItem(NSMenuItem.separator())
 
-        let debugShowExpertsItem = NSMenuItem(title: "Debug Expert Suggestions", action: #selector(showDebugExpertSuggestions), keyEquivalent: "")
-        menu.addItem(debugShowExpertsItem)
+            let debugShowExpertsItem = NSMenuItem(title: "Debug Expert Suggestions", action: #selector(showDebugExpertSuggestions), keyEquivalent: "")
+            menu.addItem(debugShowExpertsItem)
 
-        let debugClearExpertsItem = NSMenuItem(title: "Clear Debug Suggestions", action: #selector(clearDebugExpertSuggestions), keyEquivalent: "")
-        menu.addItem(debugClearExpertsItem)
+            let debugClearExpertsItem = NSMenuItem(title: "Clear Debug Suggestions", action: #selector(clearDebugExpertSuggestions), keyEquivalent: "")
+            menu.addItem(debugClearExpertsItem)
+        }
 
         menu.addItem(NSMenuItem.separator())
 

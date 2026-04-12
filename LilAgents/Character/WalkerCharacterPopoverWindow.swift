@@ -420,7 +420,8 @@ extension WalkerCharacter {
     func refreshPopoverHeader() {
         popoverTitleLabel?.stringValue = focusedExpert?.name ?? resolvedTheme.titleString
         popoverSubtitleLabel?.stringValue = focusedExpert?.title ?? "Your desktop shortcut to LennyData."
-        popoverReturnButton?.isHidden = true
+        popoverReturnButton?.isHidden = (focusedExpert == nil)
+        terminalView?.setReturnToLennyVisible(focusedExpert != nil)
         updatePopoverExpertSwitcherState()
         updatePopoverTitleLayout()
     }
@@ -674,7 +675,7 @@ extension WalkerCharacter {
             guard let self else { return }
             self.claudeSession?.markConversationRead(for: self.focusedExpert)
         }
-        terminal.setReturnToLennyVisible(false)
+        terminal.setReturnToLennyVisible(focusedExpert != nil)
         container.addSubview(terminal)
 
         win.contentView = container

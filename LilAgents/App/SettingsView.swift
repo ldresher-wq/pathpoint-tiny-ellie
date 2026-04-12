@@ -131,7 +131,7 @@ struct SettingsView: View {
 
     private var visiblePanes: [SettingsPane] {
         var panes: [SettingsPane] = [.source, .models, .about]
-        if debugLoggingEnabled {
+        if AppSettings.showsDeveloperTools {
             panes.append(.developer)
         }
         return panes

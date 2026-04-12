@@ -81,13 +81,17 @@ extension SettingsView {
 
             SettingsSectionCard(title: "Why I built this", subtitle: "The thinking behind Lil-Lenny.") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("I built Lil-Lenny because I wanted fast, grounded product advice to feel as lightweight and ambient as opening a desktop companion, not another heavy research workflow.")
+                    (
+                        Text("I saw Ryan's project and immediately wanted to make a Lenny version of it as an extension of the ")
+                        + Text(.init("[LennyRPG app](https://www.lennyrpg.fun/)"))
+                        + Text(".")
+                    )
+                    .settingsCaption()
+
+                    Text("It's nothing fundamentally different from using Claude Code or Codex with the LennyData MCP, just a more fun way to do it.")
                         .settingsCaption()
 
-                    Text("The goal was to bring Lenny's writing, podcast transcripts, and expert perspectives into a format that feels conversational, local-first, and easy to keep nearby while working through product, growth, pricing, leadership, and startup questions.")
-                        .settingsCaption()
-
-                    Text("It is also a small experiment in making agent workflows feel more human: multiple voices, clearer provenance, and a calmer desktop-native interface instead of a generic chat window.")
+                    Text("Enjoy!")
                         .settingsCaption()
                 }
             }

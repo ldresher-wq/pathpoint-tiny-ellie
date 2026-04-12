@@ -8,7 +8,10 @@ extension WalkerCharacter {
             let availableWidth = screen.visibleFrame.width - margin * 2
             return (minX, max(availableWidth - displayWidth, 0))
         }
-        return (dockX, max(dockWidth - displayWidth, 0))
+        let edgeInset = min(18.0, max(10.0, dockWidth * 0.025))
+        let minX = dockX + edgeInset
+        let availableWidth = max(dockWidth - edgeInset * 2.0, 0)
+        return (minX, max(availableWidth - displayWidth, 0))
     }
 
     func startWalk() {

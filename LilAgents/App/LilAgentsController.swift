@@ -202,6 +202,7 @@ class LilAgentsController {
 
         let dividerWidth: CGFloat = 12.0
         var dockWidth = slotWidth * CGFloat(totalIcons) + CGFloat(dividers) * dividerWidth
+        let edgePadding = max(14.0, tileSize * 0.28)
 
         let magnificationEnabled = dockDefaults?.bool(forKey: "magnification") ?? false
         if magnificationEnabled,
@@ -211,18 +212,14 @@ class LilAgentsController {
             _ = largeSize
         }
 
-        // Small fudge factor for dock edge padding
-        dockWidth *= 1.1
-        let minimumUsableWidth = max(260.0, min(screen.visibleFrame.width - 48.0, screen.frame.width * 0.45))
-
-        if dockWidth < minimumUsableWidth {
-            let fallbackMargin: CGFloat = 24.0
-            let fallbackWidth = max(screen.visibleFrame.width - fallbackMargin * 2, minimumUsableWidth)
-            let fallbackX = screen.visibleFrame.minX + fallbackMargin
-            return (fallbackX, fallbackWidth)
+        if totalIcons == 0 {
+            dockWidth = max(220.0, tileSize * 4.0)
+        } else {
+            dockWidth += edgePadding * 2.0
         }
 
-        let dockX = screen.frame.origin.x + (screen.frame.width - dockWidth) / 2.0
+        dockWidth = min(dockWidth, screen.visibleFrame.width - 24.0)
+        let dockX = screen.frame.midX - dockWidth / 2.0
         return (dockX, dockWidth)
     }
 

@@ -50,6 +50,7 @@ extension WalkerCharacter {
 
     private func closeOnboarding() {
         removeEventMonitors()
+        expertSwitcherPopover?.close()
         popoverWindow?.orderOut(nil)
         popoverWindow = nil
         terminalView = nil
@@ -148,6 +149,7 @@ extension WalkerCharacter {
     func closePopover() {
         guard isIdleForPopover else { return }
 
+        expertSwitcherPopover?.close()
         isPopoverExpanded = false
         if let btn = popoverExpandButton,
            let img = NSImage(systemSymbolName: "arrow.up.left.and.arrow.down.right", accessibilityDescription: nil) {
@@ -238,13 +240,21 @@ extension WalkerCharacter {
             guard let self, let popover = self.popoverWindow else { return }
             let popoverFrame = popover.frame
             let charFrame = self.window.frame
-            if !popoverFrame.contains(NSEvent.mouseLocation) && !charFrame.contains(NSEvent.mouseLocation) {
+            let switcherFrame = self.expertSwitcherPopover?.contentViewController?.view.window?.frame
+            let isInsideSwitcher = switcherFrame?.contains(NSEvent.mouseLocation) == true
+            if !popoverFrame.contains(NSEvent.mouseLocation) &&
+                !charFrame.contains(NSEvent.mouseLocation) &&
+                !isInsideSwitcher {
                 self.closePopover()
             }
         }
 
         escapeKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             if event.keyCode == 53 {
+                if self?.expertSwitcherPopover?.isShown == true {
+                    self?.expertSwitcherPopover?.performClose(nil)
+                    return nil
+                }
                 self?.closePopover()
                 return nil
             }

@@ -1,6 +1,6 @@
 # Lil-Lenny
 
-<video src="Lenny-Ads.mp4" controls muted playsinline width="960"></video>
+<video src="Lenny-Ads.mp4" width="960" height="540" controls></video>
 
 If the embedded video does not render in your GitHub client, [watch it here](Lenny-Ads.mp4).
 

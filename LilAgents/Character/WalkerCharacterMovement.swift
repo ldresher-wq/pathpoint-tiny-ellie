@@ -8,7 +8,12 @@ extension WalkerCharacter {
             let availableWidth = screen.visibleFrame.width - margin * 2
             return (minX, max(availableWidth - displayWidth, 0))
         }
-        let edgeInset = min(18.0, max(10.0, dockWidth * 0.025))
+        let desiredInset = min(18.0, max(10.0, dockWidth * 0.025))
+        // Keep a little breathing room from the dock edges, but never let that
+        // padding eliminate the walkable range on narrower docks.
+        let minimumVisibleTravel: CGFloat = 28.0
+        let maximumInset = max((dockWidth - displayWidth - minimumVisibleTravel) / 2.0, 0)
+        let edgeInset = min(desiredInset, maximumInset)
         let minX = dockX + edgeInset
         let availableWidth = max(dockWidth - edgeInset * 2.0, 0)
         return (minX, max(availableWidth - displayWidth, 0))

@@ -218,7 +218,13 @@ class LilAgentsController {
             dockWidth += edgePadding * 2.0
         }
 
-        dockWidth = min(dockWidth, screen.visibleFrame.width - 24.0)
+        let maximumDockWidth = screen.visibleFrame.width - 24.0
+        let minimumUsableWidth = max(220.0, min(screen.visibleFrame.width - 48.0, screen.frame.width * 0.45))
+        if dockWidth < minimumUsableWidth {
+            dockWidth = minimumUsableWidth
+        }
+
+        dockWidth = min(dockWidth, maximumDockWidth)
         let dockX = screen.frame.midX - dockWidth / 2.0
         return (dockX, dockWidth)
     }

@@ -64,14 +64,14 @@ If nothing is connected yet, the app nudges the user to open Settings and connec
 
 The built-in chips are intentionally grounded in what the app can actually answer. Examples include:
 
-- `How would Elena Verna improve my onboarding?`
 - `Tell me more about Duolingo's growth strategy`
-- `How should PMs use Claude Code?`
-- `How should I evaluate this AI feature?`
-- `What would Jeanne Grosser change about our GTM?`
-- `How would Dr. Becky handle this difficult coworker?`
+- `Tell me more about Notion's growth strategy`
+- `B2B GTM playbook for 2026`
+- `Framework for evaluating an AI feature`
+- `Claude Code takeaways for PMs`
+- `Pricing playbook for a B2B product`
 
-Starter Pack chips stay closer to the public bundled archive. Full-archive chips can be broader and more expert-specific.
+Starter Pack chips stay closer to the public bundled archive. Full-archive chips can be broader, but they are still phrased to help retrieval stay pointed instead of vague.
 
 ## Requirements
 

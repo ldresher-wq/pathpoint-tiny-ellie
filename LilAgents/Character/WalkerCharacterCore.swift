@@ -340,7 +340,7 @@ extension WalkerCharacter {
         if useVideo {
             imageView.isHidden = true
             playerLayerView?.isHidden = false
-            playerLayerView?.setMirrored(facing == .left)
+            playerLayerView?.setMirrored(facing == .right)
             walkPlayer?.play()
         } else {
             walkPlayer?.pause()

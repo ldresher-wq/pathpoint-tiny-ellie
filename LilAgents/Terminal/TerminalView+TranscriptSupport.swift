@@ -121,29 +121,19 @@ class WelcomeChipsView: NSView {
     private let suggestions: [(String, String, String)]
 
     static let defaultSuggestionPool: [(String, String, String)] = [
-        ("building.2",                "What classes does Pathpoint write?",            "What classes of business does Pathpoint write?"),
-        ("doc.text.magnifyingglass",  "How do I submit a new risk?",                   "How do I submit a new risk to Pathpoint?"),
-        ("shield.lefthalf.filled",    "E&S vs admitted — what's the difference?",      "What's the difference between E&S and admitted markets?"),
-        ("chart.bar.doc.horizontal",  "What info is needed for a submission?",         "What information do I need to include in a Pathpoint submission?"),
-        ("building.columns",          "Commercial property appetite",                  "What is Pathpoint's appetite for commercial property risks?"),
-        ("person.3.sequence",         "Habitational risks — does Pathpoint write them?", "Does Pathpoint write habitational risks? What are the requirements?"),
-        ("waveform.path.ecg",         "Hard-to-place risk — where to start?",          "I have a hard-to-place risk. How should I approach submitting it to Pathpoint?"),
-        ("creditcard",                "How does Pathpoint's quoting work?",            "How does Pathpoint's quoting process work for retail agents?"),
-        ("megaphone",                 "What markets does Pathpoint access?",           "What carrier markets does Pathpoint have access to?"),
-        ("briefcase",                 "General liability appetite",                    "What is Pathpoint's appetite for general liability coverage?")
+        ("square.grid.2x2",           "Lines of business",                             "What lines of business does Pathpoint offer?"),
+        ("hammer",                    "Contractor appetite",                            "What is Pathpoint's contractor appetite?"),
+        ("checkmark.seal.fill",       "How to bind an account",                        "How do I bind an account on Pathpoint?"),
+        ("creditcard",                "PathPay Insured vs Agency",                     "Explain PathPay Insured vs PathPay Agency"),
+        ("arrow.clockwise.circle",    "Accessing my renewals",                         "How do I access my renewals?"),
     ]
 
     static let starterPackSuggestionPool: [(String, String, String)] = [
-        ("building.2",                "What classes does Pathpoint write?",            "What classes of business does Pathpoint write?"),
-        ("doc.text.magnifyingglass",  "How do I submit a new risk?",                   "How do I submit a new risk to Pathpoint?"),
-        ("shield.lefthalf.filled",    "E&S vs admitted — what's the difference?",      "What's the difference between E&S and admitted markets?"),
-        ("chart.bar.doc.horizontal",  "What info is needed for a submission?",         "What information do I need to include in a Pathpoint submission?"),
-        ("building.columns",          "Commercial property appetite",                  "What is Pathpoint's appetite for commercial property risks?"),
-        ("person.3.sequence",         "Habitational risks — does Pathpoint write them?", "Does Pathpoint write habitational risks? What are the requirements?"),
-        ("waveform.path.ecg",         "Hard-to-place risk — where to start?",          "I have a hard-to-place risk. How should I approach submitting it to Pathpoint?"),
-        ("creditcard",                "How does Pathpoint's quoting work?",            "How does Pathpoint's quoting process work for retail agents?"),
-        ("megaphone",                 "What markets does Pathpoint access?",           "What carrier markets does Pathpoint have access to?"),
-        ("briefcase",                 "General liability appetite",                    "What is Pathpoint's appetite for general liability coverage?")
+        ("square.grid.2x2",           "Lines of business",                             "What lines of business does Pathpoint offer?"),
+        ("hammer",                    "Contractor appetite",                            "What is Pathpoint's contractor appetite?"),
+        ("checkmark.seal.fill",       "How to bind an account",                        "How do I bind an account on Pathpoint?"),
+        ("creditcard",                "PathPay Insured vs Agency",                     "Explain PathPay Insured vs PathPay Agency"),
+        ("arrow.clockwise.circle",    "Accessing my renewals",                         "How do I access my renewals?"),
     ]
 
     init(theme: PopoverTheme, suggestions: [(String, String, String)] = WelcomeChipsView.defaultSuggestionPool) {

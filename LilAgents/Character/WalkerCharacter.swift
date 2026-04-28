@@ -1,10 +1,14 @@
 import AppKit
+import AVFoundation
 import Lottie
 
 final class WalkerCharacter {
     let videoName: String
     var window: NSWindow!
     var imageView: NSImageView!
+    var playerLayerView: EllieWalkPlayerView?
+    var walkPlayer: AVQueuePlayer?
+    var walkLooper: AVPlayerLooper?
 
     let displayHeight: CGFloat = 96
     let displayWidth: CGFloat = 96

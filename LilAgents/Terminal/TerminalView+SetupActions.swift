@@ -42,8 +42,8 @@ extension TerminalView {
         }
     }
 
-    @objc func returnToLennyTapped() {
-        onReturnToLenny?()
+    @objc func returnToEllieTapped() {
+        onReturnToEllie?()
     }
 
     @objc func attachButtonTapped() {

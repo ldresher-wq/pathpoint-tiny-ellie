@@ -2,7 +2,7 @@ import AppKit
 
 private struct ExpertSwitcherEntry: Equatable {
     enum Destination: Equatable {
-        case lenny
+        case ellie
         case expert(name: String, avatarPath: String)
     }
 
@@ -16,8 +16,8 @@ private struct ExpertSwitcherEntry: Equatable {
         "\(name) \(title ?? "")".lowercased()
     }
 
-    var isLenny: Bool {
-        if case .lenny = destination { return true }
+    var isEllie: Bool {
+        if case .ellie = destination { return true }
         return false
     }
 }
@@ -36,11 +36,11 @@ private enum ExpertSwitcherCatalog {
 
         var entries: [ExpertSwitcherEntry] = [
             ExpertSwitcherEntry(
-                id: "lenny",
-                name: "Lil-Lenny",
-                title: "Lenny Rachitsky's archive guide",
+                id: "ellie",
+                name: "Ellie",
+                title: "Pathpoint's E&S insurance assistant",
                 avatarPath: nil,
-                destination: .lenny
+                destination: .ellie
             )
         ]
 
@@ -119,7 +119,7 @@ private final class ExpertSwitcherRowView: NSTableCellView {
             avatarView.image = nil
             avatarView.isHidden = true
             fallbackIcon.isHidden = false
-            let symbolName = entry.isLenny ? "sparkles" : "person.crop.circle.fill"
+            let symbolName = entry.isEllie ? "sparkles" : "person.crop.circle.fill"
             if let fallback = NSImage(systemSymbolName: symbolName, accessibilityDescription: nil) {
                 let config = NSImage.SymbolConfiguration(pointSize: 14, weight: .medium)
                 fallbackIcon.image = fallback.withSymbolConfiguration(config)
@@ -419,9 +419,9 @@ extension WalkerCharacter {
 
     func refreshPopoverHeader() {
         popoverTitleLabel?.stringValue = focusedExpert?.name ?? resolvedTheme.titleString
-        popoverSubtitleLabel?.stringValue = focusedExpert?.title ?? "Your desktop shortcut to LennyData."
+        popoverSubtitleLabel?.stringValue = focusedExpert?.title ?? "Your E&S insurance assistant from Pathpoint."
         popoverReturnButton?.isHidden = (focusedExpert == nil)
-        terminalView?.setReturnToLennyVisible(focusedExpert != nil)
+        terminalView?.setReturnToEllieVisible(focusedExpert != nil)
         updatePopoverExpertSwitcherState()
         updatePopoverTitleLayout()
     }
@@ -488,7 +488,7 @@ extension WalkerCharacter {
         switcherButton.contentTintColor = t.textDim
         popoverExpertSwitcherButton = switcherButton
 
-        let subtitle = NSTextField(labelWithString: focusedExpert?.title ?? "Your desktop shortcut to LennyData.")
+        let subtitle = NSTextField(labelWithString: focusedExpert?.title ?? "Your E&S insurance assistant from Pathpoint.")
         subtitle.translatesAutoresizingMaskIntoConstraints = false
         subtitle.font = NSFont.systemFont(ofSize: 11, weight: .regular)
         subtitle.textColor = t.textDim.withAlphaComponent(0.75)
@@ -606,13 +606,13 @@ extension WalkerCharacter {
         returnPill.layer?.borderWidth = 0.75
         returnPill.layer?.borderColor = t.separatorColor.withAlphaComponent(0.55).cgColor
         returnPill.attributedTitle = NSAttributedString(
-            string: "Back to Lil-Lenny",
+            string: "Back to Ellie",
             attributes: [
                 .font: NSFont.systemFont(ofSize: 11, weight: .medium),
                 .foregroundColor: t.accentColor
             ]
         )
-        returnPill.toolTip = "Return to Lil-Lenny"
+        returnPill.toolTip = "Return to Ellie"
         returnPill.isHidden = true
         titleBar.addSubview(returnPill)
         popoverReturnButton = returnPill
@@ -644,7 +644,7 @@ extension WalkerCharacter {
             self.terminalView?.clearLiveStatus()
             self.updateExpertNameTag()
         }
-        terminal.onReturnToLenny = { [weak self] in
+        terminal.onReturnToEllie = { [weak self] in
             self?.controller?.returnToGenie()
         }
         terminal.onSelectExpert = { [weak self] expert in
@@ -675,7 +675,7 @@ extension WalkerCharacter {
             guard let self else { return }
             self.claudeSession?.markConversationRead(for: self.focusedExpert)
         }
-        terminal.setReturnToLennyVisible(focusedExpert != nil)
+        terminal.setReturnToEllieVisible(focusedExpert != nil)
         container.addSubview(terminal)
 
         win.contentView = container
@@ -702,7 +702,7 @@ extension WalkerCharacter {
         let entries = availableExpertSwitcherEntries()
         guard !entries.isEmpty else { return }
 
-        let currentSelectionID = focusedExpert.map { "expert:\($0.name)" } ?? "lenny"
+        let currentSelectionID = focusedExpert.map { "expert:\($0.name)" } ?? "ellie"
         let controller = ExpertSwitcherViewController(
             theme: resolvedTheme,
             entries: entries,
@@ -714,7 +714,7 @@ extension WalkerCharacter {
             WalkerCharacter.playSelectionSound()
 
             switch entry.destination {
-            case .lenny:
+            case .ellie:
                 guard self.focusedExpert != nil else { return }
                 self.controller?.returnToGenie()
             case .expert(let name, let avatarPath):

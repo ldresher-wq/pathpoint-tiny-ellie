@@ -1,6 +1,6 @@
 import Foundation
 
-enum LennyArchiveClientError: LocalizedError {
+enum PathpointArchiveClientError: LocalizedError {
     case invalidEndpoint
     case unsupportedResponse
     case invalidPayload
@@ -11,22 +11,22 @@ enum LennyArchiveClientError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidEndpoint:
-            return "The Lenny archive endpoint is invalid."
+            return "The Pathpoint archive endpoint is invalid."
         case .unsupportedResponse:
-            return "The Lenny archive returned an unsupported response."
+            return "The Pathpoint archive returned an unsupported response."
         case .invalidPayload:
-            return "The Lenny archive returned malformed data."
+            return "The Pathpoint archive returned malformed data."
         case let .httpError(statusCode, message):
-            return message.isEmpty ? "The Lenny archive request failed with HTTP \(statusCode)." : message
+            return message.isEmpty ? "The Pathpoint archive request failed with HTTP \(statusCode)." : message
         case let .serverError(message):
             return message
         case .missingToolResult:
-            return "The Lenny archive returned no tool result."
+            return "The Pathpoint archive returned no tool result."
         }
     }
 }
 
-final class LennyArchiveClient {
+final class PathpointArchiveClient {
     private let endpointURL: URL
     private let token: String
     private let urlSession: URLSession
@@ -34,9 +34,9 @@ final class LennyArchiveClient {
     private var sessionID: String?
     private var nextRequestID = 1
 
-    init(token: String, endpointURLString: String = ClaudeSession.Constants.lennyMCPURL, urlSession: URLSession = .shared) throws {
+    init(token: String, endpointURLString: String = ClaudeSession.Constants.pathpointMCPURL, urlSession: URLSession = .shared) throws {
         guard let endpointURL = URL(string: endpointURLString) else {
-            throw LennyArchiveClientError.invalidEndpoint
+            throw PathpointArchiveClientError.invalidEndpoint
         }
         self.endpointURL = endpointURL
         self.token = token
@@ -89,7 +89,7 @@ final class LennyArchiveClient {
             ]
         )
         guard let result = payload["result"] as? [String: Any] else {
-            throw LennyArchiveClientError.missingToolResult
+            throw PathpointArchiveClientError.missingToolResult
         }
         return try decodeToolResult(result)
     }
@@ -103,7 +103,7 @@ final class LennyArchiveClient {
                 "protocolVersion": protocolVersion,
                 "capabilities": [:],
                 "clientInfo": [
-                    "name": "Lil-Lenny",
+                    "name": "Tiny-Ellie",
                     "version": "1.0"
                 ]
             ]
@@ -145,7 +145,7 @@ final class LennyArchiveClient {
 
         let (data, response) = try await urlSession.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw LennyArchiveClientError.unsupportedResponse
+            throw PathpointArchiveClientError.unsupportedResponse
         }
 
         if let headerSessionID = httpResponse.value(forHTTPHeaderField: "MCP-Session-Id")
@@ -157,7 +157,7 @@ final class LennyArchiveClient {
         guard (200...299).contains(httpResponse.statusCode) else {
             let message = String(data: data, encoding: .utf8)?
                 .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-            throw LennyArchiveClientError.httpError(httpResponse.statusCode, message)
+            throw PathpointArchiveClientError.httpError(httpResponse.statusCode, message)
         }
 
         guard let payload = try decodeResponsePayload(data: data, response: httpResponse) else {
@@ -165,8 +165,8 @@ final class LennyArchiveClient {
         }
 
         if let error = payload["error"] as? [String: Any] {
-            let message = (error["message"] as? String) ?? "The Lenny archive request failed."
-            throw LennyArchiveClientError.serverError(message)
+            let message = (error["message"] as? String) ?? "The Pathpoint archive request failed."
+            throw PathpointArchiveClientError.serverError(message)
         }
 
         return payload
@@ -190,14 +190,14 @@ final class LennyArchiveClient {
                     return payload
                 }
             }
-            throw LennyArchiveClientError.unsupportedResponse
+            throw PathpointArchiveClientError.unsupportedResponse
         }
 
         if let payload = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
             return payload
         }
 
-        throw LennyArchiveClientError.invalidPayload
+        throw PathpointArchiveClientError.invalidPayload
     }
 
     private func decodeToolResult(_ result: [String: Any]) throws -> [String: Any] {
@@ -232,6 +232,6 @@ final class LennyArchiveClient {
             return resultValue
         }
 
-        throw LennyArchiveClientError.missingToolResult
+        throw PathpointArchiveClientError.missingToolResult
     }
 }

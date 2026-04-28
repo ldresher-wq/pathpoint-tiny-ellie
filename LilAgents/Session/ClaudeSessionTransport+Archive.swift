@@ -1,29 +1,28 @@
 import Foundation
 
 extension ClaudeSession {
-    private static let githubArchiveRawBase = "https://raw.githubusercontent.com/LennysNewsletter/lennys-newsletterpodcastdata/main"
+    private static let githubArchiveRawBase = "https://raw.githubusercontent.com/pathpoint/pathpoint-knowledge-base/main"
 
     func githubArchiveContext(for backend: Backend, expert: ResponderExpert?) -> String {
         let expertHint = expert.map { "\nFocus on content featuring \($0.name)." } ?? ""
         switch backend {
         case .claudeCodeCLI, .codexCLI:
             return """
-            Use WebFetch to search Lenny's public archive on GitHub:\(expertHint)
+            Use WebFetch to search Pathpoint's knowledge base on GitHub:\(expertHint)
             1. Fetch the index to discover what's available:
                \(Self.githubArchiveRawBase)/index.json
-               (JSON with "podcasts" and "newsletters" arrays; each entry has: title, filename, date, guest, description, word_count)
+               (JSON with content arrays; each entry has: title, filename, date, description)
             2. Fetch 1–3 of the most relevant files:
                \(Self.githubArchiveRawBase)/{filename}
-               (e.g. "podcasts/ryan-hoover.md" or "newsletters/lenny-2024-01-15.md")
             3. Ground your answer in what you retrieved.
             Do not describe the fetching steps in your response.
             """
         case .openAIResponsesAPI:
             return """
-            Lenny's public archive:\(expertHint)
+            Pathpoint's knowledge base:\(expertHint)
             Index: \(Self.githubArchiveRawBase)/index.json
             Files: \(Self.githubArchiveRawBase)/{filename}
-            Answer using your knowledge of Lenny Rachitsky's content. Cite specific episodes or newsletters when relevant.
+            Answer based on Pathpoint's E&S insurance content. Cite specific sources when relevant.
             """
         }
     }
@@ -40,7 +39,7 @@ extension ClaudeSession {
             let promptContext = """
             The bundled starter archive did not contain a strong match for this query.
             Be transparent that the starter pack only includes 10 newsletters and 50 podcast transcripts.
-            Suggest switching Settings to Official Lenny MCP for the full archive if needed.
+            Suggest switching Settings to Official Pathpoint MCP for the full archive if needed.
             """
             return (
                 promptContext,

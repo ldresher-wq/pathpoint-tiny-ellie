@@ -5,7 +5,7 @@
     <key>LSUIElement</key>
     <true/>
     <key>SUFeedURL</key>
-    <string>https://raw.githubusercontent.com/hbshih/lenny-lil-agents/main/appcast.xml</string>
+    <string>https://raw.githubusercontent.com/ldresher-wq/pathpoint-tiny-ellie/main/appcast.xml</string>
     <key>SUPublicEDKey</key>
     <string>KswNzJUt4oDOokMygU345j0XBs7c2nUtBcEGD1M/9Y4=</string>
     <key>SUEnableAutomaticChecks</key>

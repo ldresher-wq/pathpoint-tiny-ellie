@@ -121,29 +121,29 @@ class WelcomeChipsView: NSView {
     private let suggestions: [(String, String, String)]
 
     static let defaultSuggestionPool: [(String, String, String)] = [
-        ("chart.line.uptrend.xyaxis", "Tell me more about Notion's growth strategy",   "Tell me more about Notion's growth strategy."),
-        ("sparkles.rectangle.stack",  "Break down Canva's product strategy",        "Break down Canva's product strategy."),
-        ("megaphone",                 "B2B GTM playbook for 2026",                    "What does a strong B2B GTM playbook look like in 2026?"),
-        ("building.2",                "Sales-led or product-led: how to decide?",      "Sales-led or product-led: how to decide?"),
-        ("chart.bar.doc.horizontal",  "B2B onboarding teardown checklist",             "Give me a B2B onboarding teardown checklist."),
-        ("bubble.left.and.bubble.right", "Five questions to ask when growth stalls",  "What are five questions to ask when growth stalls?"),
-        ("waveform.path.ecg",         "Framework for evaluating an AI feature",        "Give me a framework for evaluating an AI feature before launch."),
-        ("shippingbox",               "How PMs are becoming builders",                 "How are PMs becoming builders?"),
-        ("creditcard",                "Pricing playbook for a B2B product",            "Give me a pricing playbook for a B2B product."),
-        ("person.3.sequence",         "Leadership lessons for scaling through chaos",  "What are the best leadership lessons for scaling through chaos?")
+        ("building.2",                "What classes does Pathpoint write?",            "What classes of business does Pathpoint write?"),
+        ("doc.text.magnifyingglass",  "How do I submit a new risk?",                   "How do I submit a new risk to Pathpoint?"),
+        ("shield.lefthalf.filled",    "E&S vs admitted — what's the difference?",      "What's the difference between E&S and admitted markets?"),
+        ("chart.bar.doc.horizontal",  "What info is needed for a submission?",         "What information do I need to include in a Pathpoint submission?"),
+        ("building.columns",          "Commercial property appetite",                  "What is Pathpoint's appetite for commercial property risks?"),
+        ("person.3.sequence",         "Habitational risks — does Pathpoint write them?", "Does Pathpoint write habitational risks? What are the requirements?"),
+        ("waveform.path.ecg",         "Hard-to-place risk — where to start?",          "I have a hard-to-place risk. How should I approach submitting it to Pathpoint?"),
+        ("creditcard",                "How does Pathpoint's quoting work?",            "How does Pathpoint's quoting process work for retail agents?"),
+        ("megaphone",                 "What markets does Pathpoint access?",           "What carrier markets does Pathpoint have access to?"),
+        ("briefcase",                 "General liability appetite",                    "What is Pathpoint's appetite for general liability coverage?")
     ]
 
     static let starterPackSuggestionPool: [(String, String, String)] = [
-        ("chart.line.uptrend.xyaxis", "Tell me more about Duolingo's growth strategy", "Tell me more about Duolingo's growth strategy."),
-        ("shippingbox",               "How AI prototyping changes PM work",            "How does AI prototyping change PM work?"),
-        ("waveform.path.ecg",         "Framework for evaluating an AI feature",        "Give me a framework for evaluating an AI feature before launch."),
-        ("terminal",                  "Claude Code takeaways for PMs",                 "What are the key takeaways from 'Everyone should be using Claude Code more' for PMs?"),
-        ("desktopcomputer",           "Alexander Embiricos on Codex",                  "What are Alexander Embiricos's best Codex workflow tips for PMs?"),
-        ("brain.head.profile",        "Build a PM second brain with ChatGPT",          "How do I build a PM second brain with ChatGPT?"),
-        ("person.crop.circle.badge.plus", "What are PMs actually vibe coding?",       "What are PMs actually vibe coding right now?"),
-        ("person.text.rectangle",     "Five questions to ask when growth stalls",      "What are five questions to ask when growth stalls?"),
-        ("chart.bar.doc.horizontal",  "B2B onboarding teardown checklist",             "Give me a B2B onboarding teardown checklist."),
-        ("briefcase",                 "State of the PM job market",                     "What does the PM job market look like right now?")
+        ("building.2",                "What classes does Pathpoint write?",            "What classes of business does Pathpoint write?"),
+        ("doc.text.magnifyingglass",  "How do I submit a new risk?",                   "How do I submit a new risk to Pathpoint?"),
+        ("shield.lefthalf.filled",    "E&S vs admitted — what's the difference?",      "What's the difference between E&S and admitted markets?"),
+        ("chart.bar.doc.horizontal",  "What info is needed for a submission?",         "What information do I need to include in a Pathpoint submission?"),
+        ("building.columns",          "Commercial property appetite",                  "What is Pathpoint's appetite for commercial property risks?"),
+        ("person.3.sequence",         "Habitational risks — does Pathpoint write them?", "Does Pathpoint write habitational risks? What are the requirements?"),
+        ("waveform.path.ecg",         "Hard-to-place risk — where to start?",          "I have a hard-to-place risk. How should I approach submitting it to Pathpoint?"),
+        ("creditcard",                "How does Pathpoint's quoting work?",            "How does Pathpoint's quoting process work for retail agents?"),
+        ("megaphone",                 "What markets does Pathpoint access?",           "What carrier markets does Pathpoint have access to?"),
+        ("briefcase",                 "General liability appetite",                    "What is Pathpoint's appetite for general liability coverage?")
     ]
 
     init(theme: PopoverTheme, suggestions: [(String, String, String)] = WelcomeChipsView.defaultSuggestionPool) {
@@ -248,7 +248,7 @@ class ConnectionSetupCardView: NSView {
         stack.addArrangedSubview(title)
         title.widthAnchor.constraint(equalTo: stack.widthAnchor).isActive = true
 
-        let body = NSTextField(wrappingLabelWithString: "Open Settings to connect Claude, Codex/ChatGPT, or OpenAI. Once one is connected, Lil-Lenny is ready to chat.")
+        let body = NSTextField(wrappingLabelWithString: "Open Settings to connect Claude, Codex/ChatGPT, or OpenAI. Once one is connected, Tiny Ellie is ready to chat.")
         body.font = NSFont.systemFont(ofSize: 12, weight: .regular)
         body.textColor = theme.textDim
         body.maximumNumberOfLines = 0

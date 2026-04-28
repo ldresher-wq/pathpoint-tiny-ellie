@@ -21,7 +21,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
     var focusedExpert: ResponderExpert?
     var settingsWindow: NSWindow?
     var char1Item: NSMenuItem?
-    var backToLennyItem: NSMenuItem?
+    var backToEllieItem: NSMenuItem?
     var installUpdateItem: NSMenuItem?
     var pendingScheduledUpdate = false
     var updaterController: SPUStandardUpdaterController!
@@ -35,7 +35,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         NSApp.setActivationPolicy(.accessory)
         AppSettings.prefetchDetectionState()
         controller = LilAgentsController()
-        NotificationCenter.default.addObserver(self, selector: #selector(handleResetAllData), name: .lilLennyDidResetData, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleResetAllData), name: .tinyEllieDidResetData, object: nil)
         controller?.onExpertsChanged = { [weak self] experts in
             self?.updateExpertStatusItems(experts)
         }
@@ -79,22 +79,22 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
     func setupMenuBar() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         if let button = statusItem?.button {
-            button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "figure.walk", accessibilityDescription: "Lil-Lenny")
+            button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "figure.walk", accessibilityDescription: "Tiny Ellie")
             button.image?.isTemplate = false
-            button.toolTip = "Open Lil-Lenny"
+            button.toolTip = "Open Tiny Ellie"
         }
 
         let menu = NSMenu()
 
-        let char1Item = NSMenuItem(title: "Show Lil-Lenny", action: #selector(toggleChar1), keyEquivalent: "1")
+        let char1Item = NSMenuItem(title: "Show Tiny Ellie", action: #selector(toggleChar1), keyEquivalent: "1")
         char1Item.state = .on
         menu.addItem(char1Item)
         self.char1Item = char1Item
 
-        let backToLennyItem = NSMenuItem(title: "Back to Lil-Lenny", action: #selector(backToLenny), keyEquivalent: "")
-        backToLennyItem.isEnabled = false
-        menu.addItem(backToLennyItem)
-        self.backToLennyItem = backToLennyItem
+        let backToEllieItem = NSMenuItem(title: "Back to Ellie", action: #selector(backToEllie), keyEquivalent: "")
+        backToEllieItem.isEnabled = false
+        menu.addItem(backToEllieItem)
+        self.backToEllieItem = backToEllieItem
 
         menu.addItem(NSMenuItem.separator())
 
@@ -227,7 +227,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
         }
     }
 
-    @objc func backToLenny() {
+    @objc func backToEllie() {
         controller?.returnToGenie()
     }
 
@@ -282,7 +282,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUStandardUserDriverDelegat
                 backing: .buffered,
                 defer: false
             )
-            window.title = "Lil-Lenny Settings"
+            window.title = "Tiny Ellie Settings"
             window.level = NSWindow.Level(rawValue: NSWindow.Level.statusBar.rawValue + 11)
             window.collectionBehavior = [.canJoinAllSpaces]
             let hostingController = NSHostingController(rootView: SettingsView())

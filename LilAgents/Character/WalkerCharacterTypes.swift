@@ -8,10 +8,10 @@ enum WalkerFacing {
 }
 
 enum WalkerPersona {
-    case lenny
+    case ellie
     case expert(ResponderExpert)
 }
 
 enum WalkerCharacterAssets {
-    static let lennyAssetsDirectory = "CharacterSprites"
+    static let ellieAssetsDirectory = "CharacterSprites"
 }

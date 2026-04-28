@@ -27,7 +27,7 @@ enum OfficialMCPInstaller {
         var errorDescription: String? {
             switch self {
             case .emptyToken:
-                return "Paste the auth key from lennysdata.com first."
+                return "Paste the auth key from pathpoint.com first."
             case let .unableToCreateConfigDirectory(label):
                 return "Couldn't create the local \(label) config folder."
             case let .unableToWriteConfig(label):
@@ -36,9 +36,9 @@ enum OfficialMCPInstaller {
         }
     }
 
-    static let serverLabel = ClaudeSession.Constants.lennyMCPServerLabel
-    static let mcpURL = ClaudeSession.Constants.lennyMCPURL
-    static let tokenEnvVar = ClaudeSession.Constants.lennyMCPAuthEnvVar
+    static let serverLabel = ClaudeSession.Constants.pathpointMCPServerLabel
+    static let mcpURL = ClaudeSession.Constants.pathpointMCPURL
+    static let tokenEnvVar = ClaudeSession.Constants.pathpointMCPAuthEnvVar
 
     static func install(token: String) throws -> InstallResult {
         let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -46,7 +46,7 @@ enum OfficialMCPInstaller {
 
         logInstallTargetDiagnostics(context: "before install")
 
-        AppSettings.officialLennyMCPToken = trimmed
+        AppSettings.officialPathpointMCPToken = trimmed
         AppSettings.archiveAccessMode = .officialMCP
 
         let availableTargets = detectedInstallTargets()
@@ -55,7 +55,7 @@ enum OfficialMCPInstaller {
 
         if availableTargets.contains(.claude) {
             // Always (re-)write the config so an expired token is replaced.
-            // installClaudeConfig only touches the lennysdata key; other entries are preserved.
+            // installClaudeConfig only touches the pathpoint key; other entries are preserved.
             try installClaudeConfig(token: trimmed)
             updatedTargets.append(.claude)
         }
@@ -95,15 +95,15 @@ enum OfficialMCPInstaller {
         let summary: String
         switch (detectedTargets.count, configuredTargets.count) {
         case (0, _):
-            summary = "No Claude Code or Codex install was detected yet. Lil-Lenny will still save the key locally for later."
+            summary = "No Claude Code or Codex install was detected yet. Tiny Ellie will still save the key locally for later."
         case (_, 2):
-            summary = "Claude Code and Codex are already detected. Lil-Lenny will keep any existing LennyData MCP setup and prefer Claude Code first when both are available."
+            summary = "Claude Code and Codex are already detected. Tiny Ellie will keep any existing Pathpoint MCP setup and prefer Claude Code first when both are available."
         case (_, 1):
             let detectedLabels = naturalList(detectedTargets.map(\.label))
             let configuredLabels = naturalList(configuredTargets.map(\.label))
-            summary = "\(detectedLabels) \(detectedTargets.count == 1 ? "is" : "are") detected. Lil-Lenny will keep the existing LennyData MCP in \(configuredLabels) and configure the other detected client locally if needed."
+            summary = "\(detectedLabels) \(detectedTargets.count == 1 ? "is" : "are") detected. Tiny Ellie will keep the existing Pathpoint MCP in \(configuredLabels) and configure the other detected client locally if needed."
         default:
-            summary = "Lil-Lenny will detect Claude Code and Codex on this Mac, keep any existing LennyData MCP setup, and configure whichever detected clients still need it."
+            summary = "Tiny Ellie will detect Claude Code and Codex on this Mac, keep any existing Pathpoint MCP setup, and configure whichever detected clients still need it."
         }
         logInstallTargetDiagnostics(context: "status summary", summary: summary)
         return summary
@@ -122,7 +122,7 @@ enum OfficialMCPInstaller {
         case (_, 1):
             hint = "\(naturalList(detectedTargets.map(\.label))) detected. Existing setup stays in place."
         default:
-            hint = "\(naturalList(detectedTargets.map(\.label))) detected. Lil-Lenny will configure what is missing."
+            hint = "\(naturalList(detectedTargets.map(\.label))) detected. Tiny Ellie will configure what is missing."
         }
 
         SessionDebugLogger.log("mcp-install", "context=compact hint | hint=\(hint)")
@@ -186,7 +186,7 @@ enum OfficialMCPInstaller {
         """
 
         let normalized = existing.replacingOccurrences(of: "\r\n", with: "\n")
-        let pattern = #"(?ms)^\[mcp_servers\.lennysdata(?:\..+)?\]\n.*?(?=^\[(?!mcp_servers\.lennysdata(?:[.\]]|$)).*|\z)"#
+        let pattern = #"(?ms)^\[mcp_servers\.pathpoint(?:\..+)?\]\n.*?(?=^\[(?!mcp_servers\.pathpoint(?:[.\]]|$)).*|\z)"#
 
         if let regex = try? NSRegularExpression(pattern: pattern) {
             let range = NSRange(normalized.startIndex..<normalized.endIndex, in: normalized)

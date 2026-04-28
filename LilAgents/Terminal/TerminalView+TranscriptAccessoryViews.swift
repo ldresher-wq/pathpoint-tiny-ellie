@@ -162,7 +162,7 @@ class TranscriptStatusView: NSView {
             return
         }
 
-        guard let image = resolvedLennyAvatarImage() else { return }
+        guard let image = resolvedEllieAvatarImage() else { return }
 
         let avatarShell = NSView()
         avatarShell.wantsLayer = true
@@ -197,7 +197,7 @@ class TranscriptStatusView: NSView {
         let names = experts.map(\.name)
         switch names.count {
         case 0:
-            return "Lil-Lenny"
+            return "Ellie"
         case 1:
             return names[0]
         case 2:

@@ -6,11 +6,11 @@ extension SettingsView {
         let _ = detectionRefreshID
         return VStack(alignment: .leading, spacing: 20) {
             SettingsHeader(
-                title: "Lenny source",
-                subtitle: "Choose whether Lil-Lenny answers from the bundled Starter Pack or the full LennyData archive."
+                title: "Ellie source",
+                subtitle: "Choose whether Tiny Ellie answers from the bundled Starter Pack or the full Pathpoint archive."
             )
 
-            SettingsSectionCard(title: "Answer source", subtitle: "Starter Pack is local and fast. Full LennyData uses the official archive when available.") {
+            SettingsSectionCard(title: "Answer source", subtitle: "Starter Pack is local and fast. Full Pathpoint uses the official archive when available.") {
                 VStack(spacing: 0) {
                     sourceRow(
                         mode: .starterPack,
@@ -22,9 +22,9 @@ extension SettingsView {
 
                     sourceRow(
                         mode: .officialMCP,
-                        title: "Full LennyData",
+                        title: "Full Pathpoint",
                         subtitle: "Official archive access",
-                        detail: "Broader and deeper answers from the full LennyData archive.",
+                        detail: "Broader and deeper answers from the full Pathpoint archive.",
                         isLast: archiveAccessMode != AppSettings.ArchiveAccessMode.officialMCP.rawValue
                     )
                 }
@@ -39,15 +39,15 @@ extension SettingsView {
                             SettingsInfoRow(
                                 icon: "exclamationmark.triangle.fill",
                                 iconColor: .orange,
-                                text: "The Lenny archive connection failed. Your auth token may have expired — enter a new one below to reconnect."
+                                text: "The Pathpoint archive connection failed. Your auth token may have expired — enter a new one below to reconnect."
                             )
                         }
 
-                        if AppSettings.officialLennyMCPToken != nil {
+                        if AppSettings.officialPathpointMCPToken != nil {
                             SettingsInfoRow(
                                 icon: "checkmark.circle.fill",
                                 iconColor: .accentColor,
-                                text: "Your auth key is saved on this Mac. Lil-Lenny will use it automatically when you send a message."
+                                text: "Your auth key is saved on this Mac. Tiny Ellie will use it automatically when you send a message."
                             )
                         } else {
                             // Show a hint when native CLI config is detected but no Settings token
@@ -56,7 +56,7 @@ extension SettingsView {
                                 SettingsInfoRow(
                                     icon: "info.circle.fill",
                                     iconColor: Color.secondary,
-                                    text: "Lenny MCP URL detected in your CLI config. Enter an auth key below to activate authentication."
+                                    text: "Pathpoint MCP URL detected in your CLI config. Enter an auth key below to activate authentication."
                                 )
                             }
 
@@ -69,13 +69,13 @@ extension SettingsView {
                                 }
                                 .buttonStyle(.borderedProminent)
 
-                                Button("Open lennysdata.com") {
+                                Button("Open pathpoint.com") {
                                     NSWorkspace.shared.open(officialArchiveURL)
                                 }
                                 .buttonStyle(.bordered)
                             }
 
-                            Text("Lil-Lenny stores this auth key locally on this Mac and, when you save it here, configures any detected Codex or Claude Code install for the official archive too.")
+                            Text("Tiny Ellie stores this auth key locally on this Mac and, when you save it here, configures any detected Codex or Claude Code install for the official archive too.")
                                 .settingsCaption()
                         }
 
@@ -154,7 +154,7 @@ extension SettingsView {
     private func saveOfficialArchiveToken() {
         let trimmed = officialToken.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else {
-            sourcePaneErrorMessage = "Paste the auth key from lennysdata.com first."
+            sourcePaneErrorMessage = "Paste the auth key from pathpoint.com first."
             return
         }
 
@@ -163,7 +163,7 @@ extension SettingsView {
             officialToken = trimmed
 
             if result.storedTokenOnly {
-                sourcePaneStatusMessage = "Saved locally. Lil-Lenny will use it automatically, and detected CLI tools can be configured later."
+                sourcePaneStatusMessage = "Saved locally. Tiny Ellie will use it automatically, and detected CLI tools can be configured later."
             } else {
                 let updated = result.updatedTargets.map(\.label)
                 let preserved = result.preservedTargets.map(\.label)

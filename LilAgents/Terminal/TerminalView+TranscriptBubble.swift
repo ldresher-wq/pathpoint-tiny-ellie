@@ -236,7 +236,7 @@ class ChatBubbleView: NSView, NSTextViewDelegate {
         if let avatarPath = speaker.avatarPath {
             image = resolvedAvatarImage(at: avatarPath)
         } else if speaker.kind == .lenny {
-            image = resolvedLennyAvatarImage()
+            image = resolvedEllieAvatarImage()
         } else {
             image = nil
         }

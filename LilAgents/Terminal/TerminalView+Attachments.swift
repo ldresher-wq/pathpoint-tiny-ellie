@@ -109,7 +109,7 @@ extension TerminalView {
         panel.canChooseFiles = true
         panel.resolvesAliases = true
         panel.title = "Add Context"
-        panel.message = "Choose files you want Lenny to use in the answer, like PDFs, spreadsheets, notes, or code. For screenshots, drag them in or paste them."
+        panel.message = "Choose files you want Ellie to use in the answer, like PDFs, spreadsheets, notes, or code. For screenshots, drag them in or paste them."
         panel.allowedContentTypes = SessionAttachment.pickerContentTypes
 
         guard panel.runModal() == .OK else { return }

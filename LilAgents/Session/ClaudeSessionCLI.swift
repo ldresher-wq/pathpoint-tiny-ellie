@@ -4,7 +4,7 @@ extension ClaudeSession {
     func callClaudeCodeCLI(executablePath: String, message: String, attachments: [SessionAttachment], environment: [String: String], expert: ResponderExpert?, conversationKey: String, archiveContext: String?, officialMCPToken: String?, useOfficialMCP: Bool) {
         let modelLabel = selectedClaudeModelLabel()
         let planningSummary = useOfficialMCP
-            ? "Calling \(modelLabel) in Claude Code with Lenny MCP"
+            ? "Calling \(modelLabel) in Claude Code with Pathpoint MCP"
             : "Calling \(modelLabel) in Claude Code"
         onToolUse?("Planning", ["summary": planningSummary])
         appendHistory(Message(role: .toolUse, text: "Planning: \(planningSummary)"), to: conversationKey)
@@ -13,12 +13,12 @@ extension ClaudeSession {
         var configURL: URL?
 
         if useOfficialMCP, let token = officialMCPToken {
-            let url = FileManager.default.temporaryDirectory.appendingPathComponent("lenny-claude-mcp-\(UUID().uuidString).json")
+            let url = FileManager.default.temporaryDirectory.appendingPathComponent("ellie-claude-mcp-\(UUID().uuidString).json")
             let config: [String: Any] = [
                 "mcpServers": [
-                    Constants.lennyMCPServerLabel: [
+                    Constants.pathpointMCPServerLabel: [
                         "type": "http",
-                        "url": Constants.lennyMCPURL,
+                        "url": Constants.pathpointMCPURL,
                         "headers": [
                             "Authorization": "Bearer \(token)"
                         ]
@@ -51,7 +51,7 @@ extension ClaudeSession {
         }
 
         if useOfficialMCP {
-            args.append(contentsOf: ["--allowedTools", "mcp__\(Constants.lennyMCPServerLabel)__*"])
+            args.append(contentsOf: ["--allowedTools", "mcp__\(Constants.pathpointMCPServerLabel)__*"])
             if let configURL {
                 args.append(contentsOf: ["--mcp-config", configURL.path, "--strict-mcp-config"])
             }
@@ -69,10 +69,10 @@ extension ClaudeSession {
             body: prompt
         )
 
-        // Tracks whether the Lenny MCP server actually registered tools in this session.
+        // Tracks whether the Pathpoint MCP server actually registered tools in this session.
         // Set from the init event so the completion handler can detect a missing server
         // without relying on response-text pattern matching.
-        var lennyMCPFoundInInit = false
+        var pathpointMCPFoundInInit = false
         var streamedAssistantText = ""
 
         runProcess(
@@ -87,19 +87,19 @@ extension ClaudeSession {
                     return
                 }
 
-                // Detect the init event and check if the Lenny MCP server loaded.
-                if useOfficialMCP, !lennyMCPFoundInInit,
+                // Detect the init event and check if the Pathpoint MCP server loaded.
+                if useOfficialMCP, !pathpointMCPFoundInInit,
                    let data = line.data(using: .utf8),
                    let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
                    (json["type"] as? String) == "system",
                    (json["subtype"] as? String) == "init",
                    let tools = json["tools"] as? [String] {
-                    lennyMCPFoundInInit = tools.contains { $0.hasPrefix("mcp__\(Constants.lennyMCPServerLabel)__") }
+                    pathpointMCPFoundInInit = tools.contains { $0.hasPrefix("mcp__\(Constants.pathpointMCPServerLabel)__") }
                     SessionDebugLogger.log(
                         "claude-cli",
-                        lennyMCPFoundInInit
-                            ? "init event: mcp__lennysdata__* tools present"
-                            : "init event: no mcp__lennysdata__* tools — MCP server not loaded"
+                        pathpointMCPFoundInInit
+                            ? "init event: mcp__pathpoint__* tools present"
+                            : "init event: no mcp__pathpoint__* tools — MCP server not loaded"
                     )
                 }
 
@@ -151,13 +151,13 @@ extension ClaudeSession {
 
             let outputText = self.extractClaudeCLIResult(from: stdout)
             if status == 0, let outputText, !outputText.isEmpty {
-                // If the init event showed no Lenny MCP tools, the server never
+                // If the init event showed no Pathpoint MCP tools, the server never
                 // loaded — treat the entire response as an MCP connection failure.
-                if useOfficialMCP, !lennyMCPFoundInInit {
+                if useOfficialMCP, !pathpointMCPFoundInInit {
                     SessionDebugLogger.log("claude-cli", "MCP server absent from init — failing turn and firing onMCPAuthFailure")
                     DispatchQueue.main.async {
                         self.failTurn(
-                            "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                            "The Pathpoint knowledge base isn't connected — your auth token may have expired or needs to be set up.",
                             conversationKey: conversationKey
                         )
                         self.onMCPAuthFailure?()
@@ -171,7 +171,7 @@ extension ClaudeSession {
                     SessionDebugLogger.log("claude-cli", "MCP not-connected detected in response text — failing turn and firing onMCPAuthFailure")
                     DispatchQueue.main.async {
                         self.failTurn(
-                            "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                            "The Pathpoint knowledge base isn't connected — your auth token may have expired or needs to be set up.",
                             conversationKey: conversationKey
                         )
                         self.onMCPAuthFailure?()
@@ -190,7 +190,7 @@ extension ClaudeSession {
                 SessionDebugLogger.log("claude-cli", "MCP auth failure detected — failing turn and firing onMCPAuthFailure")
                 DispatchQueue.main.async {
                     self.failTurn(
-                        "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                        "The Pathpoint knowledge base isn't connected — your auth token may have expired or needs to be set up.",
                         conversationKey: conversationKey
                     )
                     self.onMCPAuthFailure?()
@@ -206,16 +206,16 @@ extension ClaudeSession {
     func callCodexCLI(executablePath: String, message: String, attachments: [SessionAttachment], environment: [String: String], expert: ResponderExpert?, conversationKey: String, archiveContext: String?, useOfficialMCP: Bool) {
         let modelLabel = selectedCodexModelLabel()
         let planningSummary = useOfficialMCP
-            ? "Calling \(modelLabel) in Codex with Lenny MCP"
+            ? "Calling \(modelLabel) in Codex with Pathpoint MCP"
             : "Calling \(modelLabel) in Codex"
         onToolUse?("Planning", ["summary": planningSummary])
         appendHistory(Message(role: .toolUse, text: "Planning: \(planningSummary)"), to: conversationKey)
 
         let prompt = buildConversationPrompt(message: message, attachments: attachments, expert: expert, conversationKey: conversationKey, archiveContext: archiveContext, expectMCP: useOfficialMCP)
-        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("lenny-codex-last-message-\(UUID().uuidString).md")
+        let outputURL = FileManager.default.temporaryDirectory.appendingPathComponent("ellie-codex-last-message-\(UUID().uuidString).md")
         var runtimeEnvironment = environment
         if let token = officialMCPToken(from: environment) {
-            runtimeEnvironment[Constants.lennyMCPAuthEnvVar] = token
+            runtimeEnvironment[Constants.pathpointMCPAuthEnvVar] = token
         }
 
         let approvalPolicy = useOfficialMCP ? "on-request" : "never"
@@ -240,18 +240,18 @@ extension ClaudeSession {
             // When the native path is used (token == nil), Codex reads its own .codex/config.toml.
             args.append(contentsOf: [
                 "-c",
-                "mcp_servers.\(Constants.lennyMCPServerLabel).url=\"\(Constants.lennyMCPURL)\""
+                "mcp_servers.\(Constants.pathpointMCPServerLabel).url=\"\(Constants.pathpointMCPURL)\""
             ])
 
-            if AppSettings.officialLennyMCPToken != nil {
+            if AppSettings.officialPathpointMCPToken != nil {
                 args.append(contentsOf: [
                     "-c",
-                    "mcp_servers.\(Constants.lennyMCPServerLabel).http_headers.Authorization=\"Bearer \(token)\""
+                    "mcp_servers.\(Constants.pathpointMCPServerLabel).http_headers.Authorization=\"Bearer \(token)\""
                 ])
             } else {
                 args.append(contentsOf: [
                     "-c",
-                    "mcp_servers.\(Constants.lennyMCPServerLabel).bearer_token_env_var=\"\(Constants.lennyMCPAuthEnvVar)\""
+                    "mcp_servers.\(Constants.pathpointMCPServerLabel).bearer_token_env_var=\"\(Constants.pathpointMCPAuthEnvVar)\""
                 ])
             }
         }
@@ -345,7 +345,7 @@ extension ClaudeSession {
                 SessionDebugLogger.log("codex-cli", "MCP auth failure detected — failing turn and firing onMCPAuthFailure")
                 DispatchQueue.main.async {
                     self.failTurn(
-                        "The Lenny archive isn't connected — your auth token may have expired or needs to be set up.",
+                        "The Pathpoint knowledge base isn't connected — your auth token may have expired or needs to be set up.",
                         conversationKey: conversationKey
                     )
                     self.onMCPAuthFailure?()

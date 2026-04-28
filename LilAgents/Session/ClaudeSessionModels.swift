@@ -80,7 +80,7 @@ struct TranscriptSpeakerMessage: Codable, Equatable {
         }
         switch kind {
         case .lenny:
-            return "Lil-Lenny"
+            return "Ellie"
         case .expert:
             return followUpExpertName ?? "Expert"
         case .status:

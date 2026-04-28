@@ -5,10 +5,10 @@ func resolvedAvatarImage(at path: String) -> NSImage? {
     return NSImage(contentsOfFile: resolvedPath)
 }
 
-func resolvedLennyAvatarImage() -> NSImage? {
+func resolvedEllieAvatarImage() -> NSImage? {
     guard let resourceURL = Bundle.main.resourceURL else { return nil }
     let path = resourceURL
-        .appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory, isDirectory: true)
+        .appendingPathComponent(WalkerCharacterAssets.ellieAssetsDirectory, isDirectory: true)
         .appendingPathComponent("main-front.png")
         .path
     return NSImage(contentsOfFile: path)
@@ -23,7 +23,7 @@ func pngAvatarPath(for path: String) -> String? {
         return nil
     }
 
-    let cacheDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("lenny-avatar-cache", isDirectory: true)
+    let cacheDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("ellie-avatar-cache", isDirectory: true)
     try? FileManager.default.createDirectory(at: cacheDir, withIntermediateDirectories: true)
 
     let fileName = URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent + ".png"

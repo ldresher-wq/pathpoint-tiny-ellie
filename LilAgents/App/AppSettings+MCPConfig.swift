@@ -2,8 +2,8 @@ import Foundation
 
 extension AppSettings {
     private static let officialMCPMarkers = [
-        "https://mcp.lennysdata.com/mcp",
-        "lennysdata"
+        "https://mcp.pathpoint.com/mcp",
+        "pathpoint"
     ]
 
     static var homeDirectoryURL: URL {
@@ -67,7 +67,7 @@ extension AppSettings {
 
         let existing = try String(contentsOf: url, encoding: .utf8)
         let normalized = existing.replacingOccurrences(of: "\r\n", with: "\n")
-        let pattern = #"(?ms)^\[mcp_servers\.lennysdata(?:\..+)?\]\n.*?(?=^\[(?!mcp_servers\.lennysdata(?:[.\]]|$)).*|\z)"#
+        let pattern = #"(?ms)^\[mcp_servers\.pathpoint(?:\..+)?\]\n.*?(?=^\[(?!mcp_servers\.pathpoint(?:[.\]]|$)).*|\z)"#
         guard let regex = try? NSRegularExpression(pattern: pattern) else { return }
 
         let range = NSRange(normalized.startIndex..<normalized.endIndex, in: normalized)
@@ -145,7 +145,7 @@ extension AppSettings {
             return true
         }
 
-        return key.caseInsensitiveCompare(ClaudeSession.Constants.lennyMCPServerLabel) == .orderedSame
+        return key.caseInsensitiveCompare(ClaudeSession.Constants.pathpointMCPServerLabel) == .orderedSame
     }
 
     private static func isOfficialClaudeMCPServerConfiguration(_ value: Any) -> Bool {
@@ -155,10 +155,10 @@ extension AppSettings {
         }
 
         return url.trimmingCharacters(in: .whitespacesAndNewlines)
-            .caseInsensitiveCompare(ClaudeSession.Constants.lennyMCPURL) == .orderedSame
+            .caseInsensitiveCompare(ClaudeSession.Constants.pathpointMCPURL) == .orderedSame
     }
 
     private static func isOfficialClaudeMCPPermission(_ value: String) -> Bool {
-        value.lowercased().hasPrefix("mcp__\(ClaudeSession.Constants.lennyMCPServerLabel.lowercased())__")
+        value.lowercased().hasPrefix("mcp__\(ClaudeSession.Constants.pathpointMCPServerLabel.lowercased())__")
     }
 }

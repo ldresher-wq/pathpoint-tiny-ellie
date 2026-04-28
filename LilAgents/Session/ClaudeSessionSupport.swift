@@ -49,7 +49,7 @@ extension ClaudeSession {
 
         var finalStdout = ""
         var finalStderr = ""
-        let queue = DispatchQueue(label: "lenny.runProcess", attributes: .concurrent)
+        let queue = DispatchQueue(label: "ellie.runProcess", attributes: .concurrent)
         var stdoutLineBuffer = ""
         var stderrLineBuffer = ""
 

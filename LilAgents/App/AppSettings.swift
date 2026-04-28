@@ -110,7 +110,7 @@ enum AppSettings {
     static let hasExplicitPreferredTransportChoiceKey = "hasExplicitPreferredTransportChoice"
     static let archiveAccessModeKey              = "archiveAccessMode"
     static let hasExplicitStarterPackChoiceKey   = "hasExplicitStarterPackChoice"
-    static let officialLennyMCPTokenKey          = "officialLennyMCPToken"
+    static let officialPathpointMCPTokenKey      = "officialPathpointMCPToken"
     static let openAIAPIKeyKey                   = "openAIAPIKey"
     static let debugLoggingEnabledKey            = "debugLoggingEnabled"
     static let preferredClaudeModelKey           = "preferredClaudeModel"
@@ -153,9 +153,9 @@ enum AppSettings {
         set { UserDefaults.standard.set(newValue, forKey: hasExplicitStarterPackChoiceKey) }
     }
 
-    static var officialLennyMCPToken: String? {
+    static var officialPathpointMCPToken: String? {
         get {
-            let value = UserDefaults.standard.string(forKey: officialLennyMCPTokenKey)?
+            let value = UserDefaults.standard.string(forKey: officialPathpointMCPTokenKey)?
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             guard let value, !value.isEmpty else { return nil }
             return value
@@ -163,9 +163,9 @@ enum AppSettings {
         set {
             let trimmed = newValue?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if trimmed.isEmpty {
-                UserDefaults.standard.removeObject(forKey: officialLennyMCPTokenKey)
+                UserDefaults.standard.removeObject(forKey: officialPathpointMCPTokenKey)
             } else {
-                UserDefaults.standard.set(trimmed, forKey: officialLennyMCPTokenKey)
+                UserDefaults.standard.set(trimmed, forKey: officialPathpointMCPTokenKey)
             }
         }
     }
@@ -267,7 +267,7 @@ enum AppSettings {
             hasExplicitPreferredTransportChoiceKey,
             archiveAccessModeKey,
             hasExplicitStarterPackChoiceKey,
-            officialLennyMCPTokenKey,
+            officialPathpointMCPTokenKey,
             openAIAPIKeyKey,
             debugLoggingEnabledKey,
             preferredClaudeModelKey,
@@ -284,10 +284,10 @@ enum AppSettings {
 
         try removeOfficialMCPConfiguration()
         refreshDetectionState()
-        NotificationCenter.default.post(name: .lilLennyDidResetData, object: nil)
+        NotificationCenter.default.post(name: .tinyEllieDidResetData, object: nil)
     }
 }
 
 extension Notification.Name {
-    static let lilLennyDidResetData = Notification.Name("LilLennyDidResetData")
+    static let tinyEllieDidResetData = Notification.Name("TinyEllieDidResetData")
 }

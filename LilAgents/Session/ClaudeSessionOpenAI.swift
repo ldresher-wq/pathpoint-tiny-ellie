@@ -20,14 +20,14 @@ extension ClaudeSession {
         if let mcpToken {
             payload["tools"] = [[
                 "type": "mcp",
-                "server_label": Constants.lennyMCPServerLabel,
-                "server_description": "Lenny Rachitsky's archive of newsletter posts and podcast transcripts about startups, product, growth, pricing, leadership, career, and AI product work.",
-                "server_url": Constants.lennyMCPURL,
+                "server_label": Constants.pathpointMCPServerLabel,
+                "server_description": "Pathpoint's E&S insurance knowledge base for retail agents.",
+                "server_url": Constants.pathpointMCPURL,
                 "headers": [
                     "Authorization": "Bearer \(mcpToken)"
                 ],
                 "require_approval": "never",
-                "allowed_tools": Constants.lennyAllowedTools
+                "allowed_tools": Constants.pathpointAllowedTools
             ]]
         }
 
@@ -47,7 +47,7 @@ extension ClaudeSession {
         let modelLabel = selectedOpenAIModelLabel()
         let planningSummary = mcpToken == nil
             ? "Calling \(modelLabel) via OpenAI"
-            : "Calling \(modelLabel) via OpenAI with Lenny MCP"
+            : "Calling \(modelLabel) via OpenAI with Pathpoint MCP"
         onToolUse?("Planning", ["summary": planningSummary])
         appendHistory(Message(role: .toolUse, text: "Planning: \(planningSummary)"), to: conversationKey)
 
@@ -200,7 +200,7 @@ extension ClaudeSession {
 
         if let error = json["error"] as? [String: Any],
            let message = error["message"] as? String {
-            if let authError = normalizedLennyMCPAuthError(from: message) {
+            if let authError = normalizedPathpointMCPAuthError(from: message) {
                 failTurn(authError, conversationKey: conversationKey)
             } else {
                 failTurn("OpenAI error: \(message)", conversationKey: conversationKey)
@@ -243,7 +243,7 @@ extension ClaudeSession {
         if let error = json["error"] as? [String: Any],
            let message = error["message"] as? String {
             SessionDebugLogger.log("openai", "model returned error: \(message)")
-            if let authError = normalizedLennyMCPAuthError(from: message) {
+            if let authError = normalizedPathpointMCPAuthError(from: message) {
                 failTurn(authError, conversationKey: conversationKey)
             } else {
                 failTurn("OpenAI error: \(message)", conversationKey: conversationKey)
@@ -267,7 +267,7 @@ extension ClaudeSession {
                 let tools = item["tools"] as? [[String: Any]] ?? []
                 let count = tools.count
                 SessionDebugLogger.log("mcp", "mcp_list_tools returned \(count) tool(s)")
-                let summary = "Connected to Lenny archive, \(count) tools ready"
+                let summary = "Connected to Pathpoint archive, \(count) tools ready"
                 onToolResult?(summary, false)
                 appendHistory(Message(role: .toolResult, text: summary), to: conversationKey)
 

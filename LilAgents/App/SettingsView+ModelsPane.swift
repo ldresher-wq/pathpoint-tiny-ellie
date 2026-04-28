@@ -7,7 +7,7 @@ extension SettingsView {
         return VStack(alignment: .leading, spacing: 20) {
             SettingsHeader(
                 title: "Models",
-                subtitle: "Choose how Lil-Lenny should answer on this Mac."
+                subtitle: "Choose how Tiny Ellie should answer on this Mac."
             )
 
             SettingsSectionCard(title: "Runtime", subtitle: modelSectionSubtitle) {
@@ -47,7 +47,7 @@ extension SettingsView {
                             SecureField("Paste OpenAI API key", text: $openAIAPIKey)
                                 .textFieldStyle(.roundedBorder)
 
-                            Text("Used only when Lil-Lenny needs to fall back to the OpenAI API on this Mac.")
+                            Text("Used only when Tiny Ellie needs to fall back to the OpenAI API on this Mac.")
                                 .settingsCaption()
                         }
                     }
@@ -65,7 +65,7 @@ extension SettingsView {
 
             SettingsSectionCard(title: "Credits", subtitle: "Original project and this fork.") {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Lil-Lenny is built on top of the original lil agents project.")
+                    Text("Tiny Ellie is built on top of the original lil agents project.")
                         .settingsCaption()
 
                     Link("Ryan Stephen · Original lil agents project", destination: URL(string: "https://github.com/ryanstephen/lil-agents")!)
@@ -79,19 +79,12 @@ extension SettingsView {
                 }
             }
 
-            SettingsSectionCard(title: "Why I built this", subtitle: "The thinking behind Lil-Lenny.") {
+            SettingsSectionCard(title: "About Tiny Ellie", subtitle: "Ellie is Pathpoint's AI assistant for retail agents.") {
                 VStack(alignment: .leading, spacing: 10) {
-                    (
-                        Text("I saw Ryan's project and immediately wanted to make a Lenny version of it as an extension of the ")
-                        + Text(.init("[LennyRPG app](https://www.lennyrpg.fun/)"))
-                        + Text(".")
-                    )
-                    .settingsCaption()
-
-                    Text("It's nothing fundamentally different from using Claude Code or Codex with the LennyData MCP, just a more fun way to do it.")
+                    Text("Tiny Ellie is Pathpoint's AI-SDR — designed to keep retail insurance agents engaged with the Pathpoint platform and help them place E&S risks with confidence.")
                         .settingsCaption()
 
-                    Text("Enjoy!")
+                    Text("She's built on Claude Code, Codex, and OpenAI, using the Pathpoint knowledge base to provide accurate, professional answers about Pathpoint's appetite and submission process.")
                         .settingsCaption()
                 }
             }
@@ -141,7 +134,7 @@ extension SettingsView {
                         Text("Reset")
                             .font(.headline)
 
-                        Text("Clear Lil-Lenny's local settings and remove its Claude/Codex LennyData MCP configuration so you can test the setup flow from a clean state.")
+                        Text("Clear Tiny Ellie's local settings and remove its Claude/Codex Pathpoint MCP configuration so you can test the setup flow from a clean state.")
                             .settingsCaption()
 
                         Button("Reset all local data…", role: .destructive) {
@@ -174,18 +167,18 @@ extension SettingsView {
 
     var modelSectionSubtitle: String {
         switch effectiveModelTransport {
-        case .claudeCode: return "Lil-Lenny will answer through Claude Code."
-        case .codex:      return "Lil-Lenny will answer through Codex."
-        case .openAIAPI:  return "Lil-Lenny will answer through the OpenAI API."
+        case .claudeCode: return "Tiny Ellie will answer through Claude Code."
+        case .codex:      return "Tiny Ellie will answer through Codex."
+        case .openAIAPI:  return "Tiny Ellie will answer through the OpenAI API."
         case .automatic:  return "Detecting available runtimes…"
         }
     }
 
     var selectedRuntimeDescription: String {
         switch effectiveModelTransport {
-        case .claudeCode: return "Choose which Claude model Lil-Lenny should use."
-        case .codex:      return "Choose which Codex model Lil-Lenny should use."
-        case .openAIAPI:  return "Choose which OpenAI model Lil-Lenny should use and add an API key below."
+        case .claudeCode: return "Choose which Claude model Tiny Ellie should use."
+        case .codex:      return "Choose which Codex model Tiny Ellie should use."
+        case .openAIAPI:  return "Choose which OpenAI model Tiny Ellie should use and add an API key below."
         case .automatic:  return "Detecting available runtimes…"
         }
     }

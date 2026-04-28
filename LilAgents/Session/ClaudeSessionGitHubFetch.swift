@@ -2,8 +2,8 @@ import Foundation
 
 extension ClaudeSession {
 
-    private static let archiveIndexURL = URL(string: "https://raw.githubusercontent.com/LennysNewsletter/lennys-newsletterpodcastdata/main/index.json")!
-    private static let archiveFileBase = "https://raw.githubusercontent.com/LennysNewsletter/lennys-newsletterpodcastdata/main/"
+    private static let archiveIndexURL = URL(string: "https://raw.githubusercontent.com/pathpoint/pathpoint-knowledge-base/main/index.json")!
+    private static let archiveFileBase = "https://raw.githubusercontent.com/pathpoint/pathpoint-knowledge-base/main/"
 
     /// Two-step GitHub archive pre-fetch for the OpenAI path.
     /// Step 1: Fetch index.json, score entries by relevance to the query.
@@ -17,8 +17,8 @@ extension ClaudeSession {
     ) {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
-            self.onToolUse?("Searching Lenny archive", ["summary": "Fetching archive index…"])
-            self.appendHistory(Message(role: .toolUse, text: "Searching Lenny archive: Fetching archive index…"), to: conversationKey)
+            self.onToolUse?("Searching Pathpoint knowledge base", ["summary": "Fetching archive index…"])
+            self.appendHistory(Message(role: .toolUse, text: "Searching Pathpoint knowledge base: Fetching archive index…"), to: conversationKey)
         }
 
         Task {
@@ -50,7 +50,7 @@ extension ClaudeSession {
 
                 let label = top.count == 1 ? "1 episode" : "\(top.count) episodes"
                 DispatchQueue.main.async { [weak self] in
-                    self?.onToolUse?("Searching Lenny archive", ["summary": "Reading \(label)…"])
+                    self?.onToolUse?("Searching Pathpoint knowledge base", ["summary": "Reading \(label)…"])
                 }
 
                 var contextSections: [String] = []

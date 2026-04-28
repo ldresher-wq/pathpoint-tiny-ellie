@@ -24,7 +24,7 @@ enum SessionDebugLogger {
             "PATH",
             "ANTHROPIC_API_KEY",
             "OPENAI_API_KEY",
-            ClaudeSession.Constants.lennyMCPAuthEnvVar
+            ClaudeSession.Constants.pathpointMCPAuthEnvVar
         ]
 
         return interestingKeys.map { key in
@@ -45,14 +45,14 @@ enum SessionDebugLogger {
 
     private static func printFormatted(category: String, message: String) {
         let timestamp = ISO8601DateFormatter().string(from: Date())
-        print("[Lenny][\(timestamp)][\(category)] \(redactSensitiveValues(in: message))")
+        print("[Ellie][\(timestamp)][\(category)] \(redactSensitiveValues(in: message))")
     }
 
     private static func redactSensitiveValues(in text: String) -> String {
         let patterns = [
             #"Bearer\s+[A-Za-z0-9\-\._~\+\/=]+"#,
             #""Authorization"\s*:\s*"Bearer\s+[A-Za-z0-9\-\._~\+\/=]+""#,
-            #""officialLennyMCPToken"\s*:\s*"[^"]+""#
+            #""officialPathpointMCPToken"\s*:\s*"[^"]+""#
         ]
 
         return patterns.reduce(text) { partial, pattern in

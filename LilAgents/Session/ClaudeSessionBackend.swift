@@ -47,11 +47,11 @@ extension ClaudeSession {
                     SessionDebugLogger.log("env", "using locally stored OPENAI_API_KEY from Settings (overrides shell env)")
                 }
 
-                if (environment[Constants.lennyMCPAuthEnvVar] ?? "").isEmpty,
-                   let storedToken = AppSettings.officialLennyMCPToken,
+                if (environment[Constants.pathpointMCPAuthEnvVar] ?? "").isEmpty,
+                   let storedToken = AppSettings.officialPathpointMCPToken,
                    !storedToken.isEmpty {
-                    environment[Constants.lennyMCPAuthEnvVar] = storedToken
-                    SessionDebugLogger.log("env", "using locally stored \(Constants.lennyMCPAuthEnvVar) from Settings")
+                    environment[Constants.pathpointMCPAuthEnvVar] = storedToken
+                    SessionDebugLogger.log("env", "using locally stored \(Constants.pathpointMCPAuthEnvVar) from Settings")
                 }
 
                 Self.shellEnvironment = environment
@@ -101,7 +101,7 @@ extension ClaudeSession {
                 return
             }
 
-            // ── Priority 1: Claude Code with native Lenny MCP in .claude.json ──────────
+            // ── Priority 1: Claude Code with native Pathpoint MCP in .claude.json ──────────
             self.resolveClaudeCodeBackend(environment: environment) { claudeBackend in
                 if let claudeBackend, self.backendHasNativeMCPConfiguration(claudeBackend) {
                     SessionDebugLogger.log("backend", "selected Claude backend — native MCP config detected")
@@ -111,7 +111,7 @@ extension ClaudeSession {
                     return
                 }
 
-                // ── Priority 2: Codex with native Lenny MCP in .codex/config.toml ─────────
+                // ── Priority 2: Codex with native Pathpoint MCP in .codex/config.toml ─────────
                 self.resolveCodexBackend(environment: environment) { codexBackend in
                     if let codexBackend, self.backendHasNativeMCPConfiguration(codexBackend) {
                         SessionDebugLogger.log("backend", "selected Codex backend — native MCP config detected")
@@ -198,8 +198,8 @@ extension ClaudeSession {
             AppSettings.preferredOpenAIModel.rawValue,
             (environment["ANTHROPIC_API_KEY"]?.isEmpty == false) ? "anthropic:1" : "anthropic:0",
             (environment["OPENAI_API_KEY"]?.isEmpty == false) ? "openai:1" : "openai:0",
-            (AppSettings.officialLennyMCPToken?.isEmpty == false) ? "mcp-settings:1" : "mcp-settings:0",
-            (environment[Constants.lennyMCPAuthEnvVar]?.isEmpty == false) ? "mcp-env:1" : "mcp-env:0"
+            (AppSettings.officialPathpointMCPToken?.isEmpty == false) ? "mcp-settings:1" : "mcp-settings:0",
+            (environment[Constants.pathpointMCPAuthEnvVar]?.isEmpty == false) ? "mcp-env:1" : "mcp-env:0"
         ].joined(separator: "|")
     }
 
@@ -213,7 +213,7 @@ extension ClaudeSession {
             resolveClaudeCodeBackend(environment: environment) { backend in
                 if let backend {
                     if archiveMode == .officialMCP, !self.backendSupportsOfficialMCP(backend, environment: environment) {
-                        completion(nil, environment, "Claude Code is selected in Settings, but the official Lenny MCP is not configured there. Configure it in Claude Code, save a bearer token in Settings, or switch to Starter Pack.")
+                        completion(nil, environment, "Claude Code is selected in Settings, but the official Pathpoint MCP is not configured there. Configure it in Claude Code, save a bearer token in Settings, or switch to Starter Pack.")
                         return
                     }
                     SessionDebugLogger.log("backend", "selected forced Claude backend")
@@ -226,7 +226,7 @@ extension ClaudeSession {
             resolveCodexBackend(environment: environment) { backend in
                 if let backend {
                     if archiveMode == .officialMCP, !self.backendSupportsOfficialMCP(backend, environment: environment) {
-                        completion(nil, environment, "Codex is selected in Settings, but the official Lenny MCP is not configured there. Configure it in Codex, save a bearer token in Settings, or switch to Starter Pack.")
+                        completion(nil, environment, "Codex is selected in Settings, but the official Pathpoint MCP is not configured there. Configure it in Codex, save a bearer token in Settings, or switch to Starter Pack.")
                         return
                     }
                     SessionDebugLogger.log("backend", "selected forced Codex backend")
@@ -334,13 +334,13 @@ extension ClaudeSession {
     }
 
     func officialMCPToken(from environment: [String: String]) -> String? {
-        if let override = AppSettings.officialLennyMCPToken {
+        if let override = AppSettings.officialPathpointMCPToken {
             SessionDebugLogger.log("mcp", "using official MCP token from Settings")
             return override
         }
-        if let custom = environment[Constants.lennyMCPAuthEnvVar]?.trimmingCharacters(in: .whitespacesAndNewlines),
+        if let custom = environment[Constants.pathpointMCPAuthEnvVar]?.trimmingCharacters(in: .whitespacesAndNewlines),
            !custom.isEmpty {
-            SessionDebugLogger.log("mcp", "using official MCP token from environment variable \(Constants.lennyMCPAuthEnvVar)")
+            SessionDebugLogger.log("mcp", "using official MCP token from environment variable \(Constants.pathpointMCPAuthEnvVar)")
             return custom
         }
         SessionDebugLogger.log("mcp", "no official MCP token available")
@@ -365,7 +365,7 @@ extension ClaudeSession {
         officialMCPToken(from: environment) != nil || AppSettings.hasDetectedOfficialMCPConfiguration
     }
 
-    /// True when the backend can invoke the Lenny MCP server using its own locally
+    /// True when the backend can invoke the Pathpoint MCP server using its own locally
     /// stored credentials (no separate bearer token required from the app).
     func backendHasNativeMCPConfiguration(_ backend: Backend) -> Bool {
         switch backend {
@@ -396,7 +396,7 @@ extension ClaudeSession {
         let archiveMode = environment.map { effectiveArchiveAccessMode(environment: $0) } ?? AppSettings.effectiveArchiveAccessMode
         let archiveLabel = archiveMode == .starterPack
             ? "bundled starter archive"
-            : "official Lenny MCP"
+            : "official Pathpoint MCP"
         switch backend {
         case .claudeCodeCLI:
             let modelSuffix = selectedClaudeModel().map { " • model: \($0)" } ?? ""
@@ -412,10 +412,10 @@ extension ClaudeSession {
     func backendSetupMessage(environment: [String: String]) -> String {
         let hasOpenAIKey = !(environment["OPENAI_API_KEY"] ?? "").isEmpty
         let hasAnthropicKey = !(environment["ANTHROPIC_API_KEY"] ?? "").isEmpty
-        let hasCustomMCPKey = !(environment[Constants.lennyMCPAuthEnvVar] ?? "").isEmpty
+        let hasCustomMCPKey = !(environment[Constants.pathpointMCPAuthEnvVar] ?? "").isEmpty
 
         var lines = [
-            "Lenny is not connected yet.",
+            "Ellie is not connected yet.",
             "",
             "Open Settings to connect one of these:",
             "1. Claude Code",
@@ -430,7 +430,7 @@ extension ClaudeSession {
             lines.append("Detected in your shell:")
             if hasAnthropicKey { lines.append("- `ANTHROPIC_API_KEY`") }
             if hasOpenAIKey { lines.append("- `OPENAI_API_KEY`") }
-            if hasCustomMCPKey { lines.append("- `\(Constants.lennyMCPAuthEnvVar)`") }
+            if hasCustomMCPKey { lines.append("- `\(Constants.pathpointMCPAuthEnvVar)`") }
         }
 
         return lines.joined(separator: "\n")

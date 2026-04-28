@@ -4,10 +4,10 @@ final class ClaudeSession {
     enum Constants {
         static let openAIEndpoint = URL(string: "https://api.openai.com/v1/responses")!
         static let requestTimeout: TimeInterval = 120
-        static let lennyMCPURL = "https://mcp.lennysdata.com/mcp"
-        static let lennyMCPServerLabel = "lennysdata"
-        static let lennyMCPAuthEnvVar = "LENNYSDATA_MCP_AUTH_TOKEN"
-        static let lennyAllowedTools = ["search_content", "read_excerpt", "read_content", "list_content"]
+        static let pathpointMCPURL = "https://mcp.pathpoint.com/mcp"
+        static let pathpointMCPServerLabel = "pathpoint"
+        static let pathpointMCPAuthEnvVar = "PATHPOINT_MCP_AUTH_TOKEN"
+        static let pathpointAllowedTools = ["search_content", "read_excerpt", "read_content", "list_content"]
         static let avatarsDirectory = "ExpertAvatars"
     }
 
@@ -65,7 +65,7 @@ final class ClaudeSession {
     static var shellEnvironmentResolvedAt: Date?
     static var openAIKey: String?
     private(set) var cachedOfficialArchiveToken: String?
-    private(set) var cachedOfficialArchiveClient: LennyArchiveClient?
+    private(set) var cachedOfficialArchiveClient: PathpointArchiveClient?
 
     func selectedClaudeModel() -> String? {
         let model = AppSettings.preferredClaudeModel
@@ -93,12 +93,12 @@ final class ClaudeSession {
         AppSettings.preferredOpenAIModel.label
     }
 
-    func officialArchiveClient(token: String) throws -> LennyArchiveClient {
+    func officialArchiveClient(token: String) throws -> PathpointArchiveClient {
         if cachedOfficialArchiveToken == token, let cachedOfficialArchiveClient {
             return cachedOfficialArchiveClient
         }
 
-        let client = try LennyArchiveClient(token: token)
+        let client = try PathpointArchiveClient(token: token)
         cachedOfficialArchiveToken = token
         cachedOfficialArchiveClient = client
         return client

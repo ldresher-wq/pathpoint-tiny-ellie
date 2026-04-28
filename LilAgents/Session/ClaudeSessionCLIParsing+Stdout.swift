@@ -299,7 +299,7 @@ extension ClaudeSession {
     }
 
     func normalizedTransportToolName(_ rawToolName: String) -> String {
-        let mcpPrefix = "mcp__\(Constants.lennyMCPServerLabel)__"
+        let mcpPrefix = "mcp__\(Constants.pathpointMCPServerLabel)__"
         if rawToolName.hasPrefix(mcpPrefix) {
             return String(rawToolName.dropFirst(mcpPrefix.count))
         }
@@ -319,13 +319,13 @@ extension ClaudeSession {
         let lowered = errorMessage.lowercased()
 
         if lowered.contains("user cancelled mcp tool call") {
-            if Constants.lennyAllowedTools.contains(toolName) {
+            if Constants.pathpointAllowedTools.contains(toolName) {
                 return "The archive lookup was cancelled before it finished"
             }
             return "That tool call was cancelled before it finished"
         }
 
-        if lowered.contains("environment variable") && lowered.contains(Constants.lennyMCPAuthEnvVar.lowercased()) {
+        if lowered.contains("environment variable") && lowered.contains(Constants.pathpointMCPAuthEnvVar.lowercased()) {
             return "The archive token was not available to the MCP server"
         }
 

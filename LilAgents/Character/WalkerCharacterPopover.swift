@@ -28,9 +28,9 @@ extension WalkerCharacter {
         }
 
         let welcome = """
-        Ask Lil-Lenny anything about product, growth, leadership, pricing, startups, or AI.
+        Ask Ellie anything about product, growth, leadership, pricing, startups, or AI.
 
-        Your desktop shortcut to LennyData.
+        Your E&S insurance assistant from Pathpoint.
         """
         terminalView?.appendStreamingText(welcome)
         terminalView?.endStreaming()

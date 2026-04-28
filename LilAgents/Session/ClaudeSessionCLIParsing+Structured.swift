@@ -13,8 +13,8 @@ extension ClaudeSession {
                 if kind == "expert", let expert = expertSuggestion(named: speakerName) {
                     segments.append(AssistantSegment(speaker: speaker(for: expert), markdown: markdown, followUpExpert: expert))
                 } else {
-                    let speakerValue = normalize(speakerName) == normalize("Lil-Lenny")
-                        ? lennySpeaker()
+                    let speakerValue = normalize(speakerName) == normalize("Ellie")
+                        ? ellieSpeaker()
                         : TranscriptSpeaker(name: speakerName, avatarPath: nil, kind: .system)
                     segments.append(AssistantSegment(speaker: speakerValue, markdown: markdown, followUpExpert: nil))
                 }
@@ -22,7 +22,7 @@ extension ClaudeSession {
         }
 
         if segments.isEmpty, let answerMarkdown = json["answer_markdown"] as? String {
-            segments = [AssistantSegment(speaker: lennySpeaker(), markdown: answerMarkdown, followUpExpert: nil)]
+            segments = [AssistantSegment(speaker: ellieSpeaker(), markdown: answerMarkdown, followUpExpert: nil)]
         }
 
         guard !segments.isEmpty else { return nil }

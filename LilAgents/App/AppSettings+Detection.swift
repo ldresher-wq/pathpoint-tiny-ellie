@@ -18,7 +18,7 @@ extension AppSettings {
         if hasDetectedCodexOfficialMCPConfiguration {
             sources.append(.codexGlobalConfig)
         }
-        if officialLennyMCPToken != nil {
+        if officialPathpointMCPToken != nil {
             sources.append(.settingsToken)
         }
         if shellEnvironmentOfficialMCPToken() != nil {
@@ -198,7 +198,7 @@ extension AppSettings {
         guard result.status == 0 else { return false }
 
         let combinedOutput = "\(result.stdout)\n\(result.stderr)".lowercased()
-        return combinedOutput.contains("lennysdata") && combinedOutput.contains(ClaudeSession.Constants.lennyMCPURL.lowercased())
+        return combinedOutput.contains("pathpoint") && combinedOutput.contains(ClaudeSession.Constants.pathpointMCPURL.lowercased())
     }
 
     static var hasDetectedCodexOfficialMCPConfiguration: Bool {
@@ -218,10 +218,10 @@ extension AppSettings {
         guard result.status == 0 else { return false }
 
         let combinedOutput = "\(result.stdout)\n\(result.stderr)".lowercased()
-        if combinedOutput.contains("\"name\":\"lennysdata\"") || combinedOutput.contains("\"lennysdata\"") {
+        if combinedOutput.contains("\"name\":\"pathpoint\"") || combinedOutput.contains("\"pathpoint\"") {
             return true
         }
-        return combinedOutput.contains("lennysdata") && combinedOutput.contains(ClaudeSession.Constants.lennyMCPURL.lowercased())
+        return combinedOutput.contains("pathpoint") && combinedOutput.contains(ClaudeSession.Constants.pathpointMCPURL.lowercased())
     }
 
     // MARK: - Shell environment

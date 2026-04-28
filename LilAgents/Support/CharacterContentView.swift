@@ -114,7 +114,7 @@ class CharacterContentView: NSView {
         settingsItem.target = NSApp.delegate
         menu.addItem(settingsItem)
 
-        let quitItem = NSMenuItem(title: "Quit Lil-Lenny", action: #selector(AppDelegate.quitApp), keyEquivalent: "")
+        let quitItem = NSMenuItem(title: "Quit Tiny Ellie", action: #selector(AppDelegate.quitApp), keyEquivalent: "")
         quitItem.target = NSApp.delegate
         menu.addItem(quitItem)
 

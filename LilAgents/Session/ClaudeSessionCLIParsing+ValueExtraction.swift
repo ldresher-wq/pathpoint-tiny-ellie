@@ -1,13 +1,12 @@
 import Foundation
 
 extension ClaudeSession {
-    func normalizedLennyMCPAuthError(from text: String) -> String? {
+    func normalizedPathpointMCPAuthError(from text: String) -> String? {
         let normalized = text.lowercased()
-        let mentionsLennyMCP =
-            normalized.contains("lennysdata") ||
-            normalized.contains("mcp.lennysdata.com") ||
-            normalized.contains("lenny mcp") ||
-            normalized.contains("lennydata mcp")
+        let mentionsPathpointMCP =
+            normalized.contains("pathpoint") ||
+            normalized.contains("mcp.pathpoint.com") ||
+            normalized.contains("pathpoint mcp")
 
         let looksLikeAuthFailure =
             normalized.contains("401") ||
@@ -21,9 +20,9 @@ extension ClaudeSession {
             normalized.contains("invalid bearer") ||
             normalized.contains("bearer token")
 
-        guard mentionsLennyMCP && looksLikeAuthFailure else { return nil }
+        guard mentionsPathpointMCP && looksLikeAuthFailure else { return nil }
 
-        return "Your LennyData token looks invalid or expired. Open Settings and add a new token, or switch back to Starter Pack."
+        return "Your Pathpoint token looks invalid or expired. Open Settings and add a new token, or switch back to Starter Pack."
     }
 
     func extractStructuredJSONStringValue(forKey key: String, from outputText: String) -> String? {
@@ -105,7 +104,7 @@ extension ClaudeSession {
             .filter { !$0.isEmpty }
             .joined(separator: "\n")
 
-        if let authError = normalizedLennyMCPAuthError(from: combined) {
+        if let authError = normalizedPathpointMCPAuthError(from: combined) {
             return authError
         }
 
@@ -120,7 +119,7 @@ extension ClaudeSession {
 
         let promptMarkers = [
             "System instructions:",
-            "You are answering inside a macOS companion app",
+            "You are Ellie, Pathpoint's AI assistant",
             "Return only valid JSON",
             "answer_markdown",
             "suggested_experts",

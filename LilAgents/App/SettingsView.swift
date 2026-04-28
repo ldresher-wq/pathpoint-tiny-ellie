@@ -12,7 +12,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .source: return "Lenny source"
+        case .source: return "Ellie source"
         case .models: return "Models"
         case .about: return "About"
         case .developer: return "Developer"
@@ -21,7 +21,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 
     var subtitle: String {
         switch self {
-        case .source: return "Starter Pack or Full LennyData"
+        case .source: return "Starter Pack or Full Pathpoint"
         case .models: return "Runtime and model choices"
         case .about: return "Credits and release notes"
         case .developer: return "Logs and preview states"
@@ -41,7 +41,7 @@ enum SettingsPane: String, CaseIterable, Identifiable {
 struct SettingsView: View {
     @AppStorage(AppSettings.preferredTransportKey) var preferredTransport = AppSettings.PreferredTransport.automatic.rawValue
     @AppStorage(AppSettings.archiveAccessModeKey) var archiveAccessMode = AppSettings.ArchiveAccessMode.starterPack.rawValue
-    @AppStorage(AppSettings.officialLennyMCPTokenKey) var officialToken = ""
+    @AppStorage(AppSettings.officialPathpointMCPTokenKey) var officialToken = ""
     @AppStorage(AppSettings.openAIAPIKeyKey) var openAIAPIKey = ""
     @AppStorage(AppSettings.debugLoggingEnabledKey) var debugLoggingEnabled = true
     @AppStorage(AppSettings.preferredClaudeModelKey) var preferredClaudeModel = AppSettings.ClaudeModel.default.rawValue
@@ -60,7 +60,7 @@ struct SettingsView: View {
     @State var detectedClaudeAvailable: Bool? = nil
     @State var detectedCodexAvailable: Bool? = nil
 
-    let officialArchiveURL = URL(string: "https://www.lennysdata.com") ?? URL(fileURLWithPath: "/")
+    let officialArchiveURL = URL(string: "https://www.pathpoint.com") ?? URL(fileURLWithPath: "/")
 
     var body: some View {
         NavigationSplitView {
@@ -98,7 +98,7 @@ struct SettingsView: View {
                 selectedPane = .source
             }
         }
-        .alert("Reset Lil-Lenny data?", isPresented: $showResetConfirmation) {
+        .alert("Reset Tiny Ellie data?", isPresented: $showResetConfirmation) {
             Button("Reset All Data", role: .destructive) {
                 do {
                     try AppSettings.resetAllData()
@@ -109,7 +109,7 @@ struct SettingsView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This clears Lil-Lenny's saved token, API keys, model/runtime settings, onboarding state, and removes the `lennysdata` MCP config it wrote for Claude and Codex.")
+            Text("This clears Tiny Ellie's saved token, API keys, model/runtime settings, onboarding state, and removes the `pathpoint` MCP config it wrote for Claude and Codex.")
         }
         .alert("Reset Failed", isPresented: Binding(
             get: { resetErrorMessage != nil },

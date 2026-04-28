@@ -162,7 +162,7 @@ extension WalkerCharacter {
             setFacing(.front)
             setPersona(.expert(expert))
         } else {
-            setPersona(.lenny)
+            setPersona(.ellie)
             if wasExpertMode, !movementLocked, !isDraggingHorizontally, !isOnboarding {
                 isPaused = true
                 isWalking = false
@@ -181,7 +181,7 @@ extension WalkerCharacter {
 
     func restoreTranscriptState() {
         updateInputPlaceholder()
-        terminalView?.setReturnToLennyVisible(focusedExpert != nil)
+        terminalView?.setReturnToEllieVisible(focusedExpert != nil)
         terminalView?.isExpertMode = focusedExpert != nil
 
         guard let session = claudeSession, let terminalView else { return }
@@ -281,8 +281,8 @@ extension WalkerCharacter {
 
     private func loadDirectionalImages() {
         directionalImages[.front] = loadImage(named: "main-front.png")
-        directionalImages[.left] = loadImage(named: "lenny-walk-left.gif", fallback: "main-left.png")
-        directionalImages[.right] = loadImage(named: "lenny-walk-right.gif", fallback: "main-right.png")
+        directionalImages[.left] = loadImage(named: "ellie-walk-left.gif", fallback: "main-left.png")
+        directionalImages[.right] = loadImage(named: "ellie-walk-right.gif", fallback: "main-right.png")
         directionalImages[.back] = loadImage(named: "main-back.png")
     }
 
@@ -290,7 +290,7 @@ extension WalkerCharacter {
         guard let resourceURL = Bundle.main.resourceURL else {
             return NSImage(size: NSSize(width: displayWidth, height: displayHeight))
         }
-        let baseURL = resourceURL.appendingPathComponent(WalkerCharacterAssets.lennyAssetsDirectory)
+        let baseURL = resourceURL.appendingPathComponent(WalkerCharacterAssets.ellieAssetsDirectory)
         let primaryPath = baseURL.appendingPathComponent(name).path
         if let image = NSImage(contentsOfFile: primaryPath) {
             return image
@@ -313,7 +313,7 @@ extension WalkerCharacter {
         self.persona = persona
 
         switch persona {
-        case .lenny:
+        case .ellie:
             loadDirectionalImages()
             characterColor = NSColor(red: 0.96, green: 0.63, blue: 0.23, alpha: 1.0)
 
@@ -339,7 +339,7 @@ extension WalkerCharacter {
         if let expert = focusedExpert ?? representedExpert {
             tooltip = "Ask \(expert.name)"
         } else {
-            tooltip = "Ask Lil-Lenny"
+            tooltip = "Ask Ellie"
         }
         window.contentView?.toolTip = tooltip
     }

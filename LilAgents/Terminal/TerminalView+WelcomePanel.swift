@@ -139,7 +139,7 @@ extension TerminalView {
         // Native MCP (codex mcp add / codex mcp login) is self-sufficient — no app token needed.
         let hasNativeMCPConfig = AppSettings.detectedOfficialMCPSources.contains(.claudeGlobalConfig)
             || AppSettings.detectedOfficialMCPSources.contains(.codexGlobalConfig)
-        let hasWorkingToken = AppSettings.officialLennyMCPToken != nil
+        let hasWorkingToken = AppSettings.officialPathpointMCPToken != nil
             || AppSettings.shellEnvironmentOfficialMCPToken() != nil
         let needsTokenSetup = !hasNativeMCPConfig
             && AppSettings.effectiveArchiveAccessMode == .officialMCP
@@ -200,7 +200,7 @@ extension TerminalView {
             "archive:\(AppSettings.archiveAccessMode.rawValue)",
             "transport:\(AppSettings.preferredTransport.rawValue)",
             "official:\(AppSettings.hasDetectedOfficialMCPConfiguration ? "1" : "0")",
-            "token:\(AppSettings.officialLennyMCPToken != nil ? "1" : "0")",
+            "token:\(AppSettings.officialPathpointMCPToken != nil ? "1" : "0")",
             "openai:\(AppSettings.openAIAPIKey != nil ? "1" : "0")",
             "setup:\(requiresInitialConnectionSetup ? "1" : "0")"
         ].joined(separator: "|")

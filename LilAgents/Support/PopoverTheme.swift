@@ -71,7 +71,7 @@ struct PopoverTheme {
         titleBarBg: NSColor(red: 0.972, green: 0.900, blue: 0.772, alpha: 0.84),
         titleText: NSColor(red: 0.365, green: 0.212, blue: 0.075, alpha: 1.0),
         titleFont: NSFont.systemFont(ofSize: 11, weight: .semibold),
-        titleString: "Lil-Lenny",
+        titleString: "Tiny Ellie",
         separatorColor: NSColor(red: 0.838, green: 0.718, blue: 0.528, alpha: 0.30),
         font: NSFont.systemFont(ofSize: 13, weight: .regular),
         fontBold: NSFont.systemFont(ofSize: 13, weight: .semibold),
@@ -100,7 +100,7 @@ struct PopoverTheme {
         titleBarBg: NSColor(red: 0.900, green: 0.914, blue: 0.935, alpha: 1.0),
         titleText: NSColor(red: 0.218, green: 0.218, blue: 0.278, alpha: 1.0),
         titleFont: NSFont(name: "Optima-Bold", size: 11) ?? .systemFont(ofSize: 11, weight: .semibold),
-        titleString: "lil-lenny ~",
+        titleString: "tiny-ellie ~",
         separatorColor: NSColor(red: 0.718, green: 0.748, blue: 0.800, alpha: 0.32),
         font: NSFont(name: "Optima", size: 13) ?? .systemFont(ofSize: 13, weight: .regular),
         fontBold: NSFont(name: "Optima-Bold", size: 13) ?? .systemFont(ofSize: 13, weight: .semibold),
@@ -129,7 +129,7 @@ struct PopoverTheme {
         titleBarBg: NSColor(red: 0.698, green: 0.732, blue: 0.658, alpha: 1.0),
         titleText: NSColor(red: 0.118, green: 0.138, blue: 0.078, alpha: 1.0),
         titleFont: NSFont(name: "Chicago", size: 11) ?? .systemFont(ofSize: 11, weight: .bold),
-        titleString: "Lil-Lenny",
+        titleString: "Tiny Ellie",
         separatorColor: NSColor(red: 0.518, green: 0.558, blue: 0.472, alpha: 0.52),
         font: NSFont(name: "Geneva", size: 11) ?? .monospacedSystemFont(ofSize: 11, weight: .regular),
         fontBold: NSFont(name: "Geneva", size: 11) ?? .monospacedSystemFont(ofSize: 11, weight: .bold),
@@ -159,7 +159,7 @@ struct PopoverTheme {
         titleBarBg: NSColor(red: 0.108, green: 0.108, blue: 0.205, alpha: 1.0),
         titleText: NSColor(red: 0.940, green: 0.778, blue: 0.418, alpha: 1.0),
         titleFont: NSFont(name: "Avenir Next Demi Bold", size: 11) ?? .systemFont(ofSize: 11, weight: .semibold),
-        titleString: "Lil-Lenny",
+        titleString: "Tiny Ellie",
         separatorColor: NSColor(red: 0.818, green: 0.608, blue: 0.218, alpha: 0.24),
         font: NSFont(name: "Avenir Next Regular", size: 13) ?? .systemFont(ofSize: 13, weight: .regular),
         fontBold: NSFont(name: "Avenir Next Demi Bold", size: 13) ?? .systemFont(ofSize: 13, weight: .semibold),
@@ -180,8 +180,8 @@ struct PopoverTheme {
     )
 
     static let harbor = PopoverTheme(
-        name: "Lenny",
-        // Warm parchment background — Lenny's brand warmth meets pi.ai's clean openness
+        name: "Ellie",
+        // Warm background color
         popoverBg: NSColor(red: 0.984, green: 0.958, blue: 0.918, alpha: 1.0),
         popoverBorder: NSColor(red: 0.820, green: 0.678, blue: 0.488, alpha: 0.28),
         popoverBorderWidth: 1.0,
@@ -189,13 +189,13 @@ struct PopoverTheme {
         titleBarBg: NSColor(red: 0.978, green: 0.948, blue: 0.904, alpha: 1.0),
         titleText: NSColor(red: 0.100, green: 0.068, blue: 0.025, alpha: 1.0),
         titleFont: NSFont.systemFont(ofSize: 13, weight: .semibold),
-        titleString: "Lil-Lenny",
+        titleString: "Tiny Ellie",
         separatorColor: NSColor(red: 0.820, green: 0.710, blue: 0.568, alpha: 0.38),
         font: NSFont.systemFont(ofSize: 14, weight: .regular),
         fontBold: NSFont.systemFont(ofSize: 14, weight: .semibold),
         textPrimary: NSColor(red: 0.112, green: 0.075, blue: 0.028, alpha: 1.0),
         textDim: NSColor(red: 0.535, green: 0.448, blue: 0.335, alpha: 1.0),
-        accentColor: NSColor(red: 0.878, green: 0.478, blue: 0.067, alpha: 1.0),  // Lenny orange
+        accentColor: NSColor(red: 0.878, green: 0.478, blue: 0.067, alpha: 1.0),  // Ellie accent
         errorColor: NSColor(red: 0.748, green: 0.218, blue: 0.148, alpha: 1.0),
         successColor: NSColor(red: 0.228, green: 0.558, blue: 0.388, alpha: 1.0),
         inputBg: NSColor(red: 0.995, green: 0.985, blue: 0.964, alpha: 1.0),

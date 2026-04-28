@@ -228,17 +228,17 @@ extension TerminalView {
         let t = theme
         let greeting: String
         if requiresInitialConnectionSetup {
-            greeting = "Hi, I'm Lil-Lenny. Open Settings to connect Claude, ChatGPT, or OpenAI, then come back here and ask me anything."
+            greeting = "Hi, I'm Ellie — Pathpoint's AI assistant. Open Settings to connect Claude, ChatGPT, or OpenAI, then come back here and ask me anything about E&S insurance."
         } else if archiveMode == .starterPack {
-            greeting = "Hi, I'm Lil-Lenny. Ask me about product, growth, leadership, pricing, startups, or AI. I'll help you think it through with the Starter Pack on this Mac."
+            greeting = "Hi, I'm Ellie — Pathpoint's AI assistant. Ask me about E&S markets, submission guidelines, Pathpoint's appetite, or placing non-standard risks. I'll help with the starter knowledge base."
         } else {
-            greeting = "Hi, I'm Lil-Lenny. Ask me about product, growth, leadership, pricing, startups, or AI. I draw from LennyData."
+            greeting = "Hi, I'm Ellie — Pathpoint's AI assistant for retail agents. Ask me about E&S markets, submission guidelines, Pathpoint's appetite, or placing non-standard risks."
         }
         let attrText = NSAttributedString(string: greeting, attributes: [
             .font: t.font,
             .foregroundColor: t.textPrimary,
         ])
-        appendBubble(text: attrText, isUser: false, speaker: TranscriptSpeaker(name: "Lil-Lenny", avatarPath: nil, kind: .lenny))
+        appendBubble(text: attrText, isUser: false, speaker: TranscriptSpeaker(name: "Ellie", avatarPath: nil, kind: .lenny))
 
         lastObservedFirstRunConfigurationSignature = firstRunConfigurationSignature()
         lastRenderedWelcomeSignature = welcomeSignature
@@ -321,7 +321,7 @@ extension TerminalView {
 
     func beginAssistantTurn(name: String?) {
         let labelName = name ?? theme.titleString
-        let speaker = TranscriptSpeaker(name: labelName, avatarPath: nil, kind: labelName.lowercased() == "lil-lenny" ? .lenny : .system)
+        let speaker = TranscriptSpeaker(name: labelName, avatarPath: nil, kind: labelName.lowercased() == "ellie" ? .lenny : .system)
         appendBubble(text: NSAttributedString(string: ""), isUser: false, speaker: speaker)
     }
 

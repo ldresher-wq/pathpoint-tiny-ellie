@@ -38,7 +38,7 @@ extension ClaudeSession {
                 return ("Tool Result", completionStatus)
             }
 
-            if Constants.lennyAllowedTools.contains(normalizedTool) {
+            if Constants.pathpointAllowedTools.contains(normalizedTool) {
                 return processDisplay(for: normalizedTool, arguments: arguments)
             }
 
@@ -114,7 +114,7 @@ extension ClaudeSession {
         }
 
         let normalizedToolName = normalizedTransportToolName(toolName)
-        if Constants.lennyAllowedTools.contains(normalizedToolName) {
+        if Constants.pathpointAllowedTools.contains(normalizedToolName) {
             let output = decodedToolResultPayload(from: content)
             return ("Tool Result", processResultStatus(for: normalizedToolName, arguments: arguments, output: output))
         }
@@ -131,7 +131,7 @@ extension ClaudeSession {
             return ("Tool Result", "Loaded \(path)")
         case "webfetch", "web_fetch":
             if let url = arguments["url"] as? String,
-               url.contains("raw.githubusercontent.com/LennysNewsletter") {
+               url.contains("raw.githubusercontent.com/pathpoint") {
                 if url.hasSuffix("index.json") {
                     return ("Tool Result", "Got the archive index")
                 }
@@ -148,7 +148,7 @@ extension ClaudeSession {
         let tool = rawToolName.trimmingCharacters(in: .whitespacesAndNewlines)
         let normalizedTool = normalizedTransportToolName(tool)
 
-        if Constants.lennyAllowedTools.contains(normalizedTool) {
+        if Constants.pathpointAllowedTools.contains(normalizedTool) {
             return processDisplay(for: normalizedTool, arguments: arguments)
         }
 
@@ -170,12 +170,12 @@ extension ClaudeSession {
             }
         case "webfetch", "web_fetch":
             if let url = arguments["url"] as? String {
-                if url.contains("raw.githubusercontent.com/LennysNewsletter") {
+                if url.contains("raw.githubusercontent.com/pathpoint") {
                     if url.hasSuffix("index.json") {
-                        return ("Browsing archive", "Checking what's available in Lenny's archive")
+                        return ("Browsing archive", "Checking what's available in Pathpoint's archive")
                     }
                     let name = readableSourceName(from: URL(string: url)?.lastPathComponent)
-                    return ("Reading archive", "Reading \(name) from Lenny's archive")
+                    return ("Reading archive", "Reading (name) from Pathpoint's archive")
                 }
                 let host = URL(string: url)?.host ?? url
                 return ("Web Fetch", "Fetching from \(host)")
@@ -269,7 +269,7 @@ extension ClaudeSession {
     }
 
     private func completedToolStatus(for toolName: String, arguments: [String: Any], result: Any) -> String? {
-        if Constants.lennyAllowedTools.contains(toolName) {
+        if Constants.pathpointAllowedTools.contains(toolName) {
             let output = decodedToolResultPayload(from: result)
             return processResultStatus(for: toolName, arguments: arguments, output: output)
         }
@@ -318,13 +318,13 @@ extension ClaudeSession {
         let lowered = errorMessage.lowercased()
 
         if lowered.contains("user cancelled mcp tool call") {
-            if Constants.lennyAllowedTools.contains(toolName) {
+            if Constants.pathpointAllowedTools.contains(toolName) {
                 return "The archive lookup was cancelled before it finished"
             }
             return "That tool call was cancelled before it finished"
         }
 
-        if lowered.contains("environment variable") && lowered.contains(Constants.lennyMCPAuthEnvVar.lowercased()) {
+        if lowered.contains("environment variable") && lowered.contains(Constants.pathpointMCPAuthEnvVar.lowercased()) {
             return "The archive token was not available to the MCP server"
         }
 

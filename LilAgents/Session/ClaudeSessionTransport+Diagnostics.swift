@@ -3,7 +3,7 @@ import Foundation
 extension ClaudeSession {
     func preferredWorkingDirectoryURL() -> URL {
         // Always use a temp dir — avoids macOS TCC prompts for home/Documents folder access.
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("LilLennyCLI", isDirectory: true)
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("TinyEllieCLI", isDirectory: true)
         try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
     }
@@ -28,8 +28,8 @@ extension ClaudeSession {
 
             let anthropicKey     = AppSettings.hasDetectedAnthropicAPIKey
             let openaiKey        = AppSettings.hasDetectedOpenAIAPIKey
-            let mcpEnvToken      = !(processEnv[ClaudeSession.Constants.lennyMCPAuthEnvVar] ?? "").isEmpty
-            let mcpSettingsToken = AppSettings.officialLennyMCPToken != nil
+            let mcpEnvToken      = !(processEnv[ClaudeSession.Constants.pathpointMCPAuthEnvVar] ?? "").isEmpty
+            let mcpSettingsToken = AppSettings.officialPathpointMCPToken != nil
 
             // ── MCP in config files ──────────────────────────────────────────
             let claudeConfigURLs       = AppSettings.claudeGlobalConfigURLs
@@ -47,7 +47,7 @@ extension ClaudeSession {
             // ── Print ────────────────────────────────────────────────────────
             var lines: [String] = []
             lines.append("╔══════════════════════════════════════════════════╗")
-            lines.append("║           Lil-Lenny startup diagnostics          ║")
+            lines.append("║           Tiny Ellie startup diagnostics          ║")
             lines.append("╚══════════════════════════════════════════════════╝")
 
             lines.append("")
@@ -62,21 +62,21 @@ extension ClaudeSession {
             lines.append("  ANTHROPIC_API_KEY         : \(anthropicKey      ? "present" : "missing")")
             lines.append("  OPENAI_API_KEY            : \(openaiKey         ? "present" : "missing")")
             lines.append("  LENNYSDATA_MCP_AUTH_TOKEN : \(mcpEnvToken       ? "present (env)"      : "missing")")
-            lines.append("  Lenny MCP token (Settings): \(mcpSettingsToken  ? "present (settings)" : "missing")")
+            lines.append("  Pathpoint MCP token (Settings): \(mcpSettingsToken  ? "present (settings)" : "missing")")
 
             lines.append("")
-            lines.append("── Lenny MCP config detection ──────────────────────")
+            lines.append("── Pathpoint MCP config detection ──────────────────────")
             for url in claudeConfigURLs {
                 let exists = fm.fileExists(atPath: url.path)
                 let hasMCP = AppSettings.containsOfficialMCPConfiguration(at: url)
-                lines.append("  \(url.lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)): \(exists ? "exists" : "missing")\(hasMCP ? " ✓ has Lenny MCP" : "")")
+                lines.append("  \(url.lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)): \(exists ? "exists" : "missing")\(hasMCP ? " ✓ has Pathpoint MCP" : "")")
             }
             let anyClaudeFileMCP = claudeConfigURLs.contains(where: AppSettings.containsOfficialMCPConfiguration(at:))
             if !anyClaudeFileMCP && claudeConfigMCPViaList {
-                lines.append("  (claude mcp list)            : ✓ has Lenny MCP")
+                lines.append("  (claude mcp list)            : ✓ has Pathpoint MCP")
             }
             let codexConfigExists = fm.fileExists(atPath: codexConfigURL.path)
-            lines.append("  \(codexConfigURL.lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)): \(codexConfigExists ? "exists" : "missing")\(codexConfigMCP ? " ✓ has Lenny MCP" : "")\((!codexConfigMCP && codexConfigMCPViaList) ? " ✓ via codex mcp list" : "")")
+            lines.append("  \(codexConfigURL.lastPathComponent.padding(toLength: 28, withPad: " ", startingAt: 0)): \(codexConfigExists ? "exists" : "missing")\(codexConfigMCP ? " ✓ has Pathpoint MCP" : "")\((!codexConfigMCP && codexConfigMCPViaList) ? " ✓ via codex mcp list" : "")")
 
             lines.append("")
             lines.append("── Detected MCP sources ────────────────────────────")

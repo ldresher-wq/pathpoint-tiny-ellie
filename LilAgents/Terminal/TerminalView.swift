@@ -25,10 +25,10 @@ class TerminalView: NSView {
     let attachButton = HoverButton(title: "", target: nil, action: nil)
     let sendButton = HoverButton(title: "", target: nil, action: nil)
     let composerStatusLabel = NSTextField(labelWithString: "Generating...")
-    let returnButton = NSButton(title: "Back to Lil-Lenny", target: nil, action: nil)
+    let returnButton = NSButton(title: "Back to Ellie", target: nil, action: nil)
     var onSendMessage: ((String, [SessionAttachment]) -> Void)?
     var onStopRequested: (() -> Void)?
-    var onReturnToLenny: (() -> Void)?
+    var onReturnToEllie: (() -> Void)?
     var onSelectExpert: ((ResponderExpert) -> Void)?
     var onSelectExpertSuggestion: ((UUID, ResponderExpert) -> Void)?
     var onEditExpertSuggestion: ((UUID) -> Void)?
@@ -76,7 +76,7 @@ class TerminalView: NSView {
     var requiresInitialConnectionSetup = false
     var lastObservedFirstRunConfigurationSignature: String?
     var settingsObserver: NSObjectProtocol?
-    let officialMCPURL = URL(string: "https://www.lennysdata.com")!
+    let officialMCPURL = URL(string: "https://www.pathpoint.com")!
 
     override init(frame: NSRect) {
         super.init(frame: frame)
@@ -110,7 +110,7 @@ class TerminalView: NSView {
         relayoutPanels()
     }
 
-    func setReturnToLennyVisible(_ visible: Bool) {
+    func setReturnToEllieVisible(_ visible: Bool) {
         returnButton.isHidden = !visible
     }
 }

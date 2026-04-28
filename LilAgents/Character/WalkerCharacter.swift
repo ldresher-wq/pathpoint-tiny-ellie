@@ -63,7 +63,7 @@ final class WalkerCharacter {
     var isClaudeBusy: Bool { claudeSession?.isBusy ?? false }
 
     var directionalImages: [WalkerFacing: NSImage] = [:]
-    var persona: WalkerPersona = .lenny
+    var persona: WalkerPersona = .ellie
 
     var lastPhraseUpdate: CFTimeInterval = 0
     var currentPhrase = ""

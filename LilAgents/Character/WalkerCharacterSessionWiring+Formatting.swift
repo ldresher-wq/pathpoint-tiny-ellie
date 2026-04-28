@@ -179,8 +179,8 @@ extension WalkerCharacter {
         if let source = match(in: summary, pattern: #"Source:\s*([^"]+)$"#) {
             return polishedStatusDetail(source)
         }
-        if summary.contains("official Lenny MCP") {
-            return "Official Lenny MCP"
+        if summary.contains("official Pathpoint MCP") {
+            return "Official Pathpoint MCP"
         }
         if summary.range(of: #"toolu_[A-Za-z0-9]+"#, options: .regularExpression) != nil {
             return nil
@@ -241,7 +241,7 @@ extension WalkerCharacter {
         if lowered.contains("composing the final answer") {
             return "Writing the answer"
         }
-        if lowered.contains("lenny mcp") || lowered.contains("official lenny mcp") {
+        if lowered.contains("pathpoint mcp") || lowered.contains("official pathpoint mcp") {
             return "Connecting to the archive"
         }
         if lowered.contains("claude code") || lowered.contains("openai responses") || lowered.contains("codex") {
@@ -257,7 +257,7 @@ extension WalkerCharacter {
         if lowered.hasPrefix("searching ") || lowered.hasPrefix("reading ") || lowered.hasPrefix("checking ") {
             return trimmed
         }
-        if lowered.contains("official lenny mcp") {
+        if lowered.contains("official pathpoint mcp") {
             return "Connecting to the archive"
         }
         if lowered.contains("archive lookup was cancelled") {

@@ -294,21 +294,21 @@ extension WalkerCharacter {
     }
 
     private func setupWalkPlayer() {
-        guard let resourceURL = Bundle.main.resourceURL else { return }
-        let videoURL = resourceURL
+        (walkLeftPlayer,  walkLeftLooper)  = makeLoopingPlayer(filename: "ellie-walk-left-hevc.mov")
+        (walkRightPlayer, walkRightLooper) = makeLoopingPlayer(filename: "ellie-walk-right-hevc.mov")
+    }
+
+    private func makeLoopingPlayer(filename: String) -> (AVQueuePlayer?, AVPlayerLooper?) {
+        guard let resourceURL = Bundle.main.resourceURL else { return (nil, nil) }
+        let url = resourceURL
             .appendingPathComponent(WalkerCharacterAssets.ellieAssetsDirectory)
-            .appendingPathComponent("ellie-walk.mov")
-        guard FileManager.default.fileExists(atPath: videoURL.path) else { return }
+            .appendingPathComponent(filename)
+        guard FileManager.default.fileExists(atPath: url.path) else { return (nil, nil) }
 
-        let asset = AVAsset(url: videoURL)
-        let templateItem = AVPlayerItem(asset: asset)
         let player = AVQueuePlayer()
-        let looper = AVPlayerLooper(player: player, templateItem: templateItem)
+        let looper = AVPlayerLooper(player: player, templateItem: AVPlayerItem(asset: AVAsset(url: url)))
         player.isMuted = true
-
-        walkPlayer = player
-        walkLooper = looper
-        playerLayerView?.setPlayer(player)
+        return (player, looper)
     }
 
     private func loadImage(named name: String, fallback: String? = nil) -> NSImage {
@@ -330,20 +330,31 @@ extension WalkerCharacter {
     }
 
     func setFacing(_ facing: WalkerFacing) {
-        let useVideo: Bool
-        if case .ellie = persona {
-            useVideo = walkPlayer != nil && (facing == .left || facing == .right)
-        } else {
-            useVideo = false
+        guard case .ellie = persona else {
+            playerLayerView?.isHidden = true
+            imageView.isHidden = false
+            imageView.image = directionalImages[facing] ?? directionalImages[.front]
+            return
         }
 
-        if useVideo {
-            imageView.isHidden = true
+        let activePlayer: AVQueuePlayer?
+        switch facing {
+        case .left  where walkLeftPlayer  != nil: activePlayer = walkLeftPlayer
+        case .right where walkRightPlayer != nil: activePlayer = walkRightPlayer
+        default:                                  activePlayer = nil
+        }
+
+        if let activePlayer {
+            let idlePlayer = activePlayer === walkLeftPlayer ? walkRightPlayer : walkLeftPlayer
+            idlePlayer?.pause()
+            playerLayerView?.setPlayer(activePlayer)
+            playerLayerView?.setMirrored(false)
             playerLayerView?.isHidden = false
-            playerLayerView?.setMirrored(facing == .right)
-            walkPlayer?.play()
+            imageView.isHidden = true
+            activePlayer.play()
         } else {
-            walkPlayer?.pause()
+            walkLeftPlayer?.pause()
+            walkRightPlayer?.pause()
             playerLayerView?.isHidden = true
             imageView.isHidden = false
             imageView.image = directionalImages[facing] ?? directionalImages[.front]
@@ -360,7 +371,8 @@ extension WalkerCharacter {
             characterColor = NSColor(red: 0.96, green: 0.63, blue: 0.23, alpha: 1.0)
 
         case .expert(let expert):
-            walkPlayer?.pause()
+            walkLeftPlayer?.pause()
+            walkRightPlayer?.pause()
             playerLayerView?.isHidden = true
             imageView.isHidden = false
             let avatar = loadExpertAvatar(at: expert.avatarPath)

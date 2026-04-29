@@ -7,8 +7,10 @@ final class WalkerCharacter {
     var window: NSWindow!
     var imageView: NSImageView!
     var playerLayerView: EllieWalkPlayerView?
-    var walkPlayer: AVQueuePlayer?
-    var walkLooper: AVPlayerLooper?
+    var walkLeftPlayer: AVQueuePlayer?
+    var walkLeftLooper: AVPlayerLooper?
+    var walkRightPlayer: AVQueuePlayer?
+    var walkRightLooper: AVPlayerLooper?
 
     let displayHeight: CGFloat = 96
     let displayWidth: CGFloat = 96

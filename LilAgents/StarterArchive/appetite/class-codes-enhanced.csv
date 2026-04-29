@@ -1,0 +1,373 @@
+vertical,class_code,class_of_business,lines_of_business,gl_eligible,excess_eligible,property_eligible,cyber_eligible,package_eligible,submissions_12m,auto_quoted_12m,bound_12m,auto_quote_rate_pct,bind_rate_pct,appetite_note
+Contractors,91300,Remodeling Contractor,"Excess Standalone, GL",YES,YES,NO,NO,NO,5405,3776,1051,69.9,22.9,"Strong appetite – high volume, strong conversion"
+Contractors,98678,Roofing–Residential–Three Stories and Under,"Excess Standalone, GL",YES,YES,NO,NO,NO,3930,2923,739,74.4,21.6,"Strong appetite – high volume, strong conversion"
+Contractors,91580,Contractors–Executive Supervisors or Executive Superintendents,"Excess Standalone, GL",YES,YES,NO,NO,NO,3572,1504,544,42.1,23.7,"Strong appetite – high volume, strong conversion"
+Contractors,99777,"Tree Pruning, Dusting, Spraying, Repairing, Trimming or Fumigating","Excess Standalone, GL",YES,YES,NO,NO,NO,1703,1358,279,79.7,17.7,Strong appetite – high volume
+Contractors,91340,Carpentry–Construction of Residential Property Not Exceeding Three Stories in Height,"Excess Standalone, GL",YES,YES,NO,NO,NO,1820,1098,395,60.3,28.3,"Strong appetite – high volume, strong conversion"
+Contractors,95625,Handyperson,"Excess Standalone, GL",YES,YES,NO,NO,NO,1396,948,309,67.9,26.0,"Strong appetite – high volume, strong conversion"
+Contractors,98522,Pressure Washing,"Excess Standalone, GL",YES,YES,NO,NO,NO,1482,932,397,62.9,29.7,"Strong appetite – high volume, strong conversion"
+Contractors,96816,Janitorial Services,"Excess Standalone, GL",YES,YES,NO,NO,NO,1142,865,139,75.7,14.2,Strong appetite – high volume
+Contractors,98305,Painting–Interior–Buildings or Structures,"Excess Standalone, GL",YES,YES,NO,NO,NO,1095,846,222,77.3,22.1,"Strong appetite – high volume, strong conversion"
+Contractors,91341,Carpentry–Interior,"Excess Standalone, GL",YES,YES,NO,NO,NO,1136,800,321,70.4,32.4,"Strong appetite – high volume, strong conversion"
+Contractors,98483,Plumbing–Residential or Domestic,"Excess Standalone, GL",YES,YES,NO,NO,NO,1011,766,62,75.8,7.2,Strong appetite – high volume
+Contractors,92478,Electrical Work–within Buildings,"Excess Standalone, GL",YES,YES,NO,NO,NO,912,690,182,75.7,23.3,"Strong appetite – high volume, strong conversion"
+Contractors,91560,Concrete Construction,"Excess Standalone, GL",YES,YES,NO,NO,NO,991,660,181,66.6,23.3,"Strong appetite – high volume, strong conversion"
+Contractors,99969,Welding or Cutting,"Excess Standalone, GL",YES,YES,NO,NO,NO,850,612,67,72.0,10.4,Strong appetite – high volume
+Contractors,94007,Excavation,"Excess Standalone, GL",YES,YES,NO,NO,NO,942,599,205,63.6,27.3,"Strong appetite – high volume, strong conversion"
+Contractors,97047,Landscape Gardening,"Excess Standalone, GL",YES,YES,NO,NO,NO,896,593,181,66.2,25.2,"Strong appetite – high volume, strong conversion"
+Contractors,99507,"Swimming Pools–Installation, Servicing or Repair–Below Ground","Excess Standalone, GL",YES,YES,NO,NO,NO,709,530,215,74.8,32.8,"Strong appetite – high volume, strong conversion"
+Contractors,98967,Siding Installation,"Excess Standalone, GL",YES,YES,NO,NO,NO,675,498,213,73.8,34.9,"Strong appetite – high volume, strong conversion"
+Contractors,95647,"Heating or Combined Heating and Air Conditioning Systems or Equipment–Dealers or Distributors and Installation, Servicing or Repair–No Liquefied Petroleum Gas (LPG) Equipment Sales or Work","Excess Standalone, GL",YES,YES,NO,NO,NO,646,465,126,72.0,23.2,"Strong appetite – high volume, strong conversion"
+Contractors,92338,Drywall or Wallboard Installation,"Excess Standalone, GL",YES,YES,NO,NO,NO,618,448,168,72.5,30.0,"Strong appetite – high volume, strong conversion"
+Contractors,98304,Painting–Exterior–Buildings or Structures–Three Stories or Less in Height,"Excess Standalone, GL",YES,YES,NO,NO,NO,591,437,148,73.9,27.9,"Strong appetite – high volume, strong conversion"
+Contractors,97050,Lawn Care Services,"Excess Standalone, GL",YES,YES,NO,NO,NO,589,393,132,66.7,27.2,"Strong appetite – high volume, strong conversion"
+Contractors,94569,Floor Covering Installation–Not Ceramic Tile or Stone,"Excess Standalone, GL",YES,YES,NO,NO,NO,477,375,107,78.6,25.1,"Strong appetite – high volume, strong conversion"
+Contractors,95410,Grading of Land,"Excess Standalone, GL",YES,YES,NO,NO,NO,539,371,147,68.8,30.7,"Strong appetite – high volume, strong conversion"
+Contractors,98677,Roofing–Commercial or Residential over Three Stories,"Excess Standalone, GL",YES,YES,NO,NO,NO,526,359,56,68.3,14.0,Strong appetite – high volume
+Contractors,99746,"Tile, Stone, Marble, Mosaic or Terrazzo Work–Interior Construction","Excess Standalone, GL",YES,YES,NO,NO,NO,440,349,108,79.3,26.8,"Strong appetite – high volume, strong conversion"
+Contractors,92215,"Driveway, Parking Area or Sidewalk–Paving or Repaving","Excess Standalone, GL",YES,YES,NO,NO,NO,455,324,101,71.2,26.6,"Strong appetite – high volume, strong conversion"
+Contractors,97447,Masonry,"Excess Standalone, GL",YES,YES,NO,NO,NO,423,296,104,70.0,29.4,"Strong appetite – high volume, strong conversion"
+Contractors,91155,"Appliances and Accessories–Installation, Servicing or Repair–Household","Excess Standalone, GL",YES,YES,NO,NO,NO,350,281,42,80.3,13.6,Strong appetite – high volume
+Contractors,91746,"Door, Window or Assembled Millwork–Installation–Metal","Excess Standalone, GL",YES,YES,NO,NO,NO,395,273,64,69.1,20.3,"Strong appetite – high volume, strong conversion"
+Contractors,43470,Pest Control Services,"Excess Standalone, GL",YES,YES,NO,NO,NO,577,268,78,46.4,20.3,"Strong appetite – high volume, strong conversion"
+Contractors,98482,Plumbing–Commercial and Industrial,"Excess Standalone, GL",YES,YES,NO,NO,NO,386,246,55,63.7,18.6,Strong appetite – high volume
+Contractors,95648,"Heating or Combined Heating and Air Conditioning Systems or Equipment–Dealers or Distributors and Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,329,244,51,74.2,18.1,Strong appetite – high volume
+Contractors,91629,Debris Removal–Construction Site,"Excess Standalone, GL",YES,YES,NO,NO,NO,362,241,78,66.6,26.5,"Strong appetite – high volume, strong conversion"
+Contractors,91577,Conduit Construction for Cables or Wires,"Excess Standalone, GL",YES,YES,NO,NO,NO,346,237,66,68.5,24.4,"Strong appetite – high volume, strong conversion"
+Contractors,91342,Carpentry,"Excess Standalone, GL",YES,YES,NO,NO,NO,338,221,37,65.4,14.4,Strong appetite – high volume
+Contractors,97223,"Machinery or Equipment–Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,428,214,39,50.0,15.1,Strong appetite – high volume
+Contractors,99080,Solar Energy Contractors,"Excess Standalone, GL",YES,YES,NO,NO,NO,292,203,65,69.5,25.9,"Strong appetite – high volume, strong conversion"
+Contractors,99505,Swimming Pool Servicing,"Excess Standalone, GL",YES,YES,NO,NO,NO,259,200,104,77.2,41.1,"Strong appetite – high volume, strong conversion"
+Contractors,94276,Fence Erection Contractors,"Excess Standalone, GL",YES,YES,NO,NO,NO,256,188,45,73.4,20.5,"Strong appetite – high volume, strong conversion"
+Contractors,99984,Gutter Installation,"Excess Standalone, GL",YES,YES,NO,NO,NO,259,179,76,69.1,33.0,"Strong appetite – high volume, strong conversion"
+Contractors,91111,"Air Conditioning Systems or Equipment–Dealers or Distributors and Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,249,174,58,69.9,28.0,"Strong appetite – high volume, strong conversion"
+Contractors,99613,"Telephone, Telegraph, or Cable Television Line Construction","Excess Standalone, GL",YES,YES,NO,NO,NO,220,171,44,77.7,23.9,"Strong appetite – high volume, strong conversion"
+Contractors,91127,"Alarms and Alarm Systems–Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,262,164,47,62.6,23.0,"Strong appetite – high volume, strong conversion"
+Contractors,98449,Plastering or Stucco Work,"Excess Standalone, GL",YES,YES,NO,NO,NO,209,163,28,78.0,15.7,Strong appetite – high volume
+Contractors,92451,"Electrical Apparatus–Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,272,154,40,56.6,22.0,"Strong appetite – high volume, strong conversion"
+Contractors,91583,"Contractors–Subcontracted Work–In Connection with Building Construction, Reconstruction, Repair or Erection–One- or Two-Family Dwellings","Excess Standalone, GL",YES,YES,NO,NO,NO,239,132,49,55.2,24.9,"Strong appetite – high volume, strong conversion"
+Contractors,99975,Window Cleaning,"Excess Standalone, GL",YES,YES,NO,NO,NO,213,131,34,61.5,19.8,Strong appetite – high volume
+Contractors,99986,Wrecking–Buildings or Structures,"Excess Standalone, GL",YES,YES,NO,NO,NO,171,116,14,67.8,10.9,Strong appetite – high volume
+Contractors,91551,Communication Equipment Installation–Industrial or Commercial,"Excess Standalone, GL",YES,YES,NO,NO,NO,162,114,35,70.4,27.6,"Strong appetite – high volume, strong conversion"
+Contractors,97655,Metal Erection–Structural,"Excess Standalone, GL",YES,YES,NO,NO,NO,168,108,14,64.3,11.7,Strong appetite – high volume
+Contractors,91523,Cleaning–Outside Surfaces of Buildings & Other Exterior Surfaces,"Excess Standalone, GL",YES,YES,NO,NO,NO,145,98,2,67.6,1.8,Strong appetite – high volume
+Contractors,91302,Cable Installation in Conduits or Subways,"Excess Standalone, GL",YES,YES,NO,NO,NO,146,81,16,55.5,16.0,Strong appetite – high volume
+Contractors,97653,Metal Erection–Nonstructural,"Excess Standalone, GL",YES,YES,NO,NO,NO,104,76,34,73.1,37.8,"Strong appetite – high volume, strong conversion"
+Contractors,98884,Sheet Metal Work–Outside,"Excess Standalone, GL",YES,YES,NO,NO,NO,93,73,16,78.5,20.3,"Strong appetite – high volume, strong conversion"
+Contractors,99955,Waterproofing,"Excess Standalone, GL",YES,YES,NO,NO,NO,102,73,17,71.6,21.0,"Strong appetite – high volume, strong conversion"
+Contractors,99506,"Swimming Pools–Installation, Servicing or Repair–Above Ground","Excess Standalone, GL",YES,YES,NO,NO,NO,88,70,28,79.5,33.7,"Strong appetite – high volume, strong conversion"
+Contractors,91150,"Appliances and Accessories–Installation, Servicing or Repair–Commercial","Excess Standalone, GL",YES,YES,NO,NO,NO,95,68,20,71.6,25.3,"Strong appetite – high volume, strong conversion"
+Contractors,97222,"Machinery or Equipment–Industrial–Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,87,68,5,78.2,7.0,Strong appetite – high volume
+Contractors,98993,"Sign Erection, Installation or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,116,68,20,58.6,22.2,"Strong appetite – high volume, strong conversion"
+Contractors,96702,Irrigation or Drainage System Construction,"Excess Standalone, GL",YES,YES,NO,NO,NO,73,60,4,82.2,6.6,Strong appetite – high volume
+Contractors,98806,"Septic Tank Systems–Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,82,59,22,72.0,30.6,"Strong appetite – high volume, strong conversion"
+Contractors,96408,Insulation Work–Plastic,"Excess Standalone, GL",YES,YES,NO,NO,NO,72,57,8,79.2,12.3,Strong appetite – high volume
+Contractors,95124,Furniture or Fixtures–Installation in Offices or Stores–Portable–Metal or Wood,"Excess Standalone, GL",YES,YES,NO,NO,NO,85,55,29,64.7,41.4,"Strong appetite – high volume, strong conversion"
+Contractors,90511,Cleaning or Washing by Pressure Apparatus,"Excess Standalone, GL",YES,YES,NO,NO,NO,114,52,16,45.6,23.9,"Strong appetite – high volume, strong conversion"
+Contractors,91581,"Contractors–Subcontracted Work–In Connection with Construction, Reconstruction, Erection or Repair–Not Buildings","Excess Standalone, GL",YES,YES,NO,NO,NO,96,52,17,54.2,23.9,"Strong appetite – high volume, strong conversion"
+Contractors,91405,"Carpet, Rug, Furniture or Upholstery Cleaning–on Customers’ Premises","Excess Standalone, GL",YES,YES,NO,NO,NO,67,45,15,67.2,24.6,Moderate appetite – converts well
+Contractors,97650,Metal Erection–Decorative or Artistic,"Excess Standalone, GL",YES,YES,NO,NO,NO,68,45,14,66.2,25.0,Moderate appetite – converts well
+Contractors,90516,"Commercial Collection Receptacles – Construction Debris, Recyclables or Other Refuse","Excess Standalone, GL",YES,YES,NO,NO,NO,97,43,8,44.3,17.0,Moderate appetite
+Contractors,91585,"Contractors–Subcontracted Work–In Connection with Construction, Reconstruction, Repair or Erection of Buildings","Excess Standalone, GL",YES,YES,NO,NO,NO,79,41,10,51.9,18.2,Moderate appetite
+Contractors,96409,Insulation Work–Organic or Plastic in Solid State,"Excess Standalone, GL",YES,YES,NO,NO,NO,67,41,15,61.2,26.8,Moderate appetite – converts well
+Contractors,96053,House Furnishings Installation,"Excess Standalone, GL",YES,YES,NO,NO,NO,52,40,5,76.9,11.1,Moderate appetite
+Contractors,91481,Chimney Cleaning,"Excess Standalone, GL",YES,YES,NO,NO,NO,50,36,7,72.0,17.9,Moderate appetite
+Contractors,98705,Sandblasting,"Excess Standalone, GL",YES,YES,NO,NO,NO,45,36,3,80.0,7.7,Moderate appetite
+Contractors,98502,Prefabricated Building Erection,"Excess Standalone, GL",YES,YES,NO,NO,NO,82,35,14,42.7,29.2,Moderate appetite – converts well
+Contractors,98303,Painting–Exterior–Buildings or Structures–Exceeding Three Stories in Height,"Excess Standalone, GL",YES,YES,NO,NO,NO,56,34,8,60.7,22.9,Moderate appetite – converts well
+Contractors,98636,"Refrigeration Systems or Equipment–Dealers and Distributors and Installation, Servicing, or Repair–Commercial","Excess Standalone, GL",YES,YES,NO,NO,NO,44,31,8,70.5,22.2,Moderate appetite – converts well
+Contractors,99650,Television or Radio Receiving Set Installation or Repair,"Excess Standalone, GL",YES,YES,NO,NO,NO,36,31,9,86.1,26.5,Moderate appetite – converts well
+Contractors,91235,Boat Repair and Servicing,"Excess Standalone, GL",YES,YES,NO,NO,NO,127,30,14,23.6,27.5,Moderate appetite – converts well
+Contractors,91343,Carpentry–Shop Only,"Excess Standalone, GL",YES,YES,NO,NO,NO,45,29,12,64.4,30.0,Moderate appetite – converts well
+Contractors,98820,Sewer Mains or Connections Construction,"Excess Standalone, GL",YES,YES,NO,NO,NO,54,28,11,51.9,32.4,Moderate appetite – converts well
+Contractors,91436,Ceiling or Wall Installation–Metal,"Excess Standalone, GL",YES,YES,NO,NO,NO,31,25,6,80.6,21.4,Moderate appetite – converts well
+Contractors,96410,Insulation Work–Mineral,"Excess Standalone, GL",YES,YES,NO,NO,NO,47,25,5,53.2,15.6,Moderate appetite
+Contractors,99948,"Water Softening Equipment–Installation, Servicing or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,35,25,3,71.4,11.1,Moderate appetite
+Contractors,99946,Water Mains or Connections Construction,"Excess Standalone, GL",YES,YES,NO,NO,NO,44,24,5,54.5,16.7,Moderate appetite
+Contractors,99987,Wrecking–Dismantling of Prefabricated Dwellings Not Exceeding Three Stories for Reerection,"Excess Standalone, GL",YES,YES,NO,NO,NO,32,24,3,75.0,11.1,Moderate appetite
+Contractors,90670,Decorator – Outdoor or Indoor Displays – Commercial or Residential,"Excess Standalone, GL",YES,YES,NO,NO,NO,34,22,6,64.7,23.1,Moderate appetite – converts well
+Contractors,92102,Drilling–Water,"Excess Standalone, GL",YES,YES,NO,NO,NO,52,20,7,38.5,22.6,Moderate appetite – converts well
+Contractors,97652,Metal Erection–In the Construction of Dwellings Not Exceeding Two Stories in Height,"Excess Standalone, GL",YES,YES,NO,NO,NO,60,20,8,33.3,25.8,Moderate appetite – converts well
+Contractors,94304,"Fire Extinguishers–Servicing, Refilling, or Testing","Excess Standalone, GL",YES,YES,NO,NO,NO,46,19,5,41.3,17.2,Moderate appetite
+Contractors,96611,Interior Decorators,"Excess Standalone, GL",YES,YES,NO,NO,NO,29,17,5,58.6,25.0,Moderate appetite – converts well
+Contractors,98805,Septic Tank System - cleaning,"Excess Standalone, GL",YES,YES,NO,NO,NO,23,17,4,73.9,21.1,Moderate appetite – converts well
+Contractors,99954,Waterproofing–By Trowel–Interior or Insulation Work,GL,YES,NO,NO,NO,NO,21,16,5,76.2,26.3,Moderate appetite – converts well
+Contractors,98813,Sewer Cleaning,"Excess Standalone, GL",YES,YES,NO,NO,NO,18,15,4,83.3,25.0,Moderate appetite – converts well
+Contractors,90089,Advertising Sign Cos.–Outdoor,"Excess Standalone, GL",YES,YES,NO,NO,NO,28,14,9,50.0,47.4,Moderate appetite – converts well
+Contractors,91250,"Boiler Inspection, Installation, Cleaning or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,21,12,0,57.1,0.0,Moderate appetite
+Contractors,98698,Salvage Operations,"Excess Standalone, GL",YES,YES,NO,NO,NO,25,12,3,48.0,21.4,Moderate appetite – converts well
+Contractors,98344,Paperhanging,"Excess Standalone, GL",YES,YES,NO,NO,NO,19,11,3,57.9,23.1,Moderate appetite – converts well
+Contractors,98640,Renovating–Outside Surfaces of Buildings,"Excess Standalone, GL",YES,YES,NO,NO,NO,22,11,1,50.0,8.3,Moderate appetite
+Contractors,99952,Waterproofing–By Pressure Apparatus,"Excess Standalone, GL",YES,YES,NO,NO,NO,19,11,5,57.9,31.3,Moderate appetite – converts well
+Contractors,14913,Locksmiths,GL,YES,NO,NO,NO,NO,22,10,1,45.5,7.7,Moderate appetite
+Contractors,99709,"Tent or Canvas Goods–Erection, Removal or Repair–Away from Shop","Excess Standalone, GL",YES,YES,NO,NO,NO,22,10,6,45.5,40.0,Moderate appetite – converts well
+Contractors,92101,Drilling–Other Than Water,GL,YES,NO,NO,NO,NO,9,8,1,88.9,12.5,Limited appetite – low volume
+Contractors,98710,Sand or Gravel Digging,"Excess Standalone, GL",YES,YES,NO,NO,NO,11,8,3,72.7,33.3,Limited appetite – low volume
+Contractors,97221,"Machinery or Equipment–Farm–Installation, Servicing, Repair or Erection",GL,YES,NO,NO,NO,NO,9,7,0,77.8,0.0,Limited appetite – low volume
+Contractors,99953,Waterproofing–By Trowel–Exterior,GL,YES,NO,NO,NO,NO,11,7,1,63.6,12.5,Limited appetite – low volume
+Contractors,49840,Window Decorating,"Excess Standalone, GL",YES,YES,NO,NO,NO,8,6,0,75.0,0.0,Limited appetite – low volume
+Contractors,98699,"Salvage Operations–Removing, Sorting, Reconditioning and Distributing of Merchandise in Damaged Buildings and Incidental Operations Away from Such Buildings","Excess Standalone, GL",YES,YES,NO,NO,NO,29,5,1,17.2,11.1,Limited appetite – low volume
+Contractors,99004,Sign Painting or Lettering–on Buildings or Structures,"Excess Standalone, GL",YES,YES,NO,NO,NO,10,5,2,50.0,28.6,Limited appetite – low volume
+Contractors,99826,Upholstering,"Excess Standalone, GL",YES,YES,NO,NO,NO,11,5,1,45.5,12.5,Limited appetite – low volume
+Contractors,99827,Upholstering–Shop Only,GL,YES,NO,NO,NO,NO,6,5,1,83.3,16.7,Limited appetite – low volume
+Contractors,98111,"Office Machines or Appliances–Installation, Inspection, Adjustment or Repair","Excess Standalone, GL",YES,YES,NO,NO,NO,7,4,1,57.1,20.0,Limited appetite – low volume
+Contractors,95505,Guniting or Shot-Crete,GL,YES,NO,NO,NO,NO,5,3,2,60.0,40.0,Limited appetite – low volume
+Contractors,98308,Painting–Shop Only,GL,YES,NO,NO,NO,NO,5,3,0,60.0,0.0,Limited appetite – low volume
+Contractors,99003,Sign Painting or Lettering–Inside of Buildings,"Excess Standalone, GL",YES,YES,NO,NO,NO,6,3,0,50.0,0.0,Limited appetite – low volume
+Contractors,99165,Steam Pipe or Boiler Insulation,GL,YES,NO,NO,NO,NO,5,2,0,40.0,0.0,Edge / rare class – verify eligibility before quoting
+Contractors,91507,Clay or Shale Digging,GL,YES,NO,NO,NO,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Contractors,91591,Contractors–Subcontracted Work–Other Than Construction-Related Work,GL,YES,NO,NO,NO,NO,4,1,1,25.0,50.0,Edge / rare class – verify eligibility before quoting
+Contractors,95487,Greenhouse Erection,GL,YES,NO,NO,NO,NO,5,1,1,20.0,33.3,Edge / rare class – verify eligibility before quoting
+Cyber,524210,Insurance Agencies and Brokerages,Cyber,NO,NO,NO,YES,NO,84,34,15,40.5,27.3,Moderate appetite – converts well
+Cyber,541511,Custom Computer Programming Services,Cyber,NO,NO,NO,YES,NO,35,11,6,31.4,25.0,Moderate appetite – converts well
+Cyber,541512,Computer Systems Design Services,Cyber,NO,NO,NO,YES,NO,14,7,1,50.0,11.1,Limited appetite – low volume
+Cyber,541219,Other Accounting Services,Cyber,NO,NO,NO,YES,NO,8,5,0,62.5,0.0,Limited appetite – low volume
+Cyber,541613,Marketing Consulting Services,Cyber,NO,NO,NO,YES,NO,15,4,3,26.7,37.5,Limited appetite – low volume
+Cyber,721110,Hotels (except Casino Hotels) and Motels,Cyber,NO,NO,NO,YES,NO,10,4,1,40.0,14.3,Limited appetite – low volume
+Cyber,813410,Civic and Social Organizations,Cyber,NO,NO,NO,YES,NO,5,4,2,80.0,40.0,Limited appetite – low volume
+Cyber,238210,Electrical Contractors and Other Wiring Installation Contractors,Cyber,NO,NO,NO,YES,NO,4,3,0,75.0,0.0,Limited appetite – low volume
+Cyber,238990,All Other Specialty Trade Contractors,Cyber,NO,NO,NO,YES,NO,3,3,1,100.0,33.3,Limited appetite – low volume
+Cyber,484121,"General Freight Trucking, Long-Distance, Truckload",Cyber,NO,NO,NO,YES,NO,3,3,1,100.0,33.3,Limited appetite – low volume
+Cyber,488510,Freight Transportation Arrangement,Cyber,NO,NO,NO,YES,NO,3,3,1,100.0,33.3,Limited appetite – low volume
+Cyber,531210,Offices of Real Estate Agents and Brokers,Cyber,NO,NO,NO,YES,NO,7,3,0,42.9,0.0,Limited appetite – low volume
+Cyber,541213,Tax Preparation Services,Cyber,NO,NO,NO,YES,NO,9,3,2,33.3,33.3,Limited appetite – low volume
+Cyber,541611,Administrative Management and General Management Consulting Services,Cyber,NO,NO,NO,YES,NO,10,3,2,30.0,25.0,Limited appetite – low volume
+Cyber,541690,Other Scientific and Technical Consulting Services,Cyber,NO,NO,NO,YES,NO,10,3,4,30.0,57.1,Limited appetite – low volume
+Cyber,621610,Home Health Care Services,Cyber,NO,NO,NO,YES,NO,4,3,1,75.0,25.0,Limited appetite – low volume
+Cyber,722511,Full-Service Restaurants,Cyber,NO,NO,NO,YES,NO,6,3,1,50.0,25.0,Limited appetite – low volume
+Cyber,323111,Commercial Printing (except Screen and Books),Cyber,NO,NO,NO,YES,NO,2,2,1,100.0,50.0,Edge / rare class – verify eligibility before quoting
+Cyber,423220,Home Furnishing Merchant Wholesalers,Cyber,NO,NO,NO,YES,NO,2,2,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,441120,Used Car Dealers,Cyber,NO,NO,NO,YES,NO,2,2,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,518210,"Data Processing, Hosting, and Related Services",Cyber,NO,NO,NO,YES,NO,7,2,1,28.6,33.3,Edge / rare class – verify eligibility before quoting
+Cyber,519130,Internet Publishing and Broadcasting and Web Search Portals,Cyber,NO,NO,NO,YES,NO,2,2,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,519190,All Other Information Services,Cyber,NO,NO,NO,YES,NO,4,2,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,522310,Mortgage and Nonmortgage Loan Brokers,Cyber,NO,NO,NO,YES,NO,4,2,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,523930,Investment Advice,Cyber,NO,NO,NO,YES,NO,2,2,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,523999,Miscellaneous Financial Investment Activities,Cyber,NO,NO,NO,YES,NO,2,2,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541519,Other Computer Related Services,Cyber,NO,NO,NO,YES,NO,4,2,1,50.0,50.0,Edge / rare class – verify eligibility before quoting
+Cyber,541618,Other Management Consulting Services,Cyber,NO,NO,NO,YES,NO,3,2,0,66.7,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,621330,Offices of Mental Health Practitioners (except Physicians),Cyber,NO,NO,NO,YES,NO,3,2,0,66.7,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,621340,"Offices of Physical, Occupational and Speech Therapists, and Audiologists",Cyber,NO,NO,NO,YES,NO,3,2,1,66.7,50.0,Edge / rare class – verify eligibility before quoting
+Cyber,624210,Community Food Services,Cyber,NO,NO,NO,YES,NO,3,2,1,66.7,33.3,Edge / rare class – verify eligibility before quoting
+Cyber,722513,Limited-Service Restaurants,Cyber,NO,NO,NO,YES,NO,2,2,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,237110,Water and Sewer Line and Related Structures Construction,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,238160,Roofing Contractors,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,238350,Finish Carpentry Contractors,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,315990,Apparel Accessories and Other Apparel Manufacturing,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,316210,Footwear Manufacturing,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,331315,"Aluminum Sheet, Plate, and Foil Manufacturing",Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,334118,Computer Terminal and Other Computer Peripheral Equipment Manufacturing,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,334290,Other Communications Equipment Manufacturing,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,337125,Household Furniture (except Wood and Metal) Manufacturing,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,339910,Jewelry and Silverware Manufacturing,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,423430,Computer and Computer Peripheral Equipment and Software Merchant Wholesalers,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,423690,Other Electronic Parts and Equipment Merchant Wholesalers,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,423820,Farm and Garden Machinery and Equipment Merchant Wholesalers,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,446120,"Cosmetics, Beauty Supplies, and Perfume Stores",Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,448140,Family Clothing Stores,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,448320,Luggage and Leather Goods Stores,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,453998,All Other Miscellaneous Store Retailers (except Tobacco Stores),Cyber,NO,NO,NO,YES,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,454210,Vending Machine Operators,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,454390,Other Direct Selling Establishments,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,484110,"General Freight Trucking, Local",Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,493110,General Warehousing and Storage,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,511210,Software Publishers,Cyber,NO,NO,NO,YES,NO,12,1,3,8.3,42.9,Edge / rare class – verify eligibility before quoting
+Cyber,522291,Consumer Lending,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,522390,Other Activities Related to Credit Intermediation,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,523920,Portfolio Management,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,524291,Claims Adjusting,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,524298,All Other Insurance Related Activities,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,531110,Lessors of Residential Buildings and Dwellings,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,531190,Lessors of Other Real Estate Property,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,531311,Residential Property Managers,Cyber,NO,NO,NO,YES,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541199,All Other Legal Services,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541310,Architectural Services,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541330,Engineering Services,Cyber,NO,NO,NO,YES,NO,2,1,1,50.0,50.0,Edge / rare class – verify eligibility before quoting
+Cyber,541490,Other Specialized Design Services,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541612,Human Resources Consulting Services,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541614,"Process, Physical Distribution, and Logistics Consulting Services",Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541715,"Research and Development in the Physical, Engineering, and Life Sciences (except Nanotechnology and Biotechnology)",Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,541922,Commercial Photography,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561311,Employment Placement Agencies,Cyber,NO,NO,NO,YES,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561320,Temporary Help Services,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561421,Telephone Answering Services,Cyber,NO,NO,NO,YES,NO,2,1,2,50.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,561499,All Other Business Support Services,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561510,Travel Agencies,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561599,All Other Travel Arrangement and Reservation Services,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561710,Exterminating and Pest Control Services,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561720,Janitorial Services,Cyber,NO,NO,NO,YES,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,561730,Landscaping Services,Cyber,NO,NO,NO,YES,NO,4,1,0,25.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,611420,Computer Training,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,611692,Automobile Driving Schools,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,621111,Offices of Physicians (except Mental Health Specialists),Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,621210,Offices of Dentists,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,621310,Offices of Chiropractors,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,621511,Medical Laboratories,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,624120,Services for the Elderly and Persons with Disabilities,Cyber,NO,NO,NO,YES,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,711510,"Independent Artists, Writers, and Performers",Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,811121,"Automotive Body, Paint, and Interior Repair and Maintenance",Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,811198,All Other Automotive Repair and Maintenance,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,811310,Commercial and Industrial Machinery and Equipment (except Automotive and Electronic) Repair and Maintenance,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,812112,Beauty Salons,Cyber,NO,NO,NO,YES,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,813110,Religious Organizations,Cyber,NO,NO,NO,YES,NO,2,1,0,50.0,0.0,Edge / rare class – verify eligibility before quoting
+Cyber,813311,Human Rights Organizations,Cyber,NO,NO,NO,YES,NO,1,1,1,100.0,100.0,Edge / rare class – verify eligibility before quoting
+Cyber,813910,Business Associations,Cyber,NO,NO,NO,YES,NO,8,1,0,12.5,0.0,Edge / rare class – verify eligibility before quoting
+LRO,60011,Apartment Buildings–Garden,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,25114,16094,2146,64.1,12.2,Strong appetite – high volume
+LRO,61212,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Other Than Not-For-Profit,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,15609,9771,1432,62.6,13.1,Strong appetite – high volume
+LRO,60010,Apartment Buildings,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,16188,7508,1531,46.4,16.5,Strong appetite – high volume
+LRO,61217,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Maintained by the Insured–Other Than Not-For-Profit,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,11779,7099,974,60.3,12.3,Strong appetite – high volume
+LRO,63010,Dwellings–One-Family (Lessor’s Risk Only),"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,8417,5558,610,66.0,10.0,Strong appetite – high volume
+LRO,63011,Dwellings–Two-Family (Lessor’s Risk Only),"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,2898,2013,213,69.5,9.7,Strong appetite – high volume
+LRO,63013,Dwellings–Four-Family (Lessor’s Risk Only),"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,2906,1937,210,66.7,9.8,Strong appetite – high volume
+LRO,68703,Warehouses–Occupied by Single Interest (Lessor’s Risk Only),"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,2837,1544,231,54.4,13.2,Strong appetite – high volume
+LRO,63012,Dwellings–Three-Family (Lessor’s Risk Only),"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,2045,1433,111,70.1,7.2,Strong appetite – high volume
+LRO,68702,Warehouses–Occupied by Multiple Interests (Lessor’s Risk Only),"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,1422,760,86,53.4,10.2,Strong appetite – high volume
+LRO,67635,"Shopping Centers–Buildings, or Premises Not Occupied by the Insured (Lessor’s Risk Only)","Excess Standalone, GL, Package",YES,YES,NO,NO,YES,984,447,96,45.4,16.6,Strong appetite – high volume
+LRO,90822,Vacation Rentals,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,1504,367,123,24.4,21.9,"Strong appetite – high volume, strong conversion"
+LRO,61218,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Maintained by the Insured–Not-For-Profit Only,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,587,231,32,39.4,12.2,Strong appetite – high volume
+LRO,61216,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Not-For-Profit Only,"Excess Standalone, GL, Package",YES,YES,NO,NO,YES,487,208,30,42.7,12.6,Strong appetite – high volume
+LRO,46607,Parking–Public–Shopping Centers–Maintained by the Insured (Lessor’s Risk Only),"GL, Package",YES,NO,NO,NO,YES,186,111,10,59.7,8.5,Strong appetite – high volume
+LRO,46622,Parking–Private,"GL, Package",YES,NO,NO,NO,YES,187,94,14,50.3,12.8,Strong appetite – high volume
+LRO,46606,Parking–Public–Shopping Centers–Maintained by Lessee (Lessor’s Risk Only),"GL, Package",YES,NO,NO,NO,YES,89,51,3,57.3,5.8,Strong appetite – high volume
+LRO,46604,Parking–Public–Open Air,"GL, Package",YES,NO,NO,NO,YES,69,38,9,55.1,21.4,Moderate appetite – converts well
+LRO,67634,"Shopping Centers–Indoor Malls–Buildings, or Premises Not Occupied by the Insured (Lessor’s Risk Only)","Excess Standalone, GL, Package",YES,YES,NO,NO,YES,59,19,9,32.2,33.3,Moderate appetite – converts well
+LRO,46603,Parking–Public–Not Open Air,"GL, Package",YES,NO,NO,NO,YES,13,7,0,53.8,0.0,Limited appetite – low volume
+Manufacturing,51970,Cosmetics Mfg.,GL,YES,NO,NO,NO,NO,306,169,39,55.2,17.0,Strong appetite – high volume
+Manufacturing,53374,Food Products Mfg.–Dry,GL,YES,NO,NO,NO,NO,151,78,24,51.7,22.6,"Strong appetite – high volume, strong conversion"
+Manufacturing,51896,Clothing Mfg.,GL,YES,NO,NO,NO,NO,76,37,16,48.7,29.1,Moderate appetite – converts well
+Manufacturing,51741,Candle Mfg.,GL,YES,NO,NO,NO,NO,69,23,7,33.3,14.9,Moderate appetite
+Manufacturing,53377,Food Products Mfg.–Not Dry–In Other Than Glass Containers,GL,YES,NO,NO,NO,NO,44,21,10,47.7,32.3,Moderate appetite – converts well
+Manufacturing,53376,Food Products Mfg.–Not Dry–In Glass Containers,GL,YES,NO,NO,NO,NO,31,15,9,48.4,34.6,Moderate appetite – converts well
+Manufacturing,56488,Liquor Mfg.,GL,YES,NO,NO,NO,NO,35,15,11,42.9,40.7,Moderate appetite – converts well
+Manufacturing,51359,Beverage Bottler–Soft Drinks–Not Carbonated–In Bottles or Cans,GL,YES,NO,NO,NO,NO,13,10,2,76.9,18.2,Moderate appetite
+Manufacturing,56202,Leather Goods Mfg.,GL,YES,NO,NO,NO,NO,29,10,5,34.5,25.0,Moderate appetite – converts well
+Manufacturing,53565,Fruit or Vegetable Juice Mfg.–No Bottling of Carbonated Beverages,GL,YES,NO,NO,NO,NO,10,7,2,70.0,25.0,Limited appetite – low volume
+Manufacturing,51355,Beverage Bottler–Soft Drinks–Carbonated–In Cans or Plastic Bottles,GL,YES,NO,NO,NO,NO,10,5,3,50.0,37.5,Limited appetite – low volume
+Manufacturing,51352,"Beer, Ale or Malt Liquor Mfg.–Not Bottled or Canned",GL,YES,NO,NO,NO,NO,8,4,2,50.0,40.0,Limited appetite – low volume
+Manufacturing,51350,"Beer, Ale or Malt Liquor Mfg.–In Bottles",GL,YES,NO,NO,NO,NO,7,3,3,42.9,50.0,Limited appetite – low volume
+Manufacturing,51351,"Beer, Ale or Malt Liquor Mfg.–In Cans",GL,YES,NO,NO,NO,NO,7,2,2,28.6,50.0,Edge / rare class – verify eligibility before quoting
+Manufacturing,51356,Beverage Bottler–Soft Drinks–Carbonated–In Glass Bottles,GL,YES,NO,NO,NO,NO,3,2,0,66.7,0.0,Edge / rare class – verify eligibility before quoting
+Manufacturing,51357,Beverage Bottler–Soft Drinks–In Metal Cylinders,GL,YES,NO,NO,NO,NO,3,2,1,66.7,50.0,Edge / rare class – verify eligibility before quoting
+Manufacturing,51752,Candy or Confectionery Products Mfg.,GL,YES,NO,NO,NO,NO,3,2,0,66.7,0.0,Edge / rare class – verify eligibility before quoting
+Manufacturing,53375,Food Products Mfg.–Frozen,GL,YES,NO,NO,NO,NO,15,2,2,13.3,33.3,Edge / rare class – verify eligibility before quoting
+Manufacturing,51358,Beverage Bottler–Soft Drinks–In Paper Containers,GL,YES,NO,NO,NO,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Manufacturing,55371,Honey Extracting,GL,YES,NO,NO,NO,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Manufacturing,59005,"Shoe, Boot or Slipper Mfg.",GL,YES,NO,NO,NO,NO,9,1,5,11.1,71.4,Edge / rare class – verify eligibility before quoting
+Manufacturing,59647,"Syrups or Molasses–Refining, Blending or Mfg.",GL,YES,NO,NO,NO,NO,1,1,0,100.0,0.0,Edge / rare class – verify eligibility before quoting
+Monoline Property,60011,Apartment Buildings–Garden,Property,NO,NO,YES,NO,NO,11650,6938,865,59.6,12.3,Strong appetite – high volume
+Monoline Property,60010,Apartment Buildings,Property,NO,NO,YES,NO,NO,7541,3504,717,46.5,19.5,Strong appetite – high volume
+Monoline Property,61212,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,7385,3420,455,46.3,12.9,Strong appetite – high volume
+Monoline Property,61217,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Maintained by the Insured–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,5569,2524,357,45.3,13.6,Strong appetite – high volume
+Monoline Property,63010,Dwellings–One-Family (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,3753,2257,292,60.1,12.8,Strong appetite – high volume
+Monoline Property,63011,Dwellings–Two-Family (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,1356,877,113,64.7,12.7,Strong appetite – high volume
+Monoline Property,63013,Dwellings–Four-Family (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,1365,830,95,60.8,11.3,Strong appetite – high volume
+Monoline Property,63012,Dwellings–Three-Family (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,987,613,59,62.1,9.4,Strong appetite – high volume
+Monoline Property,68703,Warehouses–Occupied by Single Interest (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,1320,431,64,32.7,14.3,Strong appetite – high volume
+Monoline Property,16910,Restaurants–with Sale of Alcoholic Beverages that are Less Than 30% of the Annual Receipts of the Restaurants–with Table Service,Property,NO,NO,YES,NO,NO,754,356,52,47.2,13.8,Strong appetite – high volume
+Monoline Property,16900,Restaurants–with No Sale of Alcoholic Beverages–with Table Service,Property,NO,NO,YES,NO,NO,544,252,31,46.3,11.7,Strong appetite – high volume
+Monoline Property,16901,Restaurants–with No Sale of Alcoholic Beverages–without Table Service with Seating,Property,NO,NO,YES,NO,NO,519,252,29,48.6,11.1,Strong appetite – high volume
+Monoline Property,90739,"Convenience Stores – No Gas Station, Car Wash or Restaurant",Property,NO,NO,YES,NO,NO,571,236,46,41.3,19.0,Strong appetite – high volume
+Monoline Property,90822,Vacation Rentals,Property,NO,NO,YES,NO,NO,640,205,45,32.0,21.2,"Strong appetite – high volume, strong conversion"
+Monoline Property,10145,Beverage Stores–Liquor and Wine,Property,NO,NO,YES,NO,NO,314,169,28,53.8,16.0,Strong appetite – high volume
+Monoline Property,68702,Warehouses–Occupied by Multiple Interests (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,654,169,23,25.8,13.1,Strong appetite – high volume
+Monoline Property,67635,"Shopping Centers–Buildings, or Premises Not Occupied by the Insured (Lessor’s Risk Only)",Property,NO,NO,YES,NO,NO,454,165,47,36.3,26.6,"Strong appetite – high volume, strong conversion"
+Monoline Property,16916,Restaurants–with Sale of Alcoholic Beverages that are 30% or More of But Less Than 75% of the Total Annual Receipts of the Restaurants–without Dance Floor,Property,NO,NO,YES,NO,NO,368,137,19,37.2,12.3,Strong appetite – high volume
+Monoline Property,14731,Laundries and Dry Cleaners–Self-Service,Property,NO,NO,YES,NO,NO,187,115,13,61.5,10.8,Strong appetite – high volume
+Monoline Property,10115,Beauty Parlors and Hair Styling Salons,Property,NO,NO,YES,NO,NO,202,104,6,51.5,5.7,Strong appetite – high volume
+Monoline Property,13673,Grocery Stores,Property,NO,NO,YES,NO,NO,327,95,13,29.1,13.4,Strong appetite – high volume
+Monoline Property,61218,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Maintained by the Insured–Not-For-Profit Only,Property,NO,NO,YES,NO,NO,279,85,12,30.5,13.0,Strong appetite – high volume
+Monoline Property,16930,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–without Dance Floor: Table Service,Property,NO,NO,YES,NO,NO,210,81,9,38.6,10.3,Strong appetite – high volume
+Monoline Property,11127,Clothing or Wearing Apparel Stores–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,194,79,8,40.7,9.8,Strong appetite – high volume
+Monoline Property,15600,Nail Salons,Property,NO,NO,YES,NO,NO,145,67,8,46.2,11.6,Strong appetite – high volume
+Monoline Property,16902,Restaurants–with No Sale of Alcoholic Beverages–without Seating,Property,NO,NO,YES,NO,NO,122,67,21,54.9,30.0,"Strong appetite – high volume, strong conversion"
+Monoline Property,61216,Buildings or Premises–Bank or Office–Mercantile or Mfg. (Lessor’s Risk Only)–Not-For-Profit Only,Property,NO,NO,YES,NO,NO,230,63,17,27.4,25.0,"Strong appetite – high volume, strong conversion"
+Monoline Property,16911,Restaurants–with Sale of Alcoholic Beverages that are Less Than 30% of the Annual Receipts of the Restaurants–without Table Service with Seating,Property,NO,NO,YES,NO,NO,121,52,9,43.0,15.5,Strong appetite – high volume
+Monoline Property,16941,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–Bar Service Only (No Tables): without Dance Floor,Property,NO,NO,YES,NO,NO,109,48,3,44.0,5.8,Moderate appetite
+Monoline Property,13351,Furniture Stores–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,83,43,8,51.8,16.0,Moderate appetite
+Monoline Property,13506,Gift Shops–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,80,39,7,48.8,17.5,Moderate appetite
+Monoline Property,46607,Parking–Public–Shopping Centers–Maintained by the Insured (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,84,38,3,45.2,7.9,Moderate appetite
+Monoline Property,16819,Restaurants–Operated by Concessionaires–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,88,37,3,42.0,8.1,Moderate appetite
+Monoline Property,14733,Laundry and Dry Cleaning Stores,Property,NO,NO,YES,NO,NO,70,36,6,51.4,15.8,Moderate appetite
+Monoline Property,16915,Restaurants–with Sale of Alcoholic Beverages that are 30% or More of But Less Than 75% of the Total Annual Receipts of the Restaurants–with Dance Floor,Property,NO,NO,YES,NO,NO,107,33,6,30.8,15.8,Moderate appetite
+Monoline Property,16920,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–with Dance Floor: Table Service,Property,NO,NO,YES,NO,NO,78,31,3,39.7,8.6,Moderate appetite
+Monoline Property,10113,Barber Shops,Property,NO,NO,YES,NO,NO,34,21,2,61.8,9.5,Moderate appetite
+Monoline Property,11234,"Cosmetic, Hair or Skin Preparation Stores",Property,NO,NO,YES,NO,NO,57,21,3,36.8,13.0,Moderate appetite
+Monoline Property,13716,Hardware Stores,Property,NO,NO,YES,NO,NO,56,21,3,37.5,13.0,Moderate appetite
+Monoline Property,16931,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–without Dance Floor: No Table Service,Property,NO,NO,YES,NO,NO,58,21,1,36.2,4.5,Moderate appetite
+Monoline Property,12805,Floor Covering Stores,Property,NO,NO,YES,NO,NO,33,20,2,60.6,9.1,Moderate appetite
+Monoline Property,13720,Health or Natural Food Stores,Property,NO,NO,YES,NO,NO,45,19,2,42.2,9.5,Moderate appetite
+Monoline Property,16940,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–Bar Service Only (No Tables): with Dance Floor,Property,NO,NO,YES,NO,NO,60,19,2,31.7,10.0,Moderate appetite
+Monoline Property,10026,Antique Stores,Property,NO,NO,YES,NO,NO,54,17,4,31.5,22.2,Moderate appetite – converts well
+Monoline Property,14279,Home Improvement Stores,Property,NO,NO,YES,NO,NO,51,17,3,33.3,15.0,Moderate appetite
+Monoline Property,46606,Parking–Public–Shopping Centers–Maintained by Lessee (Lessor’s Risk Only),Property,NO,NO,YES,NO,NO,40,13,0,32.5,0.0,Moderate appetite
+Monoline Property,11155,Collectibles and Memorabilia Stores,Property,NO,NO,YES,NO,NO,35,12,2,34.3,16.7,Moderate appetite
+Monoline Property,10146,Beverage Stores–Soft Drinks and Beer,Property,NO,NO,YES,NO,NO,32,10,3,31.3,30.0,Moderate appetite – converts well
+Monoline Property,14101,"Hobby, Craft or Artists’ Supply Stores",Property,NO,NO,YES,NO,NO,43,9,0,20.9,0.0,Limited appetite – low volume
+Monoline Property,67634,"Shopping Centers–Indoor Malls–Buildings, or Premises Not Occupied by the Insured (Lessor’s Risk Only)",Property,NO,NO,YES,NO,NO,26,8,3,30.8,37.5,Limited appetite – low volume
+Monoline Property,10204,Books and Magazines Stores–Other Than Not-For-Profit,Property,NO,NO,YES,NO,NO,12,7,0,58.3,0.0,Limited appetite – low volume
+Monoline Property,18335,Stationery or Paper Products Stores,Property,NO,NO,YES,NO,NO,29,7,1,24.1,12.5,Limited appetite – low volume
+Monoline Property,46622,Parking–Private,Property,NO,NO,YES,NO,NO,60,7,2,11.7,25.0,Limited appetite – low volume
+Monoline Property,12510,Fabric Stores,Property,NO,NO,YES,NO,NO,14,6,0,42.9,0.0,Limited appetite – low volume
+Monoline Property,10309,Camera and Photographic Equipment Stores,Property,NO,NO,YES,NO,NO,9,5,1,55.6,16.7,Limited appetite – low volume
+Monoline Property,16905,Restaurants – Bring Your Own Alcohol – with No Sale of Alcoholic Beverages – with Table Service,Property,NO,NO,YES,NO,NO,20,5,0,25.0,0.0,Limited appetite – low volume
+Monoline Property,10352,Candy or Confectionery Stores,Property,NO,NO,YES,NO,NO,20,4,1,20.0,25.0,Limited appetite – low volume
+Monoline Property,16403,Pet Stores,Property,NO,NO,YES,NO,NO,27,4,1,14.8,25.0,Limited appetite – low volume
+Monoline Property,16921,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–with Dance Floor: No Table Service,Property,NO,NO,YES,NO,NO,32,4,0,12.5,0.0,Limited appetite – low volume
+Monoline Property,46604,Parking–Public–Open Air,Property,NO,NO,YES,NO,NO,22,4,1,18.2,25.0,Limited appetite – low volume
+Monoline Property,15538,Musical Instrument Stores,Property,NO,NO,YES,NO,NO,6,3,0,50.0,0.0,Limited appetite – low volume
+Monoline Property,18110,Shoe Stores,Property,NO,NO,YES,NO,NO,11,2,2,18.2,66.7,Edge / rare class – verify eligibility before quoting
+Monoline Property,16820,Restaurants–Operated by Concessionaires–Not-For-Profit Only,Property,NO,NO,YES,NO,NO,7,1,0,14.3,0.0,Edge / rare class – verify eligibility before quoting
+Monoline Property,16906,Restaurants – Bring Your Own Alcohol Establishments – with No Sale of Alcoholic Beverages – without Table Service with Seating,Property,NO,NO,YES,NO,NO,3,1,0,33.3,0.0,Edge / rare class – verify eligibility before quoting
+Monoline Property,46603,Parking–Public–Not Open Air,Property,NO,NO,YES,NO,NO,5,1,0,20.0,0.0,Edge / rare class – verify eligibility before quoting
+Restaurants,16910,Restaurants–with Sale of Alcoholic Beverages that are Less Than 30% of the Annual Receipts of the Restaurants–with Table Service,"GL, Package",YES,NO,NO,NO,YES,1755,927,49,52.8,5.0,Strong appetite – high volume
+Restaurants,16900,Restaurants–with No Sale of Alcoholic Beverages–with Table Service,"GL, Package",YES,NO,NO,NO,YES,1281,806,47,62.9,5.4,Strong appetite – high volume
+Restaurants,16901,Restaurants–with No Sale of Alcoholic Beverages–without Table Service with Seating,"GL, Package",YES,NO,NO,NO,YES,1186,767,37,64.7,4.4,Strong appetite – high volume
+Restaurants,16916,Restaurants–with Sale of Alcoholic Beverages that are 30% or More of But Less Than 75% of the Total Annual Receipts of the Restaurants–without Dance Floor,"GL, Package",YES,NO,NO,NO,YES,885,480,54,54.2,10.1,Strong appetite – high volume
+Restaurants,16930,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–without Dance Floor: Table Service,"GL, Package",YES,NO,NO,NO,YES,559,313,37,56.0,10.5,Strong appetite – high volume
+Restaurants,16902,Restaurants–with No Sale of Alcoholic Beverages–without Seating,"GL, Package",YES,NO,NO,NO,YES,292,187,10,64.0,5.0,Strong appetite – high volume
+Restaurants,16941,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–Bar Service Only (No Tables): without Dance Floor,"GL, Package",YES,NO,NO,NO,YES,316,187,21,59.2,10.4,Strong appetite – high volume
+Restaurants,16911,Restaurants–with Sale of Alcoholic Beverages that are Less Than 30% of the Annual Receipts of the Restaurants–without Table Service with Seating,"GL, Package",YES,NO,NO,NO,YES,282,159,8,56.4,4.8,Strong appetite – high volume
+Restaurants,16915,Restaurants–with Sale of Alcoholic Beverages that are 30% or More of But Less Than 75% of the Total Annual Receipts of the Restaurants–with Dance Floor,"GL, Package",YES,NO,NO,NO,YES,264,118,5,44.7,3.8,Strong appetite – high volume
+Restaurants,16920,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–with Dance Floor: Table Service,"GL, Package",YES,NO,NO,NO,YES,221,112,11,50.7,9.5,Strong appetite – high volume
+Restaurants,16931,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–without Dance Floor: No Table Service,"GL, Package",YES,NO,NO,NO,YES,178,102,15,57.3,13.2,Strong appetite – high volume
+Restaurants,16819,Restaurants–Operated by Concessionaires–Other Than Not-For-Profit,"GL, Package",YES,NO,NO,NO,YES,225,89,4,39.6,4.3,Strong appetite – high volume
+Restaurants,16940,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–Bar Service Only (No Tables): with Dance Floor,"GL, Package",YES,NO,NO,NO,YES,160,75,8,46.9,10.5,Strong appetite – high volume
+Restaurants,16921,Restaurants–with Sale of Alcoholic Beverages that are 75% or More of Total Annual Receipts of the Restaurants–with Tables–with Dance Floor: No Table Service,"GL, Package",YES,NO,NO,NO,YES,96,54,5,56.3,8.3,Strong appetite – high volume
+Restaurants,16905,Restaurants – Bring Your Own Alcohol – with No Sale of Alcoholic Beverages – with Table Service,"GL, Package",YES,NO,NO,NO,YES,52,4,1,7.7,20.0,Limited appetite – low volume
+Restaurants,16820,Restaurants–Operated by Concessionaires–Not-For-Profit Only,"GL, Package",YES,NO,NO,NO,YES,19,1,0,5.3,0.0,Edge / rare class – verify eligibility before quoting
+Retail & Services,90739,"Convenience Stores – No Gas Station, Car Wash or Restaurant","GL, Package",YES,NO,NO,NO,YES,1293,601,54,46.5,8.2,Strong appetite – high volume
+Retail & Services,10145,Beverage Stores–Liquor and Wine,"GL, Package",YES,NO,NO,NO,YES,693,332,42,47.9,11.1,Strong appetite – high volume
+Retail & Services,13673,Grocery Stores,"GL, Package",YES,NO,NO,NO,YES,745,295,33,39.6,10.3,Strong appetite – high volume
+Retail & Services,10115,Beauty Parlors and Hair Styling Salons,"GL, Package",YES,NO,NO,NO,YES,514,233,17,45.3,6.5,Strong appetite – high volume
+Retail & Services,90758,Food Trucks and Trailers – Mobile Concessions,"GL, Package",YES,NO,NO,NO,YES,372,213,34,57.3,14.2,Strong appetite – high volume
+Retail & Services,11127,Clothing or Wearing Apparel Stores–Other Than Not-For-Profit,"GL, Package",YES,NO,NO,NO,YES,448,175,18,39.1,8.6,Strong appetite – high volume
+Retail & Services,15600,Nail Salons,"GL, Package",YES,NO,NO,NO,YES,351,166,21,47.3,11.2,Strong appetite – high volume
+Retail & Services,14731,Laundries and Dry Cleaners–Self-Service,"GL, Package",YES,NO,NO,NO,YES,397,136,10,34.3,5.9,Strong appetite – high volume
+Retail & Services,14733,Laundry and Dry Cleaning Stores,"GL, Package",YES,NO,NO,NO,YES,162,80,11,49.4,11.8,Strong appetite – high volume
+Retail & Services,13351,Furniture Stores–Other Than Not-For-Profit,"GL, Package",YES,NO,NO,NO,YES,201,78,11,38.8,11.1,Strong appetite – high volume
+Retail & Services,13506,Gift Shops–Other Than Not-For-Profit,"GL, Package",YES,NO,NO,NO,YES,190,69,4,36.3,5.3,Strong appetite – high volume
+Retail & Services,10113,Barber Shops,"GL, Package",YES,NO,NO,NO,YES,90,56,5,62.2,8.3,Strong appetite – high volume
+Retail & Services,11234,"Cosmetic, Hair or Skin Preparation Stores","GL, Package",YES,NO,NO,NO,YES,158,55,9,34.8,14.3,Strong appetite – high volume
+Retail & Services,10026,Antique Stores,"GL, Package",YES,NO,NO,NO,YES,125,49,7,39.2,11.5,Moderate appetite
+Retail & Services,14279,Home Improvement Stores,"GL, Package",YES,NO,NO,NO,YES,133,45,5,33.8,8.3,Moderate appetite
+Retail & Services,13716,Hardware Stores,"GL, Package",YES,NO,NO,NO,YES,134,43,7,32.1,14.0,Moderate appetite
+Retail & Services,11155,Collectibles and Memorabilia Stores,"GL, Package",YES,NO,NO,NO,YES,87,32,2,36.8,5.7,Moderate appetite
+Retail & Services,13720,Health or Natural Food Stores,"GL, Package",YES,NO,NO,NO,YES,114,31,1,27.2,2.5,Moderate appetite
+Retail & Services,12805,Floor Covering Stores,"GL, Package",YES,NO,NO,NO,YES,87,25,3,28.7,9.4,Moderate appetite
+Retail & Services,10146,Beverage Stores–Soft Drinks and Beer,"GL, Package",YES,NO,NO,NO,YES,72,22,2,30.6,8.0,Moderate appetite
+Retail & Services,14101,"Hobby, Craft or Artists’ Supply Stores","GL, Package",YES,NO,NO,NO,YES,105,22,2,21.0,7.1,Moderate appetite
+Retail & Services,18335,Stationery or Paper Products Stores,"GL, Package",YES,NO,NO,NO,YES,70,22,1,31.4,3.7,Moderate appetite
+Retail & Services,16403,Pet Stores,"GL, Package",YES,NO,NO,NO,YES,71,20,1,28.2,4.0,Moderate appetite
+Retail & Services,12510,Fabric Stores,"GL, Package",YES,NO,NO,NO,YES,32,17,0,53.1,0.0,Moderate appetite
+Retail & Services,10204,Books and Magazines Stores–Other Than Not-For-Profit,"GL, Package",YES,NO,NO,NO,YES,33,16,2,48.5,9.5,Moderate appetite
+Retail & Services,10352,Candy or Confectionery Stores,"GL, Package",YES,NO,NO,NO,YES,44,16,1,36.4,5.6,Moderate appetite
+Retail & Services,18110,Shoe Stores,"GL, Package",YES,NO,NO,NO,YES,34,16,1,47.1,6.3,Moderate appetite
+Retail & Services,10309,Camera and Photographic Equipment Stores,"GL, Package",YES,NO,NO,NO,YES,25,12,1,48.0,7.1,Moderate appetite
+Retail & Services,15993,"Painting, Picture or Frame Stores","GL, Package",YES,NO,NO,NO,YES,31,10,1,32.3,9.1,Moderate appetite
+Retail & Services,15538,Musical Instrument Stores,"GL, Package",YES,NO,NO,NO,YES,14,6,1,42.9,12.5,Limited appetite – low volume
+Retail & Services,15991,"Paint, Wallpaper, or Wallcovering Stores","GL, Package",YES,NO,NO,NO,YES,9,1,0,11.1,0.0,Edge / rare class – verify eligibility before quoting
+Vacant Building,68606,Vacant Buildings–Not Factories–Other Than Not-For-Profit,"GL, Package",YES,NO,NO,NO,YES,5082,1957,801,38.5,27.5,"Strong appetite – high volume, strong conversion"
+Vacant Building,68607,Vacant Buildings–Not Factories–Not-For-Profit Only,"GL, Package",YES,NO,NO,NO,YES,469,168,54,35.8,22.1,"Strong appetite – high volume, strong conversion"
+Vacant Building,68604,Vacant Buildings–Factories,"GL, Package",YES,NO,NO,NO,YES,62,16,10,25.8,33.3,Moderate appetite – converts well
+Vacant Land,49451,Vacant Land–Other Than Not-For-Profit,GL,YES,NO,NO,NO,NO,1454,741,537,51.0,46.9,"Strong appetite – high volume, strong conversion"
+Vacant Land,49452,Vacant Land–Not-For-Profit Only,GL,YES,NO,NO,NO,NO,211,109,55,51.7,33.5,"Strong appetite – high volume, strong conversion"

@@ -3,6 +3,13 @@
   "generated_at": "2026-04-28T00:00:00+00:00",
   "faqs": [
     {
+      "title": "Ellie Communication Rules",
+      "filename": "faqs/ellie-communication-rules.md",
+      "word_count": 750,
+      "date": "2026-04-29",
+      "subtitle": "Tone, accuracy guardrails, decline framing, strategic redirects, and conversation flow rules for Ellie."
+    },
+    {
       "title": "How do I quote business with Pathpoint?",
       "filename": "faqs/how-to-quote.md",
       "word_count": 338,

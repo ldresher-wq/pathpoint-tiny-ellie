@@ -25,7 +25,7 @@ struct LocalArchiveEntry: Decodable {
 }
 
 struct LocalArchiveIndexFile: Decodable {
-    let appetite: [LocalArchiveEntry]
+    let appetite: [LocalArchiveEntry]?
     let faqs: [LocalArchiveEntry]
 }
 
@@ -56,7 +56,7 @@ final class LocalArchive {
 
         do {
             let decoded = try JSONDecoder().decode(LocalArchiveIndexFile.self, from: indexData)
-            entries = decoded.appetite + decoded.faqs
+            entries = (decoded.appetite ?? []) + decoded.faqs
             resourceRoot = root
         } catch {
             entries = []

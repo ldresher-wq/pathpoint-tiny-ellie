@@ -43,6 +43,7 @@
 		A10000010000000000000040 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000040 /* AppSettings.swift */; };
 		A10000010000000000000041 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000041 /* SettingsView.swift */; };
 		A10000010000000000000042 /* LocalArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000042 /* LocalArchive.swift */; };
+		A10000010000000000000079 /* ClassCodeArchive.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000079 /* ClassCodeArchive.swift */; };
 		A10000010000000000000043 /* StarterArchive in Resources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000043 /* StarterArchive */; };
 		A10000010000000000000044 /* SessionDebugLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000044 /* SessionDebugLogger.swift */; };
 		A10000010000000000000045 /* ClaudeSessionBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000045 /* ClaudeSessionBackend.swift */; };
@@ -128,6 +129,7 @@
 		A10000020000000000000040 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		A10000020000000000000041 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		A10000020000000000000042 /* LocalArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalArchive.swift; sourceTree = "<group>"; };
+		A10000020000000000000079 /* ClassCodeArchive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassCodeArchive.swift; sourceTree = "<group>"; };
 		A10000020000000000000043 /* StarterArchive */ = {isa = PBXFileReference; lastKnownFileType = folder; path = StarterArchive; sourceTree = "<group>"; };
 		A10000020000000000000044 /* SessionDebugLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionDebugLogger.swift; sourceTree = "<group>"; };
 		A10000020000000000000045 /* ClaudeSessionBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeSessionBackend.swift; sourceTree = "<group>"; };
@@ -280,6 +282,7 @@
 				A10000020000000000000070 /* LennyArchiveClient.swift */,
 				A10000020000000000000071 /* ClaudeSessionGitHubFetch.swift */,
 				A10000020000000000000042 /* LocalArchive.swift */,
+				A10000020000000000000079 /* ClassCodeArchive.swift */,
 				A10000020000000000000044 /* SessionDebugLogger.swift */,
 			);
 			path = Session;
@@ -460,6 +463,7 @@
 				A10000010000000000000074 /* AppSettings+MCPInstaller.swift in Sources */,
 				A10000010000000000000041 /* SettingsView.swift in Sources */,
 				A10000010000000000000042 /* LocalArchive.swift in Sources */,
+				A10000010000000000000079 /* ClassCodeArchive.swift in Sources */,
 				A10000010000000000000044 /* SessionDebugLogger.swift in Sources */,
 				A10000010000000000000023 /* TerminalView.swift in Sources */,
 				A10000010000000000000026 /* PaddedTextFieldCell.swift in Sources */,

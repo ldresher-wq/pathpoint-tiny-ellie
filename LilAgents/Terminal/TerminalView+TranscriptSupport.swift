@@ -121,19 +121,19 @@ class WelcomeChipsView: NSView {
     private let suggestions: [(String, String, String)]
 
     static let defaultSuggestionPool: [(String, String, String)] = [
-        ("square.grid.2x2",           "Lines of business",                             "What lines of business does Pathpoint offer?"),
-        ("hammer",                    "Contractor appetite",                            "What is Pathpoint's contractor appetite?"),
+        ("hammer",                    "Can you write roofers?",                        "Can you write roofers?"),
+        ("wrench.and.screwdriver",    "Appetite for welders",                          "What's your appetite for welders?"),
+        ("doc.text.magnifyingglass",  "Class code 91300 eligibility",                  "What is the eligibility for class code 91300?"),
         ("checkmark.seal.fill",       "How to bind an account",                        "How do I bind an account on Pathpoint?"),
         ("creditcard",                "PathPay Insured vs Agency",                     "Explain PathPay Insured vs PathPay Agency"),
-        ("arrow.clockwise.circle",    "Accessing my renewals",                         "How do I access my renewals?"),
     ]
 
     static let starterPackSuggestionPool: [(String, String, String)] = [
-        ("square.grid.2x2",           "Lines of business",                             "What lines of business does Pathpoint offer?"),
-        ("hammer",                    "Contractor appetite",                            "What is Pathpoint's contractor appetite?"),
+        ("hammer",                    "Can you write roofers?",                        "Can you write roofers?"),
+        ("wrench.and.screwdriver",    "Appetite for welders",                          "What's your appetite for welders?"),
+        ("doc.text.magnifyingglass",  "Class code 91300 eligibility",                  "What is the eligibility for class code 91300?"),
         ("checkmark.seal.fill",       "How to bind an account",                        "How do I bind an account on Pathpoint?"),
         ("creditcard",                "PathPay Insured vs Agency",                     "Explain PathPay Insured vs PathPay Agency"),
-        ("arrow.clockwise.circle",    "Accessing my renewals",                         "How do I access my renewals?"),
     ]
 
     init(theme: PopoverTheme, suggestions: [(String, String, String)] = WelcomeChipsView.defaultSuggestionPool) {

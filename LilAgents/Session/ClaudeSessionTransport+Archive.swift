@@ -33,12 +33,21 @@ extension ClaudeSession {
             .joined(separator: " ")
             .trimmingCharacters(in: .whitespacesAndNewlines)
         SessionDebugLogger.log("starter-pack", "search query=\(query)")
-        let matches = LocalArchive.shared.search(query: query, limit: 4)
 
-        if matches.isEmpty {
+        // --- Class code appetite lookup ---
+        let classCodeRows = ClassCodeArchive.shared.search(query: query, limit: 8)
+        let classCodeContext = ClassCodeArchive.shared.promptContext(for: classCodeRows)
+
+        // --- FAQ lookup ---
+        let faqMatches = LocalArchive.shared.search(query: query, limit: 3)
+
+        let hasClassCodes = !classCodeRows.isEmpty
+        let hasFAQs = !faqMatches.isEmpty
+
+        if !hasClassCodes && !hasFAQs {
             let promptContext = """
             The bundled starter archive did not contain a strong match for this query.
-            Be transparent that the starter pack only includes a limited set of Pathpoint FAQs and appetite guides.
+            Be transparent that the starter pack only includes a limited set of Pathpoint FAQs and class code appetite data.
             Suggest switching Settings to Official Pathpoint MCP for the full archive if needed.
             """
             return (
@@ -49,18 +58,27 @@ extension ClaudeSession {
             )
         }
 
-        let contextLines = matches.enumerated().map { index, match in
-            let subtitle = match.entry.subtitle ?? match.entry.description ?? ""
-            let subtitleSuffix = subtitle.isEmpty ? "" : "\nSubtitle: \(subtitle)"
-            return """
-            \(index + 1). [\(match.entry.typeLabel.capitalized)] \(match.entry.title) (\(match.entry.date))
-            File: \(match.entry.filename)\(subtitleSuffix)
-            Excerpt: \(match.excerpt)
-            """
-        }
-        let promptContext = contextLines.joined(separator: "\n\n")
+        var contextParts: [String] = []
 
-        let experts = matches.compactMap { match -> ResponderExpert? in
+        if hasClassCodes {
+            contextParts.append(classCodeContext)
+        }
+
+        if hasFAQs {
+            let faqLines = faqMatches.enumerated().map { index, match in
+                let subtitle = match.entry.subtitle ?? match.entry.description ?? ""
+                let subtitleSuffix = subtitle.isEmpty ? "" : "\nSubtitle: \(subtitle)"
+                return """
+                \(index + 1). [FAQ] \(match.entry.title) (\(match.entry.date))\(subtitleSuffix)
+                Excerpt: \(match.excerpt)
+                """
+            }
+            contextParts.append("Related FAQ content:\n" + faqLines.joined(separator: "\n\n"))
+        }
+
+        let promptContext = contextParts.joined(separator: "\n\n---\n\n")
+
+        let experts = faqMatches.compactMap { match -> ResponderExpert? in
             let name = match.entry.guest ?? speakerName(fromTitle: match.entry.title)
             guard let name, let avatarPath = avatarPath(for: name) else { return nil }
             return makeResponderExpert(
@@ -76,11 +94,12 @@ extension ClaudeSession {
             }
         }
 
+        let totalCount = classCodeRows.count + faqMatches.count
         return (
             promptContext,
             Array(uniqueExperts.prefix(3)),
             "Searching the bundled starter pack",
-            "Loaded \(matches.count) starter-pack match\(matches.count == 1 ? "" : "es")"
+            "Loaded \(totalCount) starter-pack result\(totalCount == 1 ? "" : "s") (\(classCodeRows.count) class code\(classCodeRows.count == 1 ? "" : "s"), \(faqMatches.count) FAQ\(faqMatches.count == 1 ? "" : "s"))"
         )
     }
 

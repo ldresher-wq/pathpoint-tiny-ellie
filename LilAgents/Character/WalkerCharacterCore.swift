@@ -1,4 +1,5 @@
 import AppKit
+import AVFoundation
 
 extension WalkerCharacter {
     func setup() {

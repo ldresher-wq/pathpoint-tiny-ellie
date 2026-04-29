@@ -32,6 +32,7 @@
 		A10000010000000000000030 /* TerminalMarkdownRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000030 /* TerminalMarkdownRenderer.swift */; };
 		A10000010000000000000031 /* WalkerCharacterTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000031 /* WalkerCharacterTypes.swift */; };
 		A10000010000000000000032 /* WalkerCharacterCore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000032 /* WalkerCharacterCore.swift */; };
+		A10000010000000000000078 /* EllieWalkPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000078 /* EllieWalkPlayerView.swift */; };
 		A10000010000000000000033 /* WalkerCharacterPopover.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000033 /* WalkerCharacterPopover.swift */; };
 		A10000010000000000000034 /* WalkerCharacterVisuals.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000034 /* WalkerCharacterVisuals.swift */; };
 		A10000010000000000000035 /* WalkerCharacterMovement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000020000000000000035 /* WalkerCharacterMovement.swift */; };
@@ -116,6 +117,7 @@
 		A10000020000000000000030 /* TerminalMarkdownRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalMarkdownRenderer.swift; sourceTree = "<group>"; };
 		A10000020000000000000031 /* WalkerCharacterTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterTypes.swift; sourceTree = "<group>"; };
 		A10000020000000000000032 /* WalkerCharacterCore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterCore.swift; sourceTree = "<group>"; };
+		A10000020000000000000078 /* EllieWalkPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EllieWalkPlayerView.swift; sourceTree = "<group>"; };
 		A10000020000000000000033 /* WalkerCharacterPopover.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterPopover.swift; sourceTree = "<group>"; };
 		A10000020000000000000034 /* WalkerCharacterVisuals.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterVisuals.swift; sourceTree = "<group>"; };
 		A10000020000000000000035 /* WalkerCharacterMovement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WalkerCharacterMovement.swift; sourceTree = "<group>"; };
@@ -158,7 +160,7 @@
 		A10000020000000000000075 /* ClaudeSessionTransport+Archive.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionTransport+Archive.swift"; sourceTree = "<group>"; };
 		A10000020000000000000076 /* ClaudeSessionTransport+Diagnostics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ClaudeSessionTransport+Diagnostics.swift"; sourceTree = "<group>"; };
 		A10000020000000000000077 /* MCPConnectionCards+OfficialMCP.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MCPConnectionCards+OfficialMCP.swift"; sourceTree = "<group>"; };
-		A10000030000000000000001 /* Lil-Lenny.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiny Ellie.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000030000000000000001 /* Tiny Ellie.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tiny Ellie.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000120000000000000001 /* CharacterSprites */ = {isa = PBXFileReference; lastKnownFileType = folder; path = CharacterSprites; sourceTree = "<group>"; };
 		A10000120000000000000002 /* ExpertAvatars */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ExpertAvatars; sourceTree = "<group>"; };
 		A10000120000000000000003 /* fall-smoke-dust.lottie */ = {isa = PBXFileReference; lastKnownFileType = file; path = "fall-smoke-dust.lottie"; sourceTree = "<group>"; };
@@ -228,7 +230,7 @@
 		A10000050000000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A10000030000000000000001 /* Lil-Lenny.app */,
+				A10000030000000000000001 /* Tiny Ellie.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -289,6 +291,7 @@
 				A10000020000000000000024 /* WalkerCharacter.swift */,
 				A10000020000000000000031 /* WalkerCharacterTypes.swift */,
 				A10000020000000000000032 /* WalkerCharacterCore.swift */,
+				A10000020000000000000078 /* EllieWalkPlayerView.swift */,
 				A10000020000000000000034 /* WalkerCharacterVisuals.swift */,
 				A10000020000000000000035 /* WalkerCharacterMovement.swift */,
 				A10000020000000000000055 /* WalkerCharacterBubble.swift */,
@@ -361,7 +364,7 @@
 				922A33A82F812F19008BF92C /* Lottie */,
 			);
 			productName = LilAgents;
-			productReference = A10000030000000000000001 /* Lil-Lenny.app */;
+			productReference = A10000030000000000000001 /* Tiny Ellie.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -478,6 +481,7 @@
 				A10000010000000000000024 /* WalkerCharacter.swift in Sources */,
 				A10000010000000000000031 /* WalkerCharacterTypes.swift in Sources */,
 				A10000010000000000000032 /* WalkerCharacterCore.swift in Sources */,
+				A10000010000000000000078 /* EllieWalkPlayerView.swift in Sources */,
 				A10000010000000000000055 /* WalkerCharacterBubble.swift in Sources */,
 				A10000010000000000000056 /* WalkerCharacterExpertTag.swift in Sources */,
 				A10000010000000000000033 /* WalkerCharacterPopover.swift in Sources */,
@@ -616,7 +620,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 64KKU33NVH;
+				DEVELOPMENT_TEAM = 6QG4M7C8H2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
@@ -635,7 +639,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.pathpoint.tiny-ellie;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pathpoint.tiny-ellie";
 				PRODUCT_NAME = "Tiny Ellie";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;
@@ -658,7 +662,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 64KKU33NVH;
+				DEVELOPMENT_TEAM = 6QG4M7C8H2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
@@ -677,7 +681,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MARKETING_VERSION = 1.2;
-				PRODUCT_BUNDLE_IDENTIFIER = com.pathpoint.tiny-ellie;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.pathpoint.tiny-ellie";
 				PRODUCT_NAME = "Tiny Ellie";
 				RUNTIME_EXCEPTION_ALLOW_DYLD_ENVIRONMENT_VARIABLES = NO;
 				RUNTIME_EXCEPTION_ALLOW_JIT = NO;

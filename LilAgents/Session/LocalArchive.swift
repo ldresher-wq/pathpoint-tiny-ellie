@@ -20,13 +20,13 @@ struct LocalArchiveEntry: Decodable {
     }
 
     var typeLabel: String {
-        filename.hasPrefix("podcasts/") ? "podcast" : "newsletter"
+        filename.hasPrefix("faqs/") ? "faq" : "appetite"
     }
 }
 
 struct LocalArchiveIndexFile: Decodable {
-    let podcasts: [LocalArchiveEntry]
-    let newsletters: [LocalArchiveEntry]
+    let appetite: [LocalArchiveEntry]
+    let faqs: [LocalArchiveEntry]
 }
 
 struct LocalArchiveSearchMatch {
@@ -56,7 +56,7 @@ final class LocalArchive {
 
         do {
             let decoded = try JSONDecoder().decode(LocalArchiveIndexFile.self, from: indexData)
-            entries = decoded.podcasts + decoded.newsletters
+            entries = decoded.appetite + decoded.faqs
             resourceRoot = root
         } catch {
             entries = []

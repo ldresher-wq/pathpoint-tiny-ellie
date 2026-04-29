@@ -38,7 +38,7 @@ extension ClaudeSession {
         if matches.isEmpty {
             let promptContext = """
             The bundled starter archive did not contain a strong match for this query.
-            Be transparent that the starter pack only includes 10 newsletters and 50 podcast transcripts.
+            Be transparent that the starter pack only includes a limited set of Pathpoint FAQs and appetite guides.
             Suggest switching Settings to Official Pathpoint MCP for the full archive if needed.
             """
             return (

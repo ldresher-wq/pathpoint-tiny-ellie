@@ -63,12 +63,21 @@ extension ClaudeSession {
             self.appendHistory(Message(role: .toolResult, text: status), to: conversationKey)
 
             let sourceSummary = archiveMode == .starterPack
-                ? "Source: Pathpoint's knowledge base (GitHub)"
+                ? "Source: Pathpoint starter pack (local)"
                 : "Source: Official Pathpoint archive"
             self.onToolResult?(sourceSummary, false)
             self.appendHistory(Message(role: .toolResult, text: sourceSummary), to: conversationKey)
 
             if archiveMode == .starterPack {
+                let archiveResult = self.searchStarterArchive(message: message, expert: activeExpert)
+                self.pendingExperts = archiveResult.experts
+                SessionDebugLogger.log("archive", "starter-pack search: \(archiveResult.resultSummary)")
+                self.onToolUse?(archiveResult.summary, ["summary": archiveResult.resultSummary])
+                self.appendHistory(Message(role: .toolUse, text: "\(archiveResult.summary): \(archiveResult.resultSummary)"), to: conversationKey)
+                self.onToolResult?(archiveResult.resultSummary, false)
+                self.appendHistory(Message(role: .toolResult, text: archiveResult.resultSummary), to: conversationKey)
+                let archiveContext = archiveResult.promptContext.isEmpty ? nil : archiveResult.promptContext
+
                 switch backend {
                 case .openAIResponsesAPI:
                     guard let key = environment["OPENAI_API_KEY"], !key.isEmpty else {
@@ -76,27 +85,19 @@ extension ClaudeSession {
                         self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
                         return
                     }
-                    SessionDebugLogger.log("archive", "openai path: pre-fetching GitHub archive. expert=\(activeExpert?.name ?? "none")")
-                    self.prefetchGitHubArchiveContext(message: message, expert: activeExpert, conversationKey: conversationKey) { [weak self] context in
-                        guard let self else { return }
-                        self.callOpenAI(
-                            message: message,
-                            attachments: attachments,
-                            apiKey: key,
-                            expert: activeExpert,
-                            conversationKey: conversationKey,
-                            mcpToken: nil,
-                            archiveContext: context.isEmpty ? nil : context
-                        )
-                    }
+                    SessionDebugLogger.log("archive", "openai path: using local starter-pack archive. expert=\(activeExpert?.name ?? "none")")
+                    self.callOpenAI(
+                        message: message,
+                        attachments: attachments,
+                        apiKey: key,
+                        expert: activeExpert,
+                        conversationKey: conversationKey,
+                        mcpToken: nil,
+                        archiveContext: archiveContext
+                    )
 
                 case let .claudeCodeCLI(path):
-                    let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
-                    SessionDebugLogger.log("archive", "using GitHub archive context (CLI). backend=\(backend) expert=\(activeExpert?.name ?? "none")")
-                    self.onToolUse?("Searching Pathpoint archive", ["summary": "Fetching from Pathpoint's knowledge base"])
-                    self.appendHistory(Message(role: .toolUse, text: "Searching Pathpoint archive"), to: conversationKey)
-                    self.onToolResult?("Archive ready", false)
-                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                    SessionDebugLogger.log("archive", "CLI path: using local starter-pack archive. expert=\(activeExpert?.name ?? "none")")
                     self.callClaudeCodeCLI(
                         executablePath: path,
                         message: message,
@@ -110,12 +111,7 @@ extension ClaudeSession {
                     )
 
                 case let .codexCLI(path):
-                    let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
-                    SessionDebugLogger.log("archive", "using GitHub archive context (Codex). backend=\(backend) expert=\(activeExpert?.name ?? "none")")
-                    self.onToolUse?("Searching Pathpoint archive", ["summary": "Fetching from Pathpoint's knowledge base"])
-                    self.appendHistory(Message(role: .toolUse, text: "Searching Pathpoint archive"), to: conversationKey)
-                    self.onToolResult?("Archive ready", false)
-                    self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                    SessionDebugLogger.log("archive", "Codex path: using local starter-pack archive. expert=\(activeExpert?.name ?? "none")")
                     self.callCodexCLI(
                         executablePath: path,
                         message: message,
@@ -239,9 +235,17 @@ extension ClaudeSession {
                 return
             }
 
-            // No explicit MCP token — fall back to GitHub archive rather than attempting
-            // MCP via the global config (which may time out or lack auth).
-            SessionDebugLogger.log("archive", "no MCP token, using GitHub archive fallback")
+            // No explicit MCP token — fall back to local starter-pack archive.
+            SessionDebugLogger.log("archive", "no MCP token, using local starter-pack archive fallback")
+
+            let fallbackResult = self.searchStarterArchive(message: message, expert: activeExpert)
+            self.pendingExperts = fallbackResult.experts
+            SessionDebugLogger.log("archive", "starter-pack fallback search: \(fallbackResult.resultSummary)")
+            self.onToolUse?(fallbackResult.summary, ["summary": fallbackResult.resultSummary])
+            self.appendHistory(Message(role: .toolUse, text: "\(fallbackResult.summary): \(fallbackResult.resultSummary)"), to: conversationKey)
+            self.onToolResult?(fallbackResult.resultSummary, false)
+            self.appendHistory(Message(role: .toolResult, text: fallbackResult.resultSummary), to: conversationKey)
+            let fallbackContext = fallbackResult.promptContext.isEmpty ? nil : fallbackResult.promptContext
 
             switch backend {
             case .openAIResponsesAPI:
@@ -249,26 +253,19 @@ extension ClaudeSession {
                     self.failTurn(self.backendSetupMessage(environment: environment), conversationKey: conversationKey)
                     return
                 }
-                SessionDebugLogger.log("archive", "openai path: pre-fetching GitHub archive. expert=\(activeExpert?.name ?? "none")")
-                self.prefetchGitHubArchiveContext(message: message, expert: activeExpert, conversationKey: conversationKey) { [weak self] context in
-                    guard let self else { return }
-                    self.callOpenAI(
-                        message: message,
-                        attachments: attachments,
-                        apiKey: key,
-                        expert: activeExpert,
-                        conversationKey: conversationKey,
-                        mcpToken: nil,
-                        archiveContext: context.isEmpty ? nil : context
-                    )
-                }
+                SessionDebugLogger.log("archive", "openai path: using local starter-pack fallback. expert=\(activeExpert?.name ?? "none")")
+                self.callOpenAI(
+                    message: message,
+                    attachments: attachments,
+                    apiKey: key,
+                    expert: activeExpert,
+                    conversationKey: conversationKey,
+                    mcpToken: nil,
+                    archiveContext: fallbackContext
+                )
 
             case let .claudeCodeCLI(path):
-                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
-                self.onToolUse?("Searching Pathpoint archive", ["summary": "Fetching from Pathpoint's knowledge base"])
-                self.appendHistory(Message(role: .toolUse, text: "Searching Pathpoint archive"), to: conversationKey)
-                self.onToolResult?("Archive ready", false)
-                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                SessionDebugLogger.log("archive", "CLI path: using local starter-pack fallback. expert=\(activeExpert?.name ?? "none")")
                 self.callClaudeCodeCLI(
                     executablePath: path,
                     message: message,
@@ -276,16 +273,12 @@ extension ClaudeSession {
                     environment: environment,
                     expert: activeExpert,
                     conversationKey: conversationKey,
-                    archiveContext: archiveContext,
+                    archiveContext: fallbackContext,
                     officialMCPToken: nil,
                     useOfficialMCP: false
                 )
             case let .codexCLI(path):
-                let archiveContext = self.githubArchiveContext(for: backend, expert: activeExpert)
-                self.onToolUse?("Searching Pathpoint archive", ["summary": "Fetching from Pathpoint's knowledge base"])
-                self.appendHistory(Message(role: .toolUse, text: "Searching Pathpoint archive"), to: conversationKey)
-                self.onToolResult?("Archive ready", false)
-                self.appendHistory(Message(role: .toolResult, text: "Archive ready"), to: conversationKey)
+                SessionDebugLogger.log("archive", "Codex path: using local starter-pack fallback. expert=\(activeExpert?.name ?? "none")")
                 self.callCodexCLI(
                     executablePath: path,
                     message: message,
@@ -293,7 +286,7 @@ extension ClaudeSession {
                     environment: environment,
                     expert: activeExpert,
                     conversationKey: conversationKey,
-                    archiveContext: archiveContext,
+                    archiveContext: fallbackContext,
                     useOfficialMCP: false
                 )
             }

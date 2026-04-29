@@ -35,7 +35,7 @@ extension ClaudeSession {
         SessionDebugLogger.log("starter-pack", "search query=\(query)")
 
         // --- Class code appetite lookup ---
-        let classCodeRows = ClassCodeArchive.shared.search(query: query, limit: 8)
+        let classCodeRows = ClassCodeArchive.shared.search(query: query, limit: 15)
         let classCodeContext = ClassCodeArchive.shared.promptContext(for: classCodeRows)
 
         // --- FAQ lookup ---

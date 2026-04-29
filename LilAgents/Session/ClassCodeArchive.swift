@@ -89,24 +89,40 @@ final class ClassCodeArchive {
 
         var s = 0
 
-        // Exact class code hit (query IS the code or query CONTAINS the code as a word)
+        // Exact class code hit (query IS the code, or query contains the code as a word)
         if query == codeNorm { s += 120 }
         else if query.contains(codeNorm) { s += 100 }
 
-        // Exact class-of-business match
+        // Exact class-of-business match (full query)
         if cobNorm == query { s += 90 }
         else if cobNorm.contains(query) { s += 50 }
 
-        // Token-level scoring
+        // Token-level scoring — use stemMatch for class/vertical/note fields so that
+        // inflected query words ("roofers", "welders") match root forms ("Roofing", "Welding").
+        // Code matching stays strict (5-digit numbers don't inflect).
         for token in tokens {
-            if codeNorm.contains(token)  { s += 80 }
-            if cobNorm.contains(token)   { s += 25 }
-            if vertNorm.contains(token)  { s += 10 }
-            if noteNorm.contains(token)  { s += 5  }
-            if linesNorm.contains(token) { s += 4  }
+            if codeNorm.contains(token)          { s += 80 }
+            if stemMatch(token, in: cobNorm)     { s += 25 }
+            if stemMatch(token, in: vertNorm)    { s += 10 }
+            if stemMatch(token, in: noteNorm)    { s += 5  }
+            if stemMatch(token, in: linesNorm)   { s += 4  }
         }
 
         return s
+    }
+
+    /// Returns true when `token` matches `text` — either as an exact substring or via a
+    /// 4-character stem prefix (e.g. "roofers" → stem "roof" matches "Roofing").
+    /// Using 4 chars avoids over-matching while covering typical English inflections
+    /// (plurals, -er/-ing/-ed suffixes) for the trade/contractor vocabulary in the CSV.
+    private func stemMatch(_ token: String, in text: String) -> Bool {
+        guard !token.isEmpty else { return false }
+        // Fast path: exact substring
+        if text.contains(token) { return true }
+        // Stem path: first 4 characters as a shared root
+        guard token.count >= 4 else { return false }
+        let stem = String(token.prefix(4))
+        return text.contains(stem)
     }
 
     private func queryTokens(from query: String) -> [String] {
